@@ -1,5 +1,5 @@
 const express = require('express');
-const { recordTaskAttempt, getUserTaskStats, getUserTaskHistory, resetDailyTaskCounts, getTasks } = require('../controllers/taskController');
+const { recordTaskAttempt, getUserTaskStats, getUserTaskHistory, resetDailyTaskCounts, getTasks, getTaskQuestion } = require('../controllers/taskController');
 const { verifyToken } = require('../controllers/authController');
 
 const router = express.Router();
@@ -18,6 +18,9 @@ router.get('/history', verifyToken, getUserTaskHistory);
 
 // Reset daily task counts (protected) - called at midnight
 router.post('/reset-daily', verifyToken, resetDailyTaskCounts);
+
+// Get single task question (protected)
+router.get('/:id/question', verifyToken, getTaskQuestion);
 
 module.exports = router;
 

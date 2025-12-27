@@ -16,8 +16,8 @@
   <link rel="apple-touch-icon" href="images/cic-logo-192x192.png">
 
   <!-- PWA Icons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="images/cic-logo-72x72.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="images/cic-logo-72x72.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-192.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/icon-192.png">
   <style>
     :root {
       --brand-green: #00ff88;
@@ -4801,11 +4801,11 @@
         } else {
           // Not restricted - hide banners and restore tasks if needed
           window.isRestricted = false;
-          
+
           // Remove any existing holiday banners
           const existingBanners = document.querySelectorAll('.holiday-banner, .restriction-banner');
           existingBanners.forEach(banner => banner.remove());
-          
+
           // If task list was replaced by banner, restore it
           if (wasShowingBanner && taskList) {
             // Reload and render tasks
@@ -4823,7 +4823,7 @@
         window.isRestricted = false;
         const existingBanners = document.querySelectorAll('.holiday-banner, .restriction-banner');
         existingBanners.forEach(banner => banner.remove());
-        
+
         // Try to restore tasks if banner was showing
         const taskList = document.getElementById('task-list');
         if (taskList && taskList.innerHTML.includes('holiday-banner')) {
@@ -4841,7 +4841,7 @@
     document.addEventListener('DOMContentLoaded', async function () {
       // Initialize restriction flag first
       window.isRestricted = false;
-      
+
       // Check holiday status (this will update window.isRestricted)
       await checkHolidayStatus();
       console.log('🔄 Page refreshed - Loading fresh data from API...');

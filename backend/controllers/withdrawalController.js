@@ -44,12 +44,12 @@ async function processWithdrawal(req, res) {
         }
 
         // Check if user has already made a withdrawal today
-        // We use DATE(CONVERT_TZ(request_date, '+00:00', '+03:00')) to ensure Kenyan date
+        // PostgreSQL compatible date check for Kenyan time (EAT - UTC+3)
         const today = getKenyanDate();
         const [todayWithdrawals] = await pool.execute(
             `SELECT COUNT(*) as count FROM withdrawal_requests 
              WHERE user_id = ? 
-             AND DATE(CONVERT_TZ(request_date, '+00:00', '+03:00')) = ?`,
+             AND (request_date AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::date = ?::date`,
             [userId, today]
         );
 

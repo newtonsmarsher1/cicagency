@@ -453,7 +453,7 @@ const getUserStats = async (req, res) => {
             `SELECT COALESCE(SUM(amount), 0) as today_payment 
              FROM payments 
              WHERE user_id = ? 
-             AND DATE(created_at) = ? 
+             AND (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::date = ?::date
              AND payment_type IN ('bonus', 'referral', 'commission')
              AND (payment_method != 'wallet' OR payment_method IS NULL)`,
             [userId, today]
@@ -463,7 +463,7 @@ const getUserStats = async (req, res) => {
         const [todayTaskEarnings] = await pool.execute(
             `SELECT COALESCE(SUM(CASE WHEN is_complete = 1 AND reward_amount > 0 THEN reward_amount ELSE 0 END), 0) as today_task_earning 
              FROM user_tasks 
-             WHERE user_id = ? AND DATE(completed_at) = ?`,
+             WHERE user_id = ? AND (completed_at AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::date = ?::date`,
             [userId, today]
         );
 
@@ -478,7 +478,7 @@ const getUserStats = async (req, res) => {
             `SELECT COALESCE(SUM(amount), 0) as yesterday_earning 
              FROM payments 
              WHERE user_id = ? 
-             AND DATE(created_at) = ?
+             AND (created_at AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::date = ?::date
              AND payment_type IN ('bonus', 'referral', 'commission')`,
             [userId, yesterdayStr]
         );

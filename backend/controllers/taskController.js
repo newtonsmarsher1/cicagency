@@ -81,9 +81,10 @@ const recordTaskAttempt = async (req, res) => {
 
             // Check if user has already completed this task today
             const today = getKenyanDate();
+            // PostgreSQL compatible date check for Kenyan time (EAT - UTC+3)
             const [existingTasks] = await connection.execute(
                 `SELECT id FROM user_tasks 
-                 WHERE user_id = ? AND task_id = ? AND DATE(CONVERT_TZ(completed_at, '+00:00', '+03:00')) = ?`,
+                 WHERE user_id = ? AND task_id = ? AND (completed_at AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::date = ?::date`,
                 [userId, task_id, today]
             );
 
@@ -340,13 +341,15 @@ const resetDailyTaskCounts = async (req, res) => {
                 [userId]
             );
 
-            // Use CONVERT_TZ for comparison if possible, or handle in JS
+            // Use JS to get Kenyan date from last_daily_reset
             if (checkReset[0]?.last_daily_reset) {
-                const [dateRes] = await pool.execute(
-                    `SELECT DATE_FORMAT(CONVERT_TZ(?, '+00:00', '+03:00'), '%Y-%m-%d') as local_date`,
-                    [checkReset[0].last_daily_reset]
-                );
-                lastReset = dateRes[0].local_date;
+                const lastResetDate = new Date(checkReset[0].last_daily_reset);
+                lastReset = new Intl.DateTimeFormat('en-CA', {
+                    timeZone: 'Africa/Nairobi',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                }).format(lastResetDate);
             }
         } catch (error) {
             // Column might not exist, that's okay - we'll reset anyway
@@ -416,7 +419,7 @@ const getTasks = async (req, res) => {
 
         // Get user info to determine reward level
         const [userData] = await pool.execute(
-            `SELECT level, tasks_completed_today FROM users WHERE id = ?`,
+            `SELECT level, tasks_completed_today, is_temporary_worker, temp_worker_start_date FROM users WHERE id = ?`,
             [userId]
         );
 
@@ -478,9 +481,10 @@ const getTasks = async (req, res) => {
         const today = getKenyanDate();
 
         // Get today's completed task IDs
+        // PostgreSQL compatible date check for Kenyan time (EAT - UTC+3)
         const [completedTasks] = await pool.execute(
             `SELECT DISTINCT task_id FROM user_tasks 
-             WHERE user_id = ? AND DATE(CONVERT_TZ(completed_at, '+00:00', '+03:00')) = ?`,
+             WHERE user_id = ? AND (completed_at AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::date = ?::date`,
             [userId, today]
         );
 
@@ -853,7 +857,7 @@ const resetAllUsersDailyTasks = async () => {
                 `UPDATE users 
                  SET tasks_completed_today = 0,
                      last_daily_reset = CURRENT_TIMESTAMP
-                 WHERE tasks_completed_today > 0 OR last_daily_reset IS NULL OR DATE(last_daily_reset) < ?`,
+                 WHERE tasks_completed_today > 0 OR last_daily_reset IS NULL OR (last_daily_reset AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::date < ?::date`,
                 [today]
             );
             console.log(`✅ Reset daily task counts for ${userCount} users`);
@@ -887,5 +891,72 @@ module.exports = {
     getUserTaskHistory,
     resetDailyTaskCounts,
     getTasks,
+    getTaskQuestion,
     resetAllUsersDailyTasks
 };
+
+/**
+ * Get single task question
+ */
+async function getTaskQuestion(req, res) {
+    try {
+        const taskId = parseInt(req.params.id);
+        const userLevel = req.user.level || 0;
+
+        // Level-based rewards
+        const levelRewards = {
+            0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+            5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+        };
+        const levelReward = levelRewards[userLevel] || 7.00;
+
+        // Sample tasks (matching getTasks and frontend)
+        const sampleTasks = [
+            { id: 1, name: "Task 1", icon: "https://cdn-icons-png.flaticon.com/512/3046/3046120.png", question: "What is the capital city of Kenya?", choices: ["Mombasa", "Nairobi", "Kisumu", "Nakuru"], correct_answer: 1 },
+            { id: 2, name: "Task 2", icon: "https://cdn-icons-png.flaticon.com/512/281/281764.png", question: "Which mountain is the highest in Africa?", choices: ["Mount Kenya", "Mount Kilimanjaro", "Mount Elgon", "Mount Stanley"], correct_answer: 1 },
+            { id: 3, name: "Task 3", icon: "https://cdn-icons-png.flaticon.com/512/281/281769.png", question: "Which ocean borders Kenya to the East?", choices: ["Atlantic Ocean", "Pacific Ocean", "Indian Ocean", "Arctic Ocean"], correct_answer: 2 },
+            { id: 4, name: "Task 4", icon: "https://cdn-icons-png.flaticon.com/512/300/300221.png", question: "What is the official language of Kenya?", choices: ["English", "Swahili", "Both English and Swahili", "French"], correct_answer: 2 },
+            { id: 5, name: "Task 5", icon: "https://cdn-icons-png.flaticon.com/512/2111/2111463.png", question: "Which of these is a famous national park in Kenya?", choices: ["Kruger National Park", "Serengeti National Park", "Maasai Mara National Reserve", "Yellowstone National Park"], correct_answer: 2 }
+        ];
+
+        // Find task in sample tasks
+        let task = sampleTasks.find(t => t.id === taskId);
+
+        // If not found in primary sample tasks, generate a dynamic one for ID > 5
+        if (!task) {
+            const mathOps = ['+', '-', '*'];
+            const op = mathOps[taskId % mathOps.length];
+            const num1 = (taskId % 20) + 5;
+            const num2 = (taskId % 15) + 3;
+            let result;
+            if (op === '+') result = num1 + num2;
+            else if (op === '-') result = num1 - num2;
+            else result = num1 * num2;
+
+            const choices = [result, result + 2, result - 2, result + 5].sort(() => Math.random() - 0.5);
+            const correctIndex = choices.indexOf(result);
+
+            task = {
+                id: taskId,
+                name: `Task ${taskId}`,
+                question: `What is ${num1} ${op} ${num2}?`,
+                choices: choices,
+                correct_answer: correctIndex
+            };
+        }
+
+        res.json({
+            success: true,
+            ...task,
+            reward: levelReward,
+            earning: levelReward
+        });
+
+    } catch (error) {
+        console.error('Error fetching task question:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+}
