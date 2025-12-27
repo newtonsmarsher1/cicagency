@@ -1,6 +1,6 @@
 const { pool } = require('../config/database');
 const { verifyToken } = require('./authController');
-const { isRestrictedDate } = require('../utils/dateRestrictions');
+const { isRestrictedDate, getKenyanDate } = require('../utils/dateRestrictions');
 
 // Record task attempt and update user earnings
 const recordTaskAttempt = async (req, res) => {
@@ -80,10 +80,10 @@ const recordTaskAttempt = async (req, res) => {
             const finalRewardAmount = is_correct ? correctRewardAmount : 0;
 
             // Check if user has already completed this task today
-            const today = new Date().toISOString().split('T')[0];
+            const today = getKenyanDate();
             const [existingTasks] = await connection.execute(
                 `SELECT id FROM user_tasks 
-                 WHERE user_id = ? AND task_id = ? AND DATE(completed_at) = ?`,
+                 WHERE user_id = ? AND task_id = ? AND DATE(CONVERT_TZ(completed_at, '+00:00', '+03:00')) = ?`,
                 [userId, task_id, today]
             );
 
@@ -330,7 +330,7 @@ const resetDailyTaskCounts = async (req, res) => {
         const userId = req.user.id;
 
         // Get today's date
-        const today = new Date().toISOString().split('T')[0];
+        const today = getKenyanDate();
 
         // Try to check if we've already reset today (gracefully handle missing column)
         let lastReset = null;
@@ -340,9 +340,14 @@ const resetDailyTaskCounts = async (req, res) => {
                 [userId]
             );
 
-            lastReset = checkReset[0]?.last_daily_reset
-                ? new Date(checkReset[0].last_daily_reset).toISOString().split('T')[0]
-                : null;
+            // Use CONVERT_TZ for comparison if possible, or handle in JS
+            if (checkReset[0]?.last_daily_reset) {
+                const [dateRes] = await pool.execute(
+                    `SELECT DATE_FORMAT(CONVERT_TZ(?, '+00:00', '+03:00'), '%Y-%m-%d') as local_date`,
+                    [checkReset[0].last_daily_reset]
+                );
+                lastReset = dateRes[0].local_date;
+            }
         } catch (error) {
             // Column might not exist, that's okay - we'll reset anyway
             console.log('⚠️ last_daily_reset column may not exist, proceeding with reset');
@@ -470,14 +475,12 @@ const getTasks = async (req, res) => {
         const maxTasksForLevel = levelDailyTasks[userLevel] || 5;
 
         // Get today's date in Kenyan time (EAT - UTC+3)
-        const now = new Date();
-        const kenyanTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
-        const today = kenyanTime.toISOString().split('T')[0];
+        const today = getKenyanDate();
 
         // Get today's completed task IDs
         const [completedTasks] = await pool.execute(
             `SELECT DISTINCT task_id FROM user_tasks 
-             WHERE user_id = ? AND DATE(completed_at) = ?`,
+             WHERE user_id = ? AND DATE(CONVERT_TZ(completed_at, '+00:00', '+03:00')) = ?`,
             [userId, today]
         );
 
@@ -833,11 +836,9 @@ const resetAllUsersDailyTasks = async () => {
         console.log('🔄 Starting midnight reset for all users...');
 
         // Get current date in Kenyan time (EAT - UTC+3)
-        const now = new Date();
-        const kenyanTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Nairobi' }));
-        const today = kenyanTime.toISOString().split('T')[0];
+        const today = getKenyanDate();
 
-        console.log(`📅 Resetting daily tasks for date: ${today} (Kenyan time: ${kenyanTime.toLocaleString()})`);
+        console.log(`📅 Resetting daily tasks for date: ${today} (Kenyan time)`);
 
         // First, count how many users need reset
         const [countResult] = await pool.execute(

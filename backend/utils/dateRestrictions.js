@@ -157,6 +157,31 @@ function isRestrictedDate(date = new Date()) {
 }
 
 /**
+ * Get current date string in Kenyan time (YYYY-MM-DD)
+ * @returns {string}
+ */
+function getKenyanDate() {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Africa/Nairobi',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(new Date());
+}
+
+/**
+ * Get current hour in Kenyan time (0-23)
+ * @returns {number}
+ */
+function getCurrentKenyanHour() {
+    return parseInt(new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Africa/Nairobi',
+        hour: 'numeric',
+        hour12: false
+    }).format(new Date()));
+}
+
+/**
  * Get the next available date for tasks/withdrawals
  * @param {Date} startDate - Starting date (defaults to today)
  * @returns {Date} Next available date
@@ -181,11 +206,11 @@ function getNextAvailableDate(startDate = new Date()) {
 }
 
 module.exports = {
-    isSunday,
-    isPublicHoliday,
     isAuditingDay,
     isRestrictedDate,
     getNextAvailableDate,
+    getKenyanDate,
+    getCurrentKenyanHour,
     PUBLIC_HOLIDAYS
 };
 

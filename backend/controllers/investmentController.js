@@ -16,6 +16,7 @@ const getInvestments = async (req, res) => {
         const userId = req.user.id;
         console.log('✅ User authenticated, userId:', userId);
 
+
         let investments = [];
 
         try {
@@ -152,7 +153,7 @@ const createInvestment = async (req, res) => {
 
         // Get user's current wallet balances
         const [users] = await connection.execute(
-            'SELECT wallet_balance, personal_wallet FROM users WHERE id = ?',
+            'SELECT wallet_balance, personal_wallet, income_wallet, is_temporary_worker, level FROM users WHERE id = ?',
             [userId]
         );
 
@@ -164,6 +165,17 @@ const createInvestment = async (req, res) => {
         const user = users[0];
         const walletBalance = parseFloat(user.wallet_balance || 0);
         const personalWallet = parseFloat(user.personal_wallet || 0);
+
+        // ❌ Block temporary workers (Level 0) from investing
+        if (user.is_temporary_worker || parseInt(user.level) === 0) {
+            if (connection) { await connection.rollback(); connection.release(); }
+            return res.status(403).json({
+                success: false,
+                error: 'Restricted Access',
+                message: 'Temporary workers are not allowed to access the Wealth Fund. Please upgrade your account to unlock investment features.'
+            });
+        }
+
         const totalBalance = walletBalance + personalWallet;
 
         // Check if user has sufficient total balance

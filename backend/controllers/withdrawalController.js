@@ -3,7 +3,7 @@ const { validatePhoneNumber, formatPhoneNumber } = require('../utils/mpesaUtils'
 const { MPESA_CONFIG, DEMO_MODE } = require('../config/mpesa');
 const { pool } = require('../config/database');
 const { verifyToken } = require('./authController');
-const { isRestrictedDate } = require('../utils/dateRestrictions');
+const { isRestrictedDate, getKenyanDate, getCurrentKenyanHour } = require('../utils/dateRestrictions');
 
 /**
  * Process withdrawal request
@@ -14,7 +14,7 @@ async function processWithdrawal(req, res) {
     try {
         const userId = req.user.id;
         const { method, account_number, amount, bank_name } = req.body;
-        
+
         // Validate input
         if (!method || !account_number || !amount) {
             return res.status(400).json({
@@ -22,7 +22,7 @@ async function processWithdrawal(req, res) {
                 error: 'Method, account number, and amount are required'
             });
         }
-        
+
         // Check if today is a restricted date (Sunday, public holiday, or auditing day)
         const restriction = isRestrictedDate();
         if (restriction.isRestricted) {
@@ -32,7 +32,34 @@ async function processWithdrawal(req, res) {
                 restricted: true
             });
         }
-        
+
+        // 🕒 Check withdrawal time window (7:00 AM to 5:00 PM Kenyan Time)
+        const hour = getCurrentKenyanHour();
+
+        if (hour < 7 || hour >= 17) {
+            return res.status(403).json({
+                success: false,
+                error: 'Withdrawals are only allowed between 7:00 AM and 5:00 PM Kenyan Time'
+            });
+        }
+
+        // Check if user has already made a withdrawal today
+        // We use DATE(CONVERT_TZ(request_date, '+00:00', '+03:00')) to ensure Kenyan date
+        const today = getKenyanDate();
+        const [todayWithdrawals] = await pool.execute(
+            `SELECT COUNT(*) as count FROM withdrawal_requests 
+             WHERE user_id = ? 
+             AND DATE(CONVERT_TZ(request_date, '+00:00', '+03:00')) = ?`,
+            [userId, today]
+        );
+
+        if (todayWithdrawals[0].count > 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'You can only make one withdrawal request per day'
+            });
+        }
+
         // Minimum withdrawal is 300 KES
         const minWithdrawal = 300;
         if (amount < minWithdrawal) {
@@ -41,23 +68,23 @@ async function processWithdrawal(req, res) {
                 error: `Minimum withdrawal is KES ${minWithdrawal}`
             });
         }
-        
+
         // Get user's current balance
         const [users] = await pool.execute(
             'SELECT wallet_balance, phone FROM users WHERE id = ?',
             [userId]
         );
-        
+
         if (users.length === 0) {
             return res.status(404).json({
                 success: false,
                 error: 'User not found'
             });
         }
-        
+
         const user = users[0];
         const walletBalance = parseFloat(user.wallet_balance);
-        
+
         // Check if user has sufficient balance
         if (walletBalance < amount) {
             return res.status(400).json({
@@ -65,10 +92,10 @@ async function processWithdrawal(req, res) {
                 error: 'Insufficient balance'
             });
         }
-        
+
         // For M-Pesa withdrawals, use the account_number as phone number
         let phoneNumber = account_number;
-        
+
         // Validate phone number for M-Pesa
         if (method === 'mpesa' || method === 'airtel') {
             if (!validatePhoneNumber(phoneNumber)) {
@@ -79,15 +106,15 @@ async function processWithdrawal(req, res) {
             }
             phoneNumber = formatPhoneNumber(phoneNumber);
         }
-        
+
         // Save withdrawal request to database first
         const [withdrawalResult] = await pool.execute(`
             INSERT INTO withdrawal_requests (user_id, amount, bank_name, account_number, status, request_date)
             VALUES (?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
         `, [userId, amount, bank_name || method, account_number]);
-        
+
         const withdrawalId = withdrawalResult.rows && withdrawalResult.rows.length > 0 ? withdrawalResult.rows[0].id : withdrawalResult.insertId;
-        
+
         // If M-Pesa or Airtel Money, process immediately via B2C API
         if (method === 'mpesa' || method === 'airtel') {
             try {
@@ -97,32 +124,32 @@ async function processWithdrawal(req, res) {
                     SET wallet_balance = wallet_balance - ?
                     WHERE id = ?
                 `, [amount, userId]);
-                
+
                 // Update withdrawal status to processing
                 await pool.execute(`
                     UPDATE withdrawal_requests 
                     SET status = 'processing'
                     WHERE id = ?
                 `, [withdrawalId]);
-                
+
                 if (DEMO_MODE) {
                     // Demo mode - simulate successful withdrawal
                     console.log('🎭 Demo mode: Simulating M-Pesa withdrawal');
-                    
+
                     setTimeout(async () => {
                         await pool.execute(`
                             UPDATE withdrawal_requests 
                             SET status = 'completed', processed_date = NOW()
                             WHERE id = ?
                         `, [withdrawalId]);
-                        
+
                         // Save payment record
                         await pool.execute(`
                             INSERT INTO payments (user_id, amount, payment_type, status, transaction_id, phone_number, description, created_at)
                             VALUES (?, ?, 'withdrawal', 'completed', ?, ?, 'M-Pesa Withdrawal', CURRENT_TIMESTAMP)
                         `, [userId, amount, 'DEMO-' + withdrawalId, phoneNumber]);
                     }, 2000);
-                    
+
                     return res.json({
                         success: true,
                         message: 'Withdrawal processed successfully (Demo Mode)',
@@ -130,7 +157,7 @@ async function processWithdrawal(req, res) {
                         transactionId: 'DEMO-' + withdrawalId
                     });
                 }
-                
+
                 // Real M-Pesa B2C API
                 const accessToken = await getAccessToken();
                 const b2cResponse = await initiateB2CPayment(
@@ -139,7 +166,7 @@ async function processWithdrawal(req, res) {
                     amount,
                     'CIC Withdrawal'
                 );
-                
+
                 if (b2cResponse.ResponseCode === '0') {
                     // Update withdrawal with transaction details
                     await pool.execute(`
@@ -148,13 +175,13 @@ async function processWithdrawal(req, res) {
                             notes = ?
                         WHERE id = ?
                     `, [JSON.stringify(b2cResponse), withdrawalId]);
-                    
+
                     // Save payment record
                     await pool.execute(`
                         INSERT INTO payments (user_id, amount, payment_type, status, transaction_id, phone_number, description, created_at)
                         VALUES (?, ?, 'withdrawal', 'processing', ?, ?, 'M-Pesa Withdrawal', CURRENT_TIMESTAMP)
                     `, [userId, amount, b2cResponse.ConversationID || b2cResponse.OriginatorConversationID, phoneNumber]);
-                    
+
                     return res.json({
                         success: true,
                         message: 'Withdrawal request processed. Money will be sent to your M-Pesa account shortly.',
@@ -168,14 +195,14 @@ async function processWithdrawal(req, res) {
                         SET wallet_balance = wallet_balance + ?
                         WHERE id = ?
                     `, [amount, userId]);
-                    
+
                     await pool.execute(`
                         UPDATE withdrawal_requests 
                         SET status = 'rejected',
                             notes = ?
                         WHERE id = ?
                     `, [b2cResponse.ResponseDescription || 'M-Pesa API error', withdrawalId]);
-                    
+
                     return res.status(400).json({
                         success: false,
                         error: b2cResponse.ResponseDescription || 'Failed to process withdrawal via M-Pesa'
@@ -183,21 +210,21 @@ async function processWithdrawal(req, res) {
                 }
             } catch (error) {
                 console.error('❌ M-Pesa withdrawal error:', error);
-                
+
                 // Refund the wallet on error
                 await pool.execute(`
                     UPDATE users 
                     SET wallet_balance = wallet_balance + ?
                     WHERE id = ?
                 `, [amount, userId]);
-                
+
                 await pool.execute(`
                     UPDATE withdrawal_requests 
                     SET status = 'rejected',
                         notes = ?
                     WHERE id = ?
                 `, [error.message || 'M-Pesa API error', withdrawalId]);
-                
+
                 return res.status(500).json({
                     success: false,
                     error: 'Failed to process withdrawal. Please try again later.'
@@ -211,7 +238,7 @@ async function processWithdrawal(req, res) {
                 withdrawalId: withdrawalId
             });
         }
-        
+
     } catch (error) {
         console.error('❌ Withdrawal error:', error);
         return res.status(500).json({
@@ -229,7 +256,7 @@ async function processWithdrawal(req, res) {
 async function getWithdrawals(req, res) {
     try {
         const userId = req.user.id;
-        
+
         const [withdrawals] = await pool.execute(`
             SELECT id, amount, bank_name, account_number, status, request_date, processed_date, notes
             FROM withdrawal_requests
@@ -237,7 +264,7 @@ async function getWithdrawals(req, res) {
             ORDER BY request_date DESC
             LIMIT 50
         `, [userId]);
-        
+
         // Format the withdrawals for frontend
         const formattedWithdrawals = withdrawals.map(w => ({
             id: w.id,
@@ -250,7 +277,7 @@ async function getWithdrawals(req, res) {
             processed_date: w.processed_date,
             notes: w.notes
         }));
-        
+
         return res.json({
             success: true,
             withdrawals: formattedWithdrawals

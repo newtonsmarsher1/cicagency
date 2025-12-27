@@ -11,7 +11,8 @@ const { initializeAdminUsersTable } = require('./controllers/authController');
 const { verifyToken } = require('./controllers/authController');
 
 const app = express();
-const PORT = process.env.ADMIN_PORT || 2003;
+const PORT = 2003;
+
 
 // Middleware
 app.use(cors());

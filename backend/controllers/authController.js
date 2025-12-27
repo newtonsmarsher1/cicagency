@@ -696,9 +696,9 @@ const upgradeLevel = async (req, res) => {
                 });
             }
 
-            // Deduct recharge amount from wallet and update level
+            // Deduct recharge amount from wallet and update level, and clear temporary worker status
             await connection.execute(
-                'UPDATE users SET wallet_balance = wallet_balance - ?, level = ? WHERE id = ?',
+                'UPDATE users SET wallet_balance = wallet_balance - ?, level = ?, is_temporary_worker = 0 WHERE id = ?',
                 [rechargeAmount, levelNum, userId]
             );
 

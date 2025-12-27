@@ -584,6 +584,7 @@
     }
 
     let currentPlan = {};
+    let userData = {}; // Global store for user info
 
     // Define investment plans (amounts are in KES)
     const INVESTMENT_PLANS = [
@@ -677,6 +678,7 @@
           const totalBalance = walletBalance;
 
           document.getElementById('available-balance').innerHTML = formatCurrency(totalBalance);
+          userData = data; // Store full user data for restriction checks
           console.log('✅ Balance loaded successfully:', totalBalance);
         } else {
           console.error('❌ API returned success:false:', data);
@@ -776,6 +778,11 @@
     }
 
     function openInvestModal(planName, minAmount, dailyReturn, duration) {
+      // ❌ Block temporary workers from opening the modal
+      if (userData.is_temporary_worker || parseInt(userData.level) === 0) {
+        alert('⚠️ Restricted Access\n\nTemporary workers are not allowed to access the Wealth Fund. Please upgrade your account to unlock investment features.');
+        return;
+      }
       currentPlan = { planName, minAmount, dailyReturn, duration };
       const currency = getCurrentCurrency();
       document.getElementById('modal-plan-name').textContent = `${planName}`;

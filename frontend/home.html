@@ -859,7 +859,11 @@
 <body>
   <!-- Header -->
   <div class="header">
-    <h1>🚀 CIC</h1>
+    <h1 style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+      <img src="assets/icons/icon-192.png" alt="CIC Logo" class="logo-breathing"
+        style="width: 40px; height: 40px; border-radius: 50%;">
+      CIC
+    </h1>
     <div class="subtitle">
       <span class="dancing-badge" data-translate="welcome-dashboard">🌟 Welcome to your dashboard 🌟</span>
     </div>
@@ -914,10 +918,15 @@
         <div class="wallet-label" data-translate="income-wallet">Income Wallet</div>
         <div class="wallet-amount" id="income-wallet">KES 0.00</div>
       </div>
-      <a href="#" class="wallet-card" id="install-app-btn" onclick="installApp(); return false;"
-        style="text-decoration: none; cursor: pointer;">
-        <div class="wallet-label" data-translate="download-app">Download App</div>
-        <div class="wallet-amount" style="font-size: 1.2rem;" data-translate="get-mobile-app">Get Mobile App 📱</div>
+      <a href="download/cic-app.apk" class="wallet-card" id="install-app-btn" download
+        style="text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 15px; padding: 15px;">
+        <img src="assets/icons/icon-192.png" alt="App Icon" class="logo-breathing"
+          style="width: 50px; height: 50px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+        <div style="text-align: left;">
+          <div class="wallet-label" data-translate="download-app" style="margin: 0; opacity: 0.8;">Download App</div>
+          <div class="wallet-amount" style="font-size: 1.1rem; margin-top: 2px;" data-translate="get-mobile-app">Get
+            Mobile App</div>
+        </div>
       </a>
     </div>
 
@@ -1368,7 +1377,7 @@
         const data = await response.json();
 
         const banner = document.getElementById('holiday-banner');
-        
+
         if (data.success && data.isRestricted) {
           const messageEl = document.getElementById('holiday-message');
           const titleEl = banner ? banner.querySelector('.holiday-title') : null;

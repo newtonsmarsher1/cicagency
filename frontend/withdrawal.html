@@ -425,11 +425,13 @@
     <div class="info-box">
       <div class="info-box-title" data-translate="important-info">⚠️ Important Information</div>
       <div class="info-box-text">
-        <span data-translate="min-withdrawal-info">• Minimum withdrawal: </span><span id="min-withdrawal-display">KES
+        <span data-translate="withdrawal-window">• 🕒 Withdrawal window: 7:00 AM - 5:00 PM</span><br>
+        <span data-translate="withdrawal-limit">• 📱 Limit: One withdrawal request per day</span><br>
+        <span data-translate="min-withdrawal-info">• 💰 Minimum withdrawal: </span><span id="min-withdrawal-display">KES
           300</span><br>
-        <span data-translate="mpesa-info">• M-Pesa withdrawals: Instant processing</span><br>
-        <span data-translate="bank-info">• Bank transfers: 24-48 hours</span><br>
-        <span data-translate="details-info">• Make sure your payment details are correct</span>
+        <span data-translate="mpesa-info">• ⚡ M-Pesa withdrawals: Instant processing</span><br>
+        <span data-translate="bank-info">• 🏦 Bank transfers: 24-48 hours</span><br>
+        <span data-translate="details-info">• 📝 Make sure your payment details are correct</span>
       </div>
     </div>
 
@@ -773,6 +775,18 @@
       let amount = parseFloat(document.getElementById('withdrawal-amount').value);
       const bankName = document.getElementById('bank-name').value;
       const currency = getCurrentCurrency();
+
+      // 🕒 Check withdrawal time window (7:00 AM to 5:00 PM Kenyan Time)
+      // Kenyan time is UTC+3. We'll use the user's browser time but warn them.
+      const now = new Date();
+      // Get current hour in East Africa Time (UTC+3)
+      const eatHour = now.getUTCHours() + 3;
+      const hour = eatHour % 24;
+
+      if (hour < 7 || hour >= 17) {
+        showModal('🕒', 'Restricted Time', 'Withdrawals are only allowed between 7:00 AM and 5:00 PM Kenyan Time. Please try again during business hours.');
+        return;
+      }
 
       // Convert amount back to KES if user is viewing in different currency
       if (currency !== 'KES' && amount) {
