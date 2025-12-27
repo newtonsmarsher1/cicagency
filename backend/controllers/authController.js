@@ -454,7 +454,6 @@ const getUserStats = async (req, res) => {
              FROM payments 
              WHERE user_id = ? 
              AND DATE(created_at) = ? 
-             AND payment_type IN ('bonus', 'referral', 'commission')
              AND (payment_method != 'wallet' OR payment_method IS NULL)`,
             [userId, today]
         );
@@ -475,11 +474,7 @@ const getUserStats = async (req, res) => {
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = yesterday.toISOString().split('T')[0];
         const [yesterdayEarnings] = await pool.execute(
-            `SELECT COALESCE(SUM(amount), 0) as yesterday_earning 
-             FROM payments 
-             WHERE user_id = ? 
-             AND DATE(created_at) = ?
-             AND payment_type IN ('bonus', 'referral', 'commission')`,
+            'SELECT COALESCE(SUM(amount), 0) as yesterday_earning FROM payments WHERE user_id = ? AND DATE(created_at) = ?',
             [userId, yesterdayStr]
         );
 
@@ -487,11 +482,7 @@ const getUserStats = async (req, res) => {
         const startOfWeek = new Date();
         startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
         const [weekEarnings] = await pool.execute(
-            `SELECT COALESCE(SUM(amount), 0) as this_week_earning 
-             FROM payments 
-             WHERE user_id = ? 
-             AND created_at >= ?
-             AND payment_type IN ('bonus', 'referral', 'commission')`,
+            'SELECT COALESCE(SUM(amount), 0) as this_week_earning FROM payments WHERE user_id = ? AND created_at >= ?',
             [userId, startOfWeek.toISOString().split('T')[0]]
         );
 
@@ -499,11 +490,7 @@ const getUserStats = async (req, res) => {
         const startOfMonth = new Date();
         startOfMonth.setMonth(startOfMonth.getMonth(), 1);
         const [monthEarnings] = await pool.execute(
-            `SELECT COALESCE(SUM(amount), 0) as this_month_earning 
-             FROM payments 
-             WHERE user_id = ? 
-             AND created_at >= ?
-             AND payment_type IN ('bonus', 'referral', 'commission')`,
+            'SELECT COALESCE(SUM(amount), 0) as this_month_earning FROM payments WHERE user_id = ? AND created_at >= ?',
             [userId, startOfMonth.toISOString().split('T')[0]]
         );
 

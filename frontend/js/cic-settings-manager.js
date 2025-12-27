@@ -711,7 +711,7 @@ class CICLanguageManager {
         'mpesa-phone-number': 'M-Pesa Phone Number',
         'phone-help-text': 'Enter your M-Pesa registered phone number (supports +254, 07, 01 formats)',
         'pay-with-mpesa': 'Pay with M-Pesa',
-        'powered-by': 'Powered by',
+        'powered-by': 'Powered by M-Pesa',
         'instant-payment': 'Instant Payment',
         'secure-safe': 'Secure & Safe',
         'mobile-money': 'Mobile Money',

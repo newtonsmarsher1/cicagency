@@ -2911,26 +2911,6 @@
     let tasks = [...sampleTasks];
     let isTaskInProgress = false; // Global flag to track if a task is currently running
     window.isRestricted = false; // Flag to track if tasks are restricted today
-
-    // Function to check if tasks are restricted today (called by startTask)
-    function checkDayRestrictions() {
-      // Check for specific holidays first
-      if (typeof window.HOLIDAYS !== 'undefined' && Array.isArray(window.HOLIDAYS)) {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const todayStr = `${year}-${month}-${day}`;
-
-        if (window.HOLIDAYS.includes(todayStr)) {
-          return true;
-        }
-      }
-
-      // Return the general restricted flag status
-      return window.isRestricted;
-    }
-
     let currentTaskId = null; // Track the currently running task ID
     let completedTaskIds = []; // Track completed task IDs (right or wrong)
     let taskOrder = []; // Randomized order of tasks
@@ -3602,6 +3582,15 @@
       if (checkDayRestrictions()) {
         showModal('error', 'Task completion is not allowed today. Please try again tomorrow.');
         return;
+      }
+
+      // Explicit Holiday Check
+      if (typeof window.HOLIDAYS !== 'undefined' && Array.isArray(window.HOLIDAYS)) {
+        const today = new Date().toISOString().split('T')[0];
+        if (window.HOLIDAYS.includes(today)) {
+          showModal('error', '🚫 Sorry, today is a holiday! No tasks can be done today. Please check back tomorrow.');
+          return;
+        }
       }
 
       // Check if another task is already in progress

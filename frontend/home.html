@@ -1199,8 +1199,7 @@
       const currency = getCurrentCurrency();
 
       // Income Wallet = Total Balance = Earnings + Recharges
-      // walletBalance already includes recharges (personal_wallet) and task earnings (income_wallet)
-      const totalBalance = walletBalance;
+      const totalBalance = walletBalance + personalWallet;
       document.getElementById('income-wallet').textContent = formatCurrency(totalBalance, currency);
 
       // Personal Wallet = Recharges (Hidden/Replaced by Download App)
@@ -1208,7 +1207,8 @@
 
       // Update stats with currency conversion
       document.getElementById('today-earnings').textContent = formatCurrency(todayEarning, currency);
-      document.getElementById('tasks-completed').textContent = data.tasks_completed_today || 0;
+      var cToday = getCompletedTodayCount();
+      document.getElementById('tasks-completed').textContent = cToday;
       document.getElementById('team-size').textContent = data.team_size || 0;
       document.getElementById('total-earnings').textContent = formatCurrency(totalEarnings, currency);
 

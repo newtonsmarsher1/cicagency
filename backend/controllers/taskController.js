@@ -369,8 +369,7 @@ const resetDailyTaskCounts = async (req, res) => {
             );
         } catch (error) {
             // If last_daily_reset column doesn't exist, just reset tasks_completed_today
-            // ER_BAD_FIELD_ERROR is for MySQL, 42703 is for PostgreSQL
-            if (error.code === 'ER_BAD_FIELD_ERROR' || error.code === '42703') {
+            if (error.code === 'ER_BAD_FIELD_ERROR') {
                 await pool.execute(
                     `UPDATE users 
                      SET tasks_completed_today = 0

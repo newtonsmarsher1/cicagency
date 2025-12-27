@@ -59,9 +59,7 @@ function isSunday(date) {
  */
 function isPublicHoliday(date) {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
+    const dateStr = date.toISOString().split('T')[0];
 
     if (PUBLIC_HOLIDAYS[year] && PUBLIC_HOLIDAYS[year][dateStr]) {
         return PUBLIC_HOLIDAYS[year][dateStr];
@@ -111,10 +109,8 @@ function isAuditingDay(date) {
  * @returns {Object} { isRestricted: boolean, reason: string }
  */
 function isRestrictedDate(date = new Date()) {
-    // Treat the date input as local time
+    // Normalize date to start of day for comparison
     const checkDate = new Date(date);
-    // No need to set hours to 0 if we use local methods consistently, 
-    // but keeping for robustness in case date.getDay() or others are used later.
     checkDate.setHours(0, 0, 0, 0);
 
     if (isSunday(checkDate)) {

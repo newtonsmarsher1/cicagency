@@ -197,7 +197,6 @@ async function initializeDatabase() {
                 invited_by INT DEFAULT NULL,
                 last_login TIMESTAMP NULL DEFAULT NULL,
                 tasks_completed_today INT DEFAULT 0,
-                last_daily_reset TIMESTAMP NULL DEFAULT NULL,
                 income_wallet DECIMAL(10,2) DEFAULT 0.00,
                 personal_wallet DECIMAL(10,2) DEFAULT 0.00,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -672,9 +672,10 @@
         const data = await response.json();
 
         if (data.success) {
-          // walletBalance already includes recharges (personal_wallet) and task earnings (income_wallet)
+          // Calculate Total Balance (Earnings + Recharges)
           const walletBalance = parseFloat(data.wallet_balance || 0);
-          const totalBalance = walletBalance;
+          const personalWallet = parseFloat(data.personal_wallet || 0);
+          const totalBalance = walletBalance + personalWallet;
 
           document.getElementById('available-balance').innerHTML = formatCurrency(totalBalance);
           console.log('✅ Balance loaded successfully:', totalBalance);
