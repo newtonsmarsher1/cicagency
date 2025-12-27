@@ -176,54 +176,44 @@ const createInvestment = async (req, res) => {
             });
         }
 
-        const totalBalance = walletBalance + personalWallet;
+        // wallet_balance is the single source of truth for total spendable funds
+        const totalBalance = walletBalance;
 
         // Check if user has sufficient total balance
         if (totalBalance < investmentAmount) {
             if (connection) { await connection.rollback(); connection.release(); }
             return res.status(400).json({
                 success: false,
-                error: `Insufficient funds. Your Total Balance: KES ${totalBalance.toFixed(2)}, Required: KES ${investmentAmount.toFixed(2)}`
+                error: `Insufficient funds. Your Available Balance: KES ${totalBalance.toFixed(2)}, Required: KES ${investmentAmount.toFixed(2)}`
             });
         }
 
-        // Deduct logic: Prioritize Personal Wallet (Recharges), then Wallet Balance (Earnings)
+        // Deduct logic: Prioritize Personal Wallet (Recharges), then Income Wallet (Earnings)
         let deductFromPersonal = 0;
-        let deductFromEarnings = 0;
+        let deductFromIncome = 0;
 
         if (personalWallet >= investmentAmount) {
             // Personal wallet covers the full amount
             deductFromPersonal = investmentAmount;
         } else {
-            // Drain personal wallet, rest from earnings
+            // Drain personal wallet, rest from income wallet
             deductFromPersonal = personalWallet;
-            deductFromEarnings = investmentAmount - personalWallet;
+            deductFromIncome = investmentAmount - personalWallet;
         }
 
-        console.log(`💰 Deduction Plan: Personal=${deductFromPersonal}, Earnings=${deductFromEarnings}`);
+        console.log(`💰 Deduction Plan: Total=${investmentAmount}, Personal=${deductFromPersonal}, Income=${deductFromIncome}`);
 
-        // Execute Deductions
-        if (deductFromPersonal > 0) {
-            await connection.execute(
-                'UPDATE users SET personal_wallet = personal_wallet - ? WHERE id = ?',
-                [deductFromPersonal, userId]
-            );
-        }
+        // Execute Synchronized Deductions
+        await connection.execute(
+            'UPDATE users SET wallet_balance = wallet_balance - ?, personal_wallet = personal_wallet - ?, income_wallet = income_wallet - ? WHERE id = ?',
+            [investmentAmount, deductFromPersonal, deductFromIncome, userId]
+        );
 
-        if (deductFromEarnings > 0) {
-            await connection.execute(
-                'UPDATE users SET wallet_balance = wallet_balance - ? WHERE id = ?',
-                [deductFromEarnings, userId]
-            );
-        }
-
-        // Calculate new total balance directly
+        // Calculate new total balance directly for response
         const newTotalBalance = totalBalance - investmentAmount;
-
-        // Define newBalance for response compatibility (referenced later in code)
         const newBalance = newTotalBalance;
 
-        console.log(`✅ Wallet deducted. New Total Balance: ${newTotalBalance.toFixed(2)} KES`);
+        console.log(`✅ Wallets synchronized and deducted. New Total Balance: ${newTotalBalance.toFixed(2)} KES`);
 
         // Create investment record
         let result;
@@ -322,7 +312,9 @@ const createInvestment = async (req, res) => {
                 daily_return,
                 duration
             },
-            wallet_balance: newBalance // Use balance already fetched during verification
+            wallet_balance: newBalance,
+            personal_wallet: personalWallet - deductFromPersonal,
+            income_wallet: incomeWallet - deductFromIncome
         });
 
     } catch (error) {

@@ -3,7 +3,14 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00ff88">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CIC">
+  <link rel="stylesheet" href="assets/css/auth-styles.css">
   <title>Profile - CIC</title>
 
   <!-- Monarch Design System -->
@@ -403,12 +410,11 @@
         data-translate="withdraw">Withdraw</button>
     </div>
     <div style="margin-top: 16px;">
-      <a href="download/cic-app.apk" class="balance-btn"
-        style="display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; background: var(--brand-green); color: #fff; box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3); padding: 12px;"
-        download>
+      <div class="balance-btn" onclick="installApp()"
+        style="display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none; background: var(--brand-green); color: #fff; box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3); padding: 12px; cursor: pointer; border-radius: 8px;">
         <img src="assets/icons/icon-192.png" alt="App Icon" style="width: 24px; height: 24px; border-radius: 4px;">
-        Download App
-      </a>
+        Install Mobile App
+      </div>
     </div>
   </div>
 
@@ -704,8 +710,11 @@
         console.log(`User response to install prompt: ${outcome}`);
         deferredPrompt = null;
       } else {
-        // Fallback to direct download if PWA prompt is not available
-        window.location.href = 'https://app.cicagency.onrender.com/download';
+        // Fallback to instructions if PWA prompt is not available
+        alert('To install the CIC App:\n\n' +
+          '1. Open your browser menu (three dots ⋮ or share icon 📤)\n' +
+          '2. Look for "Add to Home Screen" or "Install App" 📲\n' +
+          '3. Follow the prompts to add it to your apps!');
       }
     }
 

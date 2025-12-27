@@ -436,6 +436,20 @@
   <div class="balance-card">
     <div class="balance-label" data-translate="available-balance">Available Balance</div>
     <div class="balance-amount"><span id="available-balance">0.00</span></div>
+
+    <div
+      style="display: flex; justify-content: space-around; margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+      <div>
+        <div style="font-size: 12px; color: #666;" data-translate="income-wallet">Income Wallet</div>
+        <div style="font-size: 16px; font-weight: 600; color: var(--brand-dark);"><span
+            id="income-wallet-balance">0.00</span></div>
+      </div>
+      <div>
+        <div style="font-size: 12px; color: #666;" data-translate="personal-wallet">Personal Wallet</div>
+        <div style="font-size: 16px; font-weight: 600; color: var(--brand-maroon);"><span
+            id="personal-wallet-balance">0.00</span></div>
+      </div>
+    </div>
   </div>
 
   <!-- Content -->
@@ -675,11 +689,20 @@
         if (data.success) {
           // walletBalance already includes recharges (personal_wallet) and task earnings (income_wallet)
           const walletBalance = parseFloat(data.wallet_balance || 0);
-          const totalBalance = walletBalance;
+          const incomeWallet = parseFloat(data.income_wallet || 0);
+          const personalWallet = parseFloat(data.personal_wallet || 0);
 
-          document.getElementById('available-balance').innerHTML = formatCurrency(totalBalance);
+          document.getElementById('available-balance').innerHTML = formatCurrency(walletBalance);
+
+          // Optional: If you want to show sub-wallets, you can add them to the UI
+          const incomeEl = document.getElementById('income-wallet-balance');
+          if (incomeEl) incomeEl.innerHTML = formatCurrency(incomeWallet);
+
+          const personalEl = document.getElementById('personal-wallet-balance');
+          if (personalEl) personalEl.innerHTML = formatCurrency(personalWallet);
+
           userData = data; // Store full user data for restriction checks
-          console.log('✅ Balance loaded successfully:', totalBalance);
+          console.log('✅ Balance loaded successfully:', walletBalance, 'Income:', incomeWallet);
         } else {
           console.error('❌ API returned success:false:', data);
         }

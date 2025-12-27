@@ -600,7 +600,7 @@ async function adjustUserWallet(req, res) {
 
         // Get current balance
         const [users] = await connection.execute(
-            'SELECT wallet_balance FROM users WHERE id = ?',
+            'SELECT wallet_balance, personal_wallet, income_wallet FROM users WHERE id = ?',
             [id]
         );
 
@@ -624,11 +624,23 @@ async function adjustUserWallet(req, res) {
             });
         }
 
-        // Update wallet balance
-        await connection.execute(
-            'UPDATE users SET wallet_balance = ? WHERE id = ?',
-            [newBalance, id]
-        );
+        // Update wallet balance and specific sub-wallets
+        if (type === 'add') {
+            await connection.execute(
+                'UPDATE users SET wallet_balance = wallet_balance + ?, income_wallet = income_wallet + ? WHERE id = ?',
+                [amount, amount, id]
+            );
+        } else {
+            // Subtract logic: Prioritize personal_wallet, then income_wallet
+            const personalWallet = parseFloat(users[0].personal_wallet || 0);
+            const deductFromPersonal = Math.min(personalWallet, amount);
+            const deductFromIncome = amount - deductFromPersonal;
+
+            await connection.execute(
+                'UPDATE users SET wallet_balance = wallet_balance - ?, personal_wallet = personal_wallet - ?, income_wallet = income_wallet - ? WHERE id = ?',
+                [amount, deductFromPersonal, deductFromIncome, id]
+            );
+        }
 
         // Create payment record
         await connection.execute(
@@ -759,10 +771,9 @@ async function createPayment(req, res) {
 
         // Update user wallet if it's a recharge
         if (payment_type === 'recharge' || !payment_type) {
-            const newBalance = parseFloat(users[0].wallet_balance) + parseFloat(amount);
             await connection.execute(
-                'UPDATE users SET wallet_balance = ? WHERE id = ?',
-                [newBalance, user_id]
+                'UPDATE users SET wallet_balance = wallet_balance + ?, personal_wallet = personal_wallet + ? WHERE id = ?',
+                [amount, amount, user_id]
             );
         }
 
@@ -820,15 +831,13 @@ async function updatePaymentStatus(req, res) {
         );
 
         // If status changed to success and it's a recharge, update wallet
-        if (status === 'success' && payment.status !== 'success' && payment.payment_type === 'recharge') {
-            const [users] = await connection.execute('SELECT wallet_balance FROM users WHERE id = ?', [payment.user_id]);
-            if (users.length > 0) {
-                const newBalance = parseFloat(users[0].wallet_balance) + parseFloat(payment.amount);
-                await connection.execute(
-                    'UPDATE users SET wallet_balance = ? WHERE id = ?',
-                    [newBalance, payment.user_id]
-                );
-            }
+        if (status === 'success' && payment.status !== 'success' && (payment.payment_type === 'recharge' || payment.payment_type === 'investment')) {
+            // For both recharge and investment (though investment usually deducts, 
+            // the status 'success' here probably refers to manual approval of some transaction)
+            await connection.execute(
+                'UPDATE users SET wallet_balance = wallet_balance + ?, personal_wallet = personal_wallet + ? WHERE id = ?',
+                [payment.amount, payment.amount, payment.user_id]
+            );
         }
 
         connection.release();

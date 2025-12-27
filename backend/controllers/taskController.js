@@ -103,9 +103,9 @@ const recordTaskAttempt = async (req, res) => {
             try {
                 // Try to insert with task details (if columns exist)
                 [taskResult] = await connection.execute(
-                    `INSERT INTO user_tasks (user_id, task_id, task_type, is_complete, reward_amount, completed_at, task_name, question, user_answer, correct_answer) 
-                     VALUES (?, ?, 'regular', ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?)`,
-                    [userId, task_id, is_correct ? 1 : 0, finalRewardAmount, task_name || null, question || null, user_answer || null, correct_answer || null]
+                    `INSERT INTO user_tasks (user_id, task_id, task_type, is_complete, is_correct, reward_amount, completed_at, task_name, question, user_answer, correct_answer) 
+                     VALUES (?, ?, 'regular', 1, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?)`,
+                    [userId, task_id, !!is_correct, finalRewardAmount, task_name || null, question || null, user_answer || null, correct_answer || null]
                 );
             } catch (error) {
                 // If columns don't exist, use basic insert
@@ -113,9 +113,9 @@ const recordTaskAttempt = async (req, res) => {
                 if (error.code === 'ER_BAD_FIELD_ERROR' || error.code === '42703') {
                     console.log('⚠️ Task detail columns not found, using basic insert');
                     [taskResult] = await connection.execute(
-                        `INSERT INTO user_tasks (user_id, task_id, task_type, is_complete, reward_amount, completed_at) 
-                         VALUES (?, ?, 'regular', ?, ?, CURRENT_TIMESTAMP)`,
-                        [userId, task_id, is_correct ? 1 : 0, finalRewardAmount]
+                        `INSERT INTO user_tasks (user_id, task_id, task_type, is_complete, is_correct, reward_amount, completed_at) 
+                         VALUES (?, ?, 'regular', 1, ?, ?, CURRENT_TIMESTAMP)`,
+                        [userId, task_id, !!is_correct, finalRewardAmount]
                     );
                 } else {
                     throw error;
@@ -222,18 +222,18 @@ const getUserTaskStats = async (req, res) => {
         const completedToday = parseInt(userData[0]?.tasks_completed_today || 0);
 
         // Get today's earnings from completed tasks (for today's date in Kenyan time)
-        const [todayTasks] = await pool.execute(
-            `SELECT SUM(CASE WHEN is_correct = 1 THEN reward_amount ELSE 0 END) as today_earnings
-             FROM user_tasks 
-             WHERE user_id = ? AND DATE(completed_at) = ?`,
+        const [todayEarnings] = await pool.execute(
+            `SELECT SUM(CASE WHEN is_correct = TRUE THEN reward_amount ELSE 0 END) as today_earnings
+                 FROM user_tasks 
+                 WHERE user_id = ? AND (completed_at AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::date = ?::date`,
             [userId, today]
         );
 
         // Get total completed tasks
-        const [totalTasks] = await pool.execute(
-            `SELECT COUNT(*) as total_completed, SUM(CASE WHEN is_correct = 1 THEN reward_amount ELSE 0 END) as total_earnings
-             FROM user_tasks 
-             WHERE user_id = ?`,
+        const [stats] = await pool.execute(
+            `SELECT COUNT(*) as total_completed, SUM(CASE WHEN is_correct = TRUE THEN reward_amount ELSE 0 END) as total_earnings
+                 FROM user_tasks 
+                 WHERE user_id = ?`,
             [userId]
         );
 
@@ -241,9 +241,9 @@ const getUserTaskStats = async (req, res) => {
             success: true,
             data: {
                 completed_today: completedToday, // Use from users table (resets at midnight)
-                today_earnings: todayTasks[0]?.today_earnings || 0,
-                total_completed: totalTasks[0]?.total_completed || 0,
-                total_earnings: totalTasks[0]?.total_earnings || 0,
+                today_earnings: todayEarnings[0]?.today_earnings || 0,
+                total_completed: stats[0]?.total_completed || 0,
+                total_earnings: stats[0]?.total_earnings || 0,
                 wallet_balance: userData[0]?.wallet_balance || 0,
                 level: userData[0]?.level || 0,
                 tasks_completed_today: completedToday
@@ -802,10 +802,10 @@ const getTasks = async (req, res) => {
         );
 
         // Get today's earnings from completed tasks
-        const [todayTasks] = await pool.execute(
-            `SELECT SUM(CASE WHEN is_complete = 1 THEN reward_amount ELSE 0 END) as today_earnings
-             FROM user_tasks 
-             WHERE user_id = ? AND DATE(completed_at) = ?`,
+        const [result] = await pool.execute(
+            `SELECT SUM(CASE WHEN is_correct = TRUE THEN reward_amount ELSE 0 END) as today_earnings
+                 FROM user_tasks 
+                 WHERE user_id = ? AND (completed_at AT TIME ZONE 'UTC' AT TIME ZONE 'Africa/Nairobi')::date = ?::date`,
             [userId, today]
         );
 

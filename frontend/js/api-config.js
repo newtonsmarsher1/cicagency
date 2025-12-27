@@ -1,23 +1,23 @@
 // API Configuration
-const API_CONFIG = {
-    // Automatically detect environment
-    BASE_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.') || window.location.hostname.endsWith('.local'))
-        ? `${window.location.origin}/api`
-        : 'https://cicagency.onrender.com/api',
+if (typeof window.API_CONFIG === 'undefined') {
+    window.API_CONFIG = {
+        // Automatically detect environment
+        BASE_URL: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.') || window.location.hostname.endsWith('.local'))
+            ? `${window.location.origin}/api`
+            : 'https://cicagency.onrender.com/api',
 
-    // Helper to get full URL
-    getUrl: (endpoint) => {
-        const baseUrl = API_CONFIG.BASE_URL.endsWith('/')
-            ? API_CONFIG.BASE_URL.slice(0, -1)
-            : API_CONFIG.BASE_URL;
-        const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-        return `${baseUrl}${path}`;
-    }
-};
-
-// Global export
-window.API_CONFIG = API_CONFIG;
-window.API_BASE_URL = API_CONFIG.BASE_URL; // Legacy support for existing pages
+        // Helper to get full URL
+        getUrl: (endpoint) => {
+            const baseUrl = window.API_CONFIG.BASE_URL.endsWith('/')
+                ? window.API_CONFIG.BASE_URL.slice(0, -1)
+                : window.API_CONFIG.BASE_URL;
+            if (!endpoint) return baseUrl;
+            const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+            return `${baseUrl}${path}`;
+        }
+    };
+    window.API_BASE_URL = window.API_CONFIG.BASE_URL; // Legacy support
+}
 
 // 🔒 Code Protection & Anti-Debug features
 /* 

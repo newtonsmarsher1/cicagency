@@ -22,15 +22,6 @@
   <!-- Remove any debug console overlays (Chrome-specific fix) -->
   <script>
     (function () {
-      // Force unregister old service workers (Chrome cache fix)
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (registrations) {
-          for (let registration of registrations) {
-            registration.unregister();
-          }
-        });
-      }
-
       // Remove any existing debug console elements
       function removeDebugConsole() {
         const debugElements = document.querySelectorAll('#visual-debug-console, [id*="debug"], [class*="debug-console"], [class*="visual-debug"]');
@@ -588,6 +579,27 @@
       }
     }
 
+    @keyframes logo-breathing {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(0, 255, 136, 0.15);
+      }
+
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(0, 255, 136, 0.4);
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: 0 4px 12px rgba(0, 255, 136, 0.15);
+      }
+    }
+
+    .logo-breathing {
+      animation: logo-breathing 3s ease-in-out infinite;
+    }
+
     /* Responsive */
     @media (max-width: 480px) {
       .wallet-section {
@@ -918,16 +930,16 @@
         <div class="wallet-label" data-translate="income-wallet">Income Wallet</div>
         <div class="wallet-amount" id="income-wallet">KES 0.00</div>
       </div>
-      <a href="download/cic-app.apk" class="wallet-card" id="install-app-btn" download
+      <div class="wallet-card" id="install-app-btn" onclick="installApp()"
         style="text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 15px; padding: 15px;">
         <img src="assets/icons/icon-192.png" alt="App Icon" class="logo-breathing"
           style="width: 50px; height: 50px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
         <div style="text-align: left;">
           <div class="wallet-label" data-translate="download-app" style="margin: 0; opacity: 0.8;">Download App</div>
-          <div class="wallet-amount" style="font-size: 1.1rem; margin-top: 2px;" data-translate="get-mobile-app">Get
+          <div class="wallet-amount" style="font-size: 1.1rem; margin-top: 2px;" data-translate="get-mobile-app">Install
             Mobile App</div>
         </div>
-      </a>
+      </div>
     </div>
 
     <!-- Quick Actions -->
@@ -1093,8 +1105,11 @@
         console.log(`User response to install prompt: ${outcome}`);
         deferredPrompt = null;
       } else {
-        // Fallback to direct download if PWA prompt is not available
-        window.location.href = 'https://app.cicagency.onrender.com/download';
+        // Fallback to instructions if PWA prompt is not available
+        alert('To install the CIC App:\n\n' +
+          '1. Open your browser menu (three dots ⋮ or share icon 📤)\n' +
+          '2. Look for "Add to Home Screen" or "Install App" 📲\n' +
+          '3. Follow the prompts to add it to your apps!');
       }
     }
 

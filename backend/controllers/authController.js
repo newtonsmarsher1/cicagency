@@ -696,10 +696,15 @@ const upgradeLevel = async (req, res) => {
                 });
             }
 
-            // Deduct recharge amount from wallet and update level, and clear temporary worker status
+            // Subtract logic: Prioritize personal_wallet, then income_wallet
+            const personalWallet = parseFloat(user.personal_wallet || 0);
+            const deductFromPersonal = Math.min(personalWallet, rechargeAmount);
+            const deductFromIncome = rechargeAmount - deductFromPersonal;
+
+            // Deduct upgrade amount from wallet and update level, and clear temporary worker status
             await connection.execute(
-                'UPDATE users SET wallet_balance = wallet_balance - ?, level = ?, is_temporary_worker = 0 WHERE id = ?',
-                [rechargeAmount, levelNum, userId]
+                'UPDATE users SET wallet_balance = wallet_balance - ?, personal_wallet = personal_wallet - ?, income_wallet = income_wallet - ?, level = ?, is_temporary_worker = false WHERE id = ?',
+                [rechargeAmount, deductFromPersonal, deductFromIncome, levelNum, userId]
             );
 
             // Record the level upgrade transaction
