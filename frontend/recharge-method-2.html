@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Recharge - Method 2</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="js/api-config.js"></script>
+    <script src="js/cic-settings-manager.js"></script>
+    <script src="js/cic-settings-init.js"></script>
+    <style>
+        .method2-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            margin: 2rem auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid #00ffaa;
+            position: relative;
+        }
+
+        .timer-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .number-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin: 10px 0;
+            letter-spacing: 2px;
+        }
+
+        .copy-btn {
+            background: #00ffaa;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+            background: #00e699;
+        }
+
+        .warning-text {
+            color: #d9534f;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        .instructions {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="method2-card">
+            <div style="display: flex; align-items: center; margin-bottom: 1.5rem; gap: 10px;">
+                <a href="payment.html" style="text-decoration: none; color: #333;"><i class="fas fa-arrow-left"></i></a>
+                <h2 style="margin: 0;">Manual Recharge</h2>
+            </div>
+
+            <p class="warning-text">
+                <i class="fas fa-info-circle"></i>
+                Our team is authenticating M-Pesa STK push. Use this temporary method meanwhile.
+            </p>
+
+            <div class="info-box">
+                <div class="timer-badge" id="rotation-timer">60s</div>
+                <div style="font-size: 0.9rem; color: #666;">Send payment to:</div>
+                <div class="number-display" id="recharge-number">Loading...</div>
+                <div style="font-size: 0.9rem; color: #666; margin-bottom: 10px;" id="account-name">CIC GROUP</div>
+                <button class="copy-btn" onclick="copyNumber()">
+                    <i class="fas fa-copy"></i> Copy Number
+                </button>
+            </div>
+
+            <form id="manualRechargeForm">
+                <div class="form-group">
+                    <label for="amount">Amount (KES)</label>
+                    <input type="number" id="amount" name="amount" placeholder="Enter amount paid" required
+                        style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 1rem;">
+                </div>
+
+                <div class="form-group">
+                    <label for="mpesa_message">Paste M-Pesa Message</label>
+                    <textarea id="mpesa_message" name="mpesa_message"
+                        placeholder="Paste the confirmation message received from M-Pesa here..." required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Submit for Approval</button>
+            </form>
+
+            <div class="instructions">
+                <strong>Steps:</strong>
+                <ol>
+                    <li>Copy the phone number above.</li>
+                    <li>Go to M-Pesa > Send Money.</li>
+                    <li>Enter the amount and make payment.</li>
+                    <li>Paste the full M-Pesa confirmation message in the box above.</li>
+                    <li>Click submit and wait for admin approval (usually within 5-10 mins).</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/recharge-method-2.js"></script>
+</body>
+
+</html>

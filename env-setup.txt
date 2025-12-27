@@ -1,0 +1,30 @@
+# Copy this content to create a .env file in your project root
+# Create a file named ".env" and paste this content:
+
+PORT=2001
+NODE_ENV=development
+BASE_URL=http://localhost:2001
+
+# Database Configuration - MySQL
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=cic
+DB_USER=root
+DB_PASSWORD=Caroline
+
+# Security
+JWT_SECRET=cic_super_secret_jwt_key_2024
+API_KEY=your_api_key
+
+# M-Pesa API Configuration (Demo Mode - Optional)
+MPESA_BASE_URL=https://sandbox.safaricom.co.ke
+MPESA_CONSUMER_KEY=your_sandbox_consumer_key
+MPESA_CONSUMER_SECRET=your_sandbox_consumer_secret
+MPESA_BUSINESS_SHORT_CODE=your_business_short_code
+MPESA_PASSKEY=your_passkey
+MPESA_CALLBACK_URL=http://localhost:2001/api/mpesa/callback
+MPESA_TIMEOUT_URL=http://localhost:2001/api/mpesa/timeout
+
+# Logging
+LOG_LEVEL=info
+LOG_FILE=logs/app.log

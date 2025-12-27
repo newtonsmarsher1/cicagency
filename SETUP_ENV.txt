@@ -1,0 +1,35 @@
+INSTRUCTIONS TO UPDATE YOUR .env FILE:
+
+1. Open the .env file in your project root (c:\Users\PC\Desktop\CIC GROUP\.env)
+
+2. Add or update the following line:
+
+POSTGRES_URL=postgresql://postgres:<YOUR_PASSWORD>@db.<YOUR_PROJECT_REF>.supabase.co:5432/postgres
+
+IMPORTANT: The password "Caroline@2005!" has been URL-encoded:
+- @ becomes %40
+- ! becomes %21
+
+3. Make sure you also have a JWT_SECRET set:
+
+JWT_SECRET=your_super_secret_jwt_key_2024
+
+4. Save the file and restart your server.
+
+The connection string format is:
+postgresql://username:password@host:port/database
+
+Your connection details:
+- Username: postgres
+- Password: Caroline@2005! (URL-encoded as Caroline%402005%21)
+- Host: db.giwkajkdkyapkrxssuxv.supabase.co
+- Port: 5432
+- Database: postgres
+
+
+
+
+
+
+
+

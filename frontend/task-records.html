@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title data-translate="task-records-title">Task Records - CIC</title>
+
+  <!-- Monarch Design System -->
+  <link rel="stylesheet" href="css/monarch-design-system.css">
+  <script src="js/api-config.js"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <style>
+    :root {
+      --brand-green: #00ff88;
+      --brand-maroon: #8b4513;
+      --brand-dark: #006633;
+      --brand-accent: #32ff7e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--brand-green);
+      padding: 20px;
+      color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      padding: 20px;
+    }
+
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--brand-green);
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 0 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin: 24px 0 16px 0;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .filter-tab {
+      padding: 8px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .filter-tab.active {
+      background: var(--brand-green);
+      color: white;
+      border-color: var(--brand-green);
+    }
+
+    /* Records List */
+    .records-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .record-card {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #e0e0e0;
+    }
+
+    .record-card.correct {
+      border-left-color: #4caf50;
+    }
+
+    .record-card.wrong {
+      border-left-color: #f44336;
+    }
+
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .record-task-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .record-result {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .result-correct {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .result-wrong {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .record-question {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .record-answer {
+      font-size: 13px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .record-reward {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--brand-green);
+      margin-top: 8px;
+    }
+
+    .record-date {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-green);
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <button class="back-btn" onclick="window.history.back()">←</button>
+      <h1 class="header-title" data-translate="task-records-header">Task Records</h1>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label" data-translate="completed-today-label">Completed Today</div>
+      <div class="summary-value"><span id="completed-today">0</span></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label" data-translate="correct-answers-label">Correct Answers</div>
+      <div class="summary-value"><span id="correct-answers">0</span></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label" data-translate="total-earned-label">Total Earned</div>
+      <div class="summary-value">KES <span id="total-earned">0</span></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label" data-translate="success-rate-label">Success Rate</div>
+      <div class="summary-value"><span id="success-rate">0</span>%</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <h2 class="section-title" data-translate="task-history">Task History</h2>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterRecords('all')" data-translate="all">All</button>
+      <button class="filter-tab" onclick="filterRecords('today')" data-translate="today">Today</button>
+      <button class="filter-tab" onclick="filterRecords('correct')" data-translate="correct">Correct</button>
+      <button class="filter-tab" onclick="filterRecords('wrong')" data-translate="wrong">Wrong</button>
+    </div>
+
+    <!-- Records List -->
+    <div class="records-list" id="records-list">
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text" data-translate="no-task-records">No task records yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="task.html" class="nav-item active">
+      <span class="nav-icon">📋</span>
+      <span>Tasks</span>
+    </a>
+    <a href="level.html" class="nav-item">
+      <span class="nav-icon">📊</span>
+      <span>Level</span>
+    </a>
+    <a href="withdrawal.html" class="nav-item">
+      <span class="nav-icon">💸</span>
+      <span>Withdraw</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="nav-icon">👤</span>
+      <span data-translate="profile">Profile</span>
+    </a>
+  </div>
+
+  <script>
+    let allRecords = [];
+    let currentFilter = 'all';
+
+    // Load task records
+    function loadRecords() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      fetch('/api/tasks/history', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          // Handle both data.records and data.data formats
+          const records = data.records || data.data || [];
+          if (records.length > 0) {
+            allRecords = records;
+
+            // Update summary
+            const today = allRecords.filter(r => {
+              if (!r.completed_at) return false;
+              const date = new Date(r.completed_at);
+              const now = new Date();
+              return date.toDateString() === now.toDateString();
+            });
+
+            const correct = allRecords.filter(r => r.is_correct === true || r.is_correct === 1 || r.is_complete === 1);
+            const totalEarned = correct.reduce((sum, r) => sum + (parseFloat(r.reward_amount) || 0), 0);
+            const successRate = allRecords.length > 0 ? Math.round((correct.length / allRecords.length) * 100) : 0;
+
+            document.getElementById('completed-today').textContent = today.length;
+            document.getElementById('correct-answers').textContent = correct.length;
+            document.getElementById('total-earned').textContent = totalEarned.toFixed(2);
+            document.getElementById('success-rate').textContent = successRate;
+
+            // Display records
+            displayRecords();
+          } else {
+            // No records found
+            allRecords = [];
+            displayRecords();
+          }
+        })
+        .catch(err => {
+          console.error('Error loading records:', err);
+          // Show empty state on error
+          allRecords = [];
+          displayRecords();
+        });
+    }
+
+    function displayRecords() {
+      const list = document.getElementById('records-list');
+
+      let filtered = allRecords;
+
+      if (currentFilter === 'today') {
+        filtered = allRecords.filter(r => {
+          const date = new Date(r.completed_at);
+          const now = new Date();
+          return date.toDateString() === now.toDateString();
+        });
+      } else if (currentFilter === 'correct') {
+        filtered = allRecords.filter(r => r.is_correct);
+      } else if (currentFilter === 'wrong') {
+        filtered = allRecords.filter(r => !r.is_correct);
+      }
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <div class="empty-text">No ${currentFilter !== 'all' ? currentFilter : ''} records found</div>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = filtered.map(record => {
+        const isCorrect = record.is_correct === true || record.is_correct === 1 || record.is_complete === 1;
+        const rewardAmount = parseFloat(record.reward_amount) || 0;
+        const taskName = record.task_name || 'Task';
+        const question = record.question || 'N/A';
+        const userAnswer = record.user_answer || 'N/A';
+        const correctAnswer = record.correct_answer || 'N/A';
+        const completedAt = record.completed_at ? new Date(record.completed_at).toLocaleString() : 'N/A';
+
+        return `
+          <div class="record-card ${isCorrect ? 'correct' : 'wrong'}">
+            <div class="record-header">
+              <div class="record-task-name">${taskName}</div>
+              <span class="record-result ${isCorrect ? 'result-correct' : 'result-wrong'}">
+                ${isCorrect ? '✅ Correct' : '❌ Wrong'}
+              </span>
+            </div>
+            <div class="record-question">Q: ${question}</div>
+            <div class="record-answer">
+              Your answer: ${userAnswer}
+              ${!isCorrect ? `<br>Correct answer: ${correctAnswer}` : ''}
+            </div>
+            ${isCorrect && rewardAmount > 0 ? `<div class="record-reward">Earned: KES ${rewardAmount.toFixed(2)}</div>` : ''}
+            <div class="record-date">${completedAt}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterRecords(filter) {
+      currentFilter = filter;
+
+      // Update tabs
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      displayRecords();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+      loadRecords();
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIC - Home</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00ff88">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CIC">
+
+  <!-- API Config -->
+  <script src="js/api-config.js?v=debug"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <script src="js/activity-tracker.js"></script>
+
+  <!-- Remove any debug console overlays (Chrome-specific fix) -->
+  <script>
+    (function () {
+      // Force unregister old service workers (Chrome cache fix)
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+
+      // Remove any existing debug console elements
+      function removeDebugConsole() {
+        const debugElements = document.querySelectorAll('#visual-debug-console, [id*="debug"], [class*="debug-console"], [class*="visual-debug"]');
+        debugElements.forEach(el => el.remove());
+
+        // Also check for elements with fixed position and high z-index that might be debug consoles
+        const allElements = document.querySelectorAll('div');
+        allElements.forEach(el => {
+          const style = window.getComputedStyle(el);
+          if (style.position === 'fixed' &&
+            parseInt(style.zIndex) > 10000 &&
+            (el.textContent.includes('[log]') || el.textContent.includes('[error]') ||
+              el.textContent.includes('Language changed') || el.textContent.includes('Currency changed'))) {
+            el.remove();
+          }
+        });
+      }
+
+      // Remove immediately (before anything else loads)
+      removeDebugConsole();
+
+      // Remove after DOM loads
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', removeDebugConsole);
+      }
+
+      // Remove after page loads
+      window.addEventListener('load', removeDebugConsole);
+
+      // Keep checking periodically (Chrome may inject elements later)
+      setInterval(removeDebugConsole, 500);
+
+      // Chrome-specific: Watch for dynamically added elements
+      const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+          mutation.addedNodes.forEach(function (node) {
+            if (node.nodeType === 1) { // Element node
+              const style = window.getComputedStyle(node);
+              if (style.position === 'fixed' && parseInt(style.zIndex) > 10000) {
+                if (node.textContent && (node.textContent.includes('[log]') ||
+                  node.textContent.includes('[error]') ||
+                  node.textContent.includes('Language changed') ||
+                  node.textContent.includes('Currency changed'))) {
+                  node.remove();
+                }
+              }
+            }
+          });
+        });
+      });
+
+      // Start observing
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    })();
+  </script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-green: #00ff88;
+      --dark-green: #00cc6a;
+      --light-green: #33ff99;
+      --white-bg: #ffffff;
+      --card-bg: #f8f9fa;
+      --text-primary: #2c3e50;
+      --text-secondary: #6c757d;
+      --gradient: linear-gradient(135deg, var(--brand-green, #00ff88), var(--dark-green, #00cc6a));
+      --shadow: 0 8px 32px rgba(0, 255, 136, 0.15);
+      --brand-green: #00ff88;
+      --brand-accent: #32ff7e;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--white-bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-bottom: 60px;
+      /* Space for bottom navigation */
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--brand-green, var(--primary-green, #00ff88)), var(--dark-green, #00cc6a));
+      padding: 1rem;
+      text-align: center;
+      position: relative;
+      box-shadow: var(--shadow);
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .header .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-top: 0.5rem;
+    }
+
+    /* User Info Card */
+    .user-card {
+      background: var(--card-bg);
+      margin: 1rem;
+      padding: 1.5rem;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 255, 136, 0.1);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .user-details h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .user-level {
+      background: var(--gradient);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    /* Wallet Section */
+    .wallet-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .wallet-card {
+      background: var(--white-bg);
+      padding: 1rem;
+      border-radius: 15px;
+      text-align: center;
+      border: 1px solid rgba(0, 255, 136, 0.1);
+      transition: transform 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .wallet-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary-green);
+    }
+
+    .wallet-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .wallet-amount {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-green);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .action-btn {
+      background: var(--gradient);
+      color: white;
+      border: none;
+      padding: 0.7rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .action-btn.secondary {
+      background: var(--white-bg);
+      border: 2px solid var(--primary-green);
+      color: var(--primary-green);
+    }
+
+    /* Features Section */
+    .features-section {
+      background: var(--card-bg);
+      margin: 1rem;
+      padding: 1.5rem;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 255, 136, 0.1);
+    }
+
+    .features-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .feature-card {
+      background: var(--white-bg);
+      padding: 0.8rem;
+      border-radius: 12px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text-primary);
+      border: 1px solid rgba(0, 255, 136, 0.1);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary-green);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-label {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    /* Stats Section */
+    .stats-section {
+      background: var(--card-bg);
+      margin: 1rem;
+      padding: 1.5rem;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .stats-title {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--primary-green);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+      background: var(--white-bg);
+      border-radius: 10px;
+      border: 1px solid rgba(0, 255, 136, 0.1);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary-green);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-green, var(--primary-green, #00ff88));
+      display: flex;
+      padding: 4px 0;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 4px 8px;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.7);
+      transition: all 0.3s ease;
+      gap: 2px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+    }
+
+    .nav-icon {
+      font-size: 20px;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    /* Responsive navigation */
+    @media (max-width: 480px) {
+      .bottom-nav {
+        padding: 3px 0;
+      }
+
+      .nav-item {
+        padding: 3px 6px;
+        gap: 1px;
+      }
+
+      .nav-icon {
+        font-size: 18px;
+      }
+
+      .nav-label {
+        font-size: 8px;
+      }
+
+      body {
+        padding-bottom: 50px;
+      }
+
+      .chatbot-container {
+        bottom: 50px;
+      }
+    }
+
+    /* AI Chatbot */
+    .chatbot-container {
+      position: fixed;
+      bottom: 60px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .chatbot-toggle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--gradient);
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 255, 136, 0.4);
+    }
+
+    .chatbot-modal {
+      position: absolute;
+      bottom: 70px;
+      right: 0;
+      width: 320px;
+      height: 400px;
+      background: var(--white-bg);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      display: none;
+      flex-direction: column;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .chatbot-modal.active {
+      display: flex;
+    }
+
+    .chatbot-header {
+      background: var(--gradient);
+      color: var(--white-bg);
+      padding: 15px;
+      border-radius: 20px 20px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chatbot-title {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .chatbot-close {
+      background: none;
+      border: none;
+      color: var(--white-bg);
+      font-size: 20px;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chatbot-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .chatbot-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chatbot-message {
+      max-width: 80%;
+      padding: 10px 15px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .chatbot-message.bot {
+      background: var(--card-bg);
+      align-self: flex-start;
+      border: 1px solid rgba(0, 255, 136, 0.1);
+    }
+
+    .chatbot-message.user {
+      background: var(--gradient);
+      color: var(--white-bg);
+      align-self: flex-end;
+    }
+
+    .chatbot-input {
+      padding: 15px;
+      display: flex;
+      gap: 10px;
+      border-top: 1px solid rgba(0, 255, 136, 0.1);
+    }
+
+    .chatbot-input input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 25px;
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    .chatbot-input input:focus {
+      border-color: var(--primary-green);
+    }
+
+    .chatbot-input button {
+      padding: 10px 20px;
+      background: var(--gradient);
+      color: var(--white-bg);
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-input button:hover {
+      transform: scale(1.05);
+    }
+
+    /* Loading States */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(0, 255, 136, 0.3);
+      border-top: 3px solid var(--primary-green);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .wallet-section {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Error States */
+    .error-message {
+      background: #ff4444;
+      color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      margin: 1rem;
+      text-align: center;
+    }
+
+    /* Success States */
+    .success-message {
+      background: var(--primary-green);
+      color: white;
+      padding: 1rem;
+      border-radius: 10px;
+      margin: 1rem;
+      text-align: center;
+    }
+
+    /* Scrolling Text Animation */
+    .scrolling-text-container {
+      overflow: hidden;
+      white-space: nowrap;
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 106, 0.1));
+      padding: 12px 0;
+      margin: 1rem;
+      border-radius: 10px;
+      position: relative;
+      min-height: 40px;
+    }
+
+    .scrolling-text-wrapper {
+      display: inline-flex;
+      animation: scroll-right-to-left 60s linear infinite;
+      will-change: transform;
+    }
+
+    .scrolling-text {
+      display: inline-block;
+      font-size: 0.9rem;
+      color: var(--primary-green);
+      font-weight: 600;
+      padding: 0 20px;
+      white-space: nowrap;
+    }
+
+    .scrolling-text .notification-item {
+      display: inline-block;
+      margin: 0 30px;
+      padding: 0.3rem 0.8rem;
+      background: rgba(0, 255, 136, 0.15);
+      border-radius: 15px;
+      border-left: 3px solid var(--primary-green);
+    }
+
+    .scrolling-text .notification-item.expiring {
+      border-left-color: #ff9800;
+      background: rgba(255, 152, 0, 0.15);
+    }
+
+    @keyframes scroll-right-to-left {
+      0% {
+        transform: translateX(0);
+      }
+
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    /* Dancing Badge on Header */
+    .header .subtitle {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dancing-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 600;
+      animation: dance 2s ease-in-out infinite;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    @keyframes dance {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+
+      25% {
+        transform: translateY(-5px) rotate(-2deg);
+      }
+
+      50% {
+        transform: translateY(-8px) rotate(0deg);
+      }
+
+      75% {
+        transform: translateY(-5px) rotate(2deg);
+      }
+    }
+
+
+    /* Powered By Footer */
+    .powered-by {
+      text-align: center;
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), rgba(0, 204, 106, 0.05));
+      margin: 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .powered-by strong {
+      color: var(--primary-green);
+      font-weight: 700;
+    }
+
+    /* Notifications Section */
+    .notifications-section {
+      background: var(--card-bg);
+      margin: 1rem;
+      padding: 1rem;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 255, 136, 0.1);
+    }
+
+    .notifications-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    #notifications-list {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    #notifications-list>div {
+      transition: opacity 0.3s ease;
+    }
+
+    .delete-notification-btn {
+      background: transparent;
+      border: none;
+      color: #999;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+      line-height: 1;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .delete-notification-btn:hover {
+      background: #ffebee;
+      color: #d32f2f;
+      transform: scale(1.1);
+    }
+
+    .delete-notification-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Holiday Banner */
+    .holiday-banner {
+      display: none;
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+      border: 2px solid #ffc107;
+      border-radius: 12px;
+      margin: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+      animation: slideDown 0.5s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .holiday-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .holiday-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 0.5rem;
+    }
+
+    .holiday-message {
+      font-size: 0.95rem;
+      color: #856404;
+      margin-bottom: 1rem;
+    }
+
+    .holiday-countdown {
+      background: white;
+      padding: 0.8rem;
+      border-radius: 8px;
+      display: inline-flex;
+      gap: 15px;
+      font-weight: 700;
+      color: var(--primary-green);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .countdown-unit {
+      text-align: center;
+    }
+
+    .countdown-value {
+      font-size: 1.2rem;
+      display: block;
+    }
+
+    .countdown-label {
+      font-size: 0.75rem;
+      color: #666;
+      font-weight: normal;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>🚀 CIC</h1>
+    <div class="subtitle">
+      <span class="dancing-badge" data-translate="welcome-dashboard">🌟 Welcome to your dashboard 🌟</span>
+    </div>
+  </div>
+
+  <!-- Scrolling Text with Notifications -->
+  </div>
+  </div>
+
+  <!-- Holiday Banner -->
+  <div id="holiday-banner" class="holiday-banner" style="display: none;">
+    <div class="holiday-icon">🚫</div>
+    <div class="holiday-title" data-translate="holiday-notice-title">Holiday Notice</div>
+    <div class="holiday-message" id="holiday-message">Tasks and withdrawals are restricted today.</div>
+    <div class="holiday-countdown">
+      <div class="countdown-unit">
+        <span class="countdown-value" id="h-hours">00</span>
+        <span class="countdown-label">Hours</span>
+      </div>
+      <div class="countdown-unit">
+        <span class="countdown-value" id="h-minutes">00</span>
+        <span class="countdown-label">Mins</span>
+      </div>
+      <div class="countdown-unit">
+        <span class="countdown-value" id="h-seconds">00</span>
+        <span class="countdown-label">Secs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Card -->
+  <div class="user-card">
+    <div class="user-info">
+      <div class="user-avatar" id="user-avatar">👤</div>
+      <div class="user-details">
+        <h3 id="user-name">Loading...</h3>
+        <div class="user-level" id="user-level">LV0</div>
+      </div>
+    </div>
+
+    <!-- Wallet Section -->
+    <div class="wallet-section">
+      <div class="wallet-card">
+        <div class="wallet-label" data-translate="income-wallet">Income Wallet</div>
+        <div class="wallet-amount" id="income-wallet">KES 0.00</div>
+      </div>
+      <a href="#" class="wallet-card" id="install-app-btn" onclick="installApp(); return false;"
+        style="text-decoration: none; cursor: pointer;">
+        <div class="wallet-label" data-translate="download-app">Download App</div>
+        <div class="wallet-amount" style="font-size: 1.2rem;" data-translate="get-mobile-app">Get Mobile App 📱</div>
+      </a>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <a href="payment.html" class="action-btn">
+        💳 <span data-translate="recharge">Recharge</span>
+      </a>
+      <a href="invest.html" class="action-btn secondary">
+        💰 <span data-translate="invest">Invest</span>
+      </a>
+      <a href="level.html" class="action-btn secondary">
+        📊 <span data-translate="levels">Levels</span>
+      </a>
+      <a href="withdrawal.html" class="action-btn">
+        💸 <span data-translate="withdraw">Withdraw</span>
+      </a>
+    </div>
+
+    <!-- Additional Features -->
+    <div class="features-section">
+      <div class="features-title" data-translate="quick-access">🚀 Quick Access</div>
+      <div class="features-grid">
+        <a href="team management.html" class="feature-card">
+          <div class="feature-icon">👥</div>
+          <div class="feature-label" data-translate="team-management">Team Management</div>
+        </a>
+        <a href="news.html" class="feature-card">
+          <div class="feature-icon">📰</div>
+          <div class="feature-label" data-translate="news">News</div>
+        </a>
+        <a href="benefits.html" class="feature-card">
+          <div class="feature-icon">🎁</div>
+          <div class="feature-label" data-translate="benefits">Benefits</div>
+        </a>
+        <a href="settings.html" class="feature-card">
+          <div class="feature-icon">⚙️</div>
+          <div class="feature-label" data-translate="settings">Settings</div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Section -->
+  <div class="stats-section">
+    <div class="stats-title" data-translate="todays-performance">📈 Today's Performance</div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value" id="today-earnings">KES 0.00</div>
+        <div class="stat-label" data-translate="todays-earnings">Today's Earnings</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="tasks-completed">0</div>
+        <div class="stat-label" data-translate="tasks-completed">Tasks Completed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="team-size">0</div>
+        <div class="stat-label" data-translate="team-members">Team Members</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="total-earnings">KES 0.00</div>
+        <div class="stat-label" data-translate="total-earnings">Total Earnings</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications Section -->
+  <div class="notifications-section">
+    <div class="notifications-title">
+      🔔 System Notifications
+      <span style="font-size: 12px; font-weight: normal; color: #666; margin-left: 8px;">(Tap × to delete)</span>
+    </div>
+    <div id="notifications-list">
+      <!-- Notifications will be loaded here -->
+    </div>
+  </div>
+
+  <!-- Powered By Footer -->
+  <div class="powered-by">
+    <span data-translate="powered-by">Powered by</span> <strong>cicgroup.com </strong>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item active">
+      <div class="nav-icon">🏠</div>
+      <div class="nav-label" data-translate="home">Home</div>
+    </a>
+    <a href="task.html" class="nav-item">
+      <div class="nav-icon">📋</div>
+      <div class="nav-label" data-translate="tasks">Tasks</div>
+    </a>
+    <a href="level.html" class="nav-item">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label" data-translate="level">Level</div>
+    </a>
+    <a href="withdrawal.html" class="nav-item">
+      <div class="nav-icon">💸</div>
+      <div class="nav-label" data-translate="withdraw">Withdraw</div>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <div class="nav-icon">👤</div>
+      <div class="nav-label" data-translate="profile">Profile</div>
+    </a>
+  </div>
+
+  <!-- AI Chatbot -->
+  <div class="chatbot-container">
+    <button class="chatbot-toggle" id="chatbot-toggle">
+      🤖
+    </button>
+
+    <div class="chatbot-modal" id="chatbot-modal">
+      <div class="chatbot-header">
+        <div class="chatbot-title" data-translate="ai-assistant">AI Assistant</div>
+        <button class="chatbot-close" id="chatbot-close">×</button>
+      </div>
+
+      <div class="chatbot-messages" id="chatbot-messages">
+        <div class="chatbot-message bot">
+          <div class="message-content" data-translate="ai-welcome">
+            👋 Hello! I'm your AI assistant. How can I help you today?
+          </div>
+        </div>
+      </div>
+
+      <div class="chatbot-input">
+        <input type="text" id="chatbot-input" placeholder="Type your message..."
+          data-translate-placeholder="type-message">
+        <button id="chatbot-send" data-translate="send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global variables
+    let userData = null;
+    let isLoading = true;
+
+    // PWA Installation Logic
+    let deferredPrompt;
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker Registered'))
+          .catch(err => console.log('Service Worker Error:', err));
+      });
+    }
+
+    // Capture install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      console.log('App install prompt captured');
+    });
+
+    // Handle install button click
+    async function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to install prompt: ${outcome}`);
+        deferredPrompt = null;
+      } else {
+        // Fallback to direct download if PWA prompt is not available
+        window.location.href = 'https://app.cicagency.onrender.com/download';
+      }
+    }
+
+    // Currency conversion rates (approximate - should be fetched from API in production)
+    const currencyRates = {
+      USD: 1.0,      // Base currency
+      KES: 130.0,    // 1 USD = 130 KES (approximate)
+      EUR: 0.92,     // 1 USD = 0.92 EUR (approximate)
+      GBP: 0.79      // 1 USD = 0.79 GBP (approximate)
+    };
+
+    // Get current currency from settings
+    function getCurrentCurrency() {
+      if (window.CICSettings) {
+        return window.CICSettings.get('currency') || 'KES';
+      }
+      return localStorage.getItem('cic-currency') || 'KES';
+    }
+
+    // Convert amount to current currency
+    function convertCurrency(amount, fromCurrency = 'KES', toCurrency = null) {
+      if (!toCurrency) {
+        toCurrency = getCurrentCurrency();
+      }
+
+      if (fromCurrency === toCurrency) {
+        return amount;
+      }
+
+      // Convert to USD first (base currency)
+      let amountInUSD = amount;
+      if (fromCurrency !== 'USD') {
+        amountInUSD = amount / currencyRates[fromCurrency];
+      }
+
+      // Convert from USD to target currency
+      if (toCurrency !== 'USD') {
+        return amountInUSD * currencyRates[toCurrency];
+      }
+
+      return amountInUSD;
+    }
+
+    // Format currency amount
+    function formatCurrency(amount, currency = null) {
+      if (!currency) {
+        currency = getCurrentCurrency();
+      }
+
+      const convertedAmount = convertCurrency(amount, 'KES', currency);
+      const currencySymbols = {
+        'USD': '$',
+        'KES': 'KES ',
+        'EUR': '€',
+        'GBP': '£'
+      };
+
+      const symbol = currencySymbols[currency] || currency + ' ';
+      return `${symbol}${convertedAmount.toFixed(2)}`;
+    }
+
+    // Load user data from API
+    async function loadUserData() {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        console.log('No authentication token found');
+        showNotLoggedInState();
+        return;
+      }
+
+      try {
+        console.log('Loading user data...');
+        showLoadingState();
+
+        // Use API_CONFIG to get the correct backend URL
+        const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/stats') : 'https://cicagency.onrender.com/api/auth/stats';
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('User data loaded:', data);
+
+        if (data.success === false) {
+          throw new Error(data.error || 'API returned error');
+        }
+
+        userData = data;
+        updateUI(data);
+        isLoading = false;
+
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        showErrorState(error.message);
+        isLoading = false;
+      }
+    }
+
+    // Update UI with user data
+    function updateUI(data) {
+      // Update user info
+      document.getElementById('user-name').textContent = data.name || 'User';
+      document.getElementById('user-level').textContent = `LV${data.level || 0}`;
+
+      // Update wallet amounts with currency conversion
+      const walletBalance = parseFloat(data.wallet_balance || 0);
+      const totalEarnings = parseFloat(data.total_earnings || 0);
+      const personalWallet = parseFloat(data.personal_wallet || 0);
+      const todayEarning = parseFloat(data.today_earning || 0);
+
+      const currency = getCurrentCurrency();
+
+      // Income Wallet = Total Balance = Earnings + Recharges
+      // walletBalance already includes recharges (personal_wallet) and task earnings (income_wallet)
+      const totalBalance = walletBalance;
+      document.getElementById('income-wallet').textContent = formatCurrency(totalBalance, currency);
+
+      // Personal Wallet = Recharges (Hidden/Replaced by Download App)
+      // document.getElementById('personal-wallet').textContent = formatCurrency(personalWallet, currency);
+
+      // Update stats with currency conversion
+      document.getElementById('today-earnings').textContent = formatCurrency(todayEarning, currency);
+      document.getElementById('tasks-completed').textContent = data.tasks_completed_today || 0;
+      document.getElementById('team-size').textContent = data.team_size || 0;
+      document.getElementById('total-earnings').textContent = formatCurrency(totalEarnings, currency);
+
+      // Update avatar with first letter of name
+      const firstLetter = (data.name || 'U').charAt(0).toUpperCase();
+      document.getElementById('user-avatar').textContent = firstLetter;
+    }
+
+    // Show loading state
+    function showLoadingState() {
+      document.getElementById('user-name').textContent = 'Loading...';
+      document.getElementById('income-wallet').textContent = 'Loading...';
+      // document.getElementById('personal-wallet').textContent = 'Loading...';
+    }
+
+    // Show not logged in state
+    function showNotLoggedInState() {
+      const currency = getCurrentCurrency();
+      document.getElementById('user-name').textContent = 'Please Login';
+      document.getElementById('user-level').textContent = 'LV0';
+      document.getElementById('income-wallet').textContent = formatCurrency(0, currency);
+      // document.getElementById('personal-wallet').textContent = formatCurrency(0, currency);
+
+      // Show login prompt
+      const userCard = document.querySelector('.user-card');
+      const loginPrompt = document.createElement('div');
+      loginPrompt.className = 'error-message';
+      loginPrompt.innerHTML = '🔐 Please login to view your data';
+      userCard.appendChild(loginPrompt);
+
+      // Add login button
+      const loginBtn = document.createElement('a');
+      loginBtn.href = 'index.html';
+      loginBtn.className = 'action-btn';
+      loginBtn.style.marginTop = '1rem';
+      loginBtn.textContent = '🚀 Login Now';
+      userCard.appendChild(loginBtn);
+    }
+
+    // Show error state
+    function showErrorState(message) {
+      const currency = getCurrentCurrency();
+      document.getElementById('user-name').textContent = 'Error';
+      document.getElementById('income-wallet').textContent = formatCurrency(0, currency);
+      document.getElementById('personal-wallet').textContent = formatCurrency(0, currency);
+
+      const userCard = document.querySelector('.user-card');
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      errorDiv.innerHTML = `❌ ${message}`;
+      userCard.appendChild(errorDiv);
+    }
+
+    // Auto-refresh data every 30 seconds
+    function startAutoRefresh() {
+      setInterval(() => {
+        if (!isLoading) {
+          loadUserData();
+        }
+      }, 30000);
+    }
+
+    // Chatbot functionality
+    function initChatbot() {
+      const toggle = document.getElementById('chatbot-toggle');
+      const modal = document.getElementById('chatbot-modal');
+      const close = document.getElementById('chatbot-close');
+      const input = document.getElementById('chatbot-input');
+      const sendBtn = document.getElementById('chatbot-send');
+      const messages = document.getElementById('chatbot-messages');
+
+      // Toggle chatbot
+      toggle.addEventListener('click', () => {
+        modal.classList.toggle('active');
+        if (modal.classList.contains('active')) {
+          input.focus();
+        }
+      });
+
+      // Close chatbot
+      close.addEventListener('click', () => {
+        modal.classList.remove('active');
+      });
+
+      // Send message
+      function sendMessage() {
+        const message = input.value.trim();
+        if (!message) return;
+
+        // Add user message
+        addMessage(message, 'user');
+        input.value = '';
+
+        // Simulate bot response
+        setTimeout(() => {
+          const response = getBotResponse(message);
+          addMessage(response, 'bot');
+        }, 1000);
+      }
+
+      // Send button click
+      sendBtn.addEventListener('click', sendMessage);
+
+      // Enter key press
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
+
+      // Add message to chat
+      function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `chatbot-message ${sender}`;
+        messageDiv.innerHTML = `<div class="message-content">${text}</div>`;
+        messages.appendChild(messageDiv);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      // Simple bot responses
+      function getBotResponse(message) {
+        const lowerMessage = message.toLowerCase();
+
+        if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+          return '👋 Hello! How can I help you today?';
+        } else if (lowerMessage.includes('help')) {
+          return '🤖 I can help you with:\n• Account information\n• Task completion\n• Level progression\n• Withdrawal process\n• General questions';
+        } else if (lowerMessage.includes('balance') || lowerMessage.includes('wallet')) {
+          return '💰 Your wallet balance is displayed on the home page. You can also check it in your profile section.';
+        } else if (lowerMessage.includes('task')) {
+          return '📋 Tasks are available in the Tasks section. Complete them to earn rewards!';
+        } else if (lowerMessage.includes('invest') || lowerMessage.includes('level')) {
+          return '📊 Check out our level system in the Level section. Progress through different levels to unlock more opportunities!';
+        } else if (lowerMessage.includes('withdraw')) {
+          return '💸 You can withdraw your earnings from the Withdrawal section. Make sure you have sufficient balance.';
+        } else if (lowerMessage.includes('level')) {
+          return '📊 Your level determines your earning potential. Upgrade your level to unlock more opportunities!';
+        } else {
+          return '🤔 I understand you\'re asking about "' + message + '". For specific help, please contact our support team or check the relevant sections in the app.';
+        }
+      }
+    }
+
+    // Check if today is a holiday/restricted date
+    async function checkHolidayStatus() {
+      try {
+        const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/check-restriction') : 'https://cicagency.onrender.com/api/auth/check-restriction';
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.success && data.isRestricted) {
+          const banner = document.getElementById('holiday-banner');
+          const messageEl = document.getElementById('holiday-message');
+          const titleEl = banner.querySelector('.holiday-title');
+
+          if (banner && messageEl) {
+            banner.style.display = 'block';
+            if (titleEl && data.holidayName) {
+              titleEl.textContent = `${data.holidayName} Notice`;
+            }
+            messageEl.textContent = data.reason || 'Tasks and withdrawals are restricted today.';
+
+            // Start countdown to midnight
+            startHolidayCountdown();
+          }
+        }
+      } catch (err) {
+        console.error('Error checking holiday status:', err);
+      }
+    }
+
+    function startHolidayCountdown() {
+      const updateCountdown = () => {
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        const diff = tomorrow - now;
+
+        if (diff <= 0) {
+          document.getElementById('holiday-banner').style.display = 'none';
+          return;
+        }
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('h-hours').textContent = hours.toString().padStart(2, '0');
+        document.getElementById('h-minutes').textContent = minutes.toString().padStart(2, '0');
+        document.getElementById('h-seconds').textContent = seconds.toString().padStart(2, '0');
+      };
+
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    }
+
+    // Update navigation bar color based on settings
+    function updateNavigationBarColor() {
+      const bottomNav = document.querySelector('.bottom-nav');
+      if (bottomNav && window.CICSettings) {
+        const themeColor = window.CICSettings.get('themeColor') || 'green';
+        const colorMap = {
+          green: '#00ff88',
+          blue: '#2196f3',
+          purple: '#9c27b0',
+          orange: '#ff9800',
+          red: '#f44336'
+        };
+        const color = colorMap[themeColor] || colorMap.green;
+        bottomNav.style.background = color;
+      }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('CIC Home Page Initialized');
+      checkHolidayStatus();
+      loadUserData();
+      startAutoRefresh();
+      initChatbot(); // Initialize chatbot
+      updateNavigationBarColor(); // Set initial nav bar color
+
+      // Listen for settings changes
+      if (window.CICSettings) {
+        window.CICSettings.addListener('themeColor', function () {
+          updateNavigationBarColor();
+        });
+
+        // Listen for currency changes and update UI
+        window.CICSettings.addListener('currency', function () {
+          console.log('Currency changed, updating UI...');
+          if (userData) {
+            updateUI(userData);
+          }
+        });
+      }
+
+      // Listen for storage changes (currency changes from other tabs)
+      window.addEventListener('storage', function (e) {
+        if (e.key === 'cic-settings') {
+          try {
+            const settings = JSON.parse(e.newValue);
+            if (settings.currency && userData) {
+              updateUI(userData);
+            }
+          } catch (err) {
+            console.error('Error parsing settings:', err);
+          }
+        }
+      });
+
+      // Also listen for storage changes (cross-tab sync)
+      window.addEventListener('storage', function (e) {
+        if (e.key === 'cic-settings') {
+          updateNavigationBarColor();
+        }
+      });
+
+      // Add click handlers for navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function (e) {
+          document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+
+      // Initialize notification system
+      initializeNotifications();
+    });
+
+    // Notification System with 24-hour expiry
+    function initializeNotifications() {
+      // Load public notifications from other users
+      loadPublicNotifications();
+
+      // Load and display notifications immediately
+      loadAndDisplayNotifications();
+
+      // Refresh notifications from API every 30 seconds
+      setInterval(() => {
+        loadAndDisplayNotifications();
+      }, 30000); // Refresh every 30 seconds
+
+      // Check for expired notifications every minute
+      setInterval(() => {
+        removeExpiredNotifications();
+        removeExpiredPublicNotifications();
+        loadAndDisplayNotifications();
+      }, 60000); // Check every minute
+
+      // Also check on page load
+      removeExpiredNotifications();
+      removeExpiredPublicNotifications();
+    }
+
+    function loadPublicNotifications() {
+      const publicNotifications = getPublicNotifications();
+      const activePublic = publicNotifications.filter(n => !isExpired(n));
+
+      // Merge with user's own notifications
+      const userNotifications = getNotifications();
+      const allNotifications = [...userNotifications, ...activePublic];
+
+      // Sort by timestamp (newest first) and save temporarily for display
+      allNotifications.sort((a, b) => b.timestamp - a.timestamp);
+
+      // Store merged notifications temporarily for display
+      try {
+        localStorage.setItem('cic-merged-notifications', JSON.stringify(allNotifications));
+      } catch (e) {
+        console.error('Error storing merged notifications:', e);
+      }
+    }
+
+    function removeExpiredPublicNotifications() {
+      const publicNotifications = getPublicNotifications();
+      const active = publicNotifications.filter(n => !isExpired(n));
+      if (active.length !== publicNotifications.length) {
+        try {
+          localStorage.setItem('cic-public-notifications', JSON.stringify(active));
+        } catch (e) {
+          console.error('Error saving public notifications:', e);
+        }
+      }
+    }
+
+    async function loadAndDisplayNotifications() {
+      const scrollingContainer = document.getElementById('scrolling-notifications');
+      const notificationsList = document.getElementById('notifications-list');
+      if (!scrollingContainer) return;
+
+      // Load notifications from API
+      let apiNotifications = [];
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          // Use API_CONFIG to get the correct backend URL
+          const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('notifications') : 'https://cicagency.onrender.com/api/notifications';
+          const response = await fetch(apiUrl, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && Array.isArray(data.data)) {
+              apiNotifications = data.data.map(n => ({
+                id: n.id || Date.now().toString(),
+                title: n.title || 'Notification',
+                content: n.message || n.content || '',
+                timestamp: n.created_at ? new Date(n.created_at).getTime() : Date.now(),
+                type: n.type || 'info',
+                is_read: n.is_read || false
+              }));
+            }
+          }
+        }
+      } catch (error) {
+        console.log('Error loading API notifications:', error);
+      }
+
+      // Get merged notifications (user's + public + API)
+      let allNotifications = [];
+      try {
+        const merged = localStorage.getItem('cic-merged-notifications');
+        if (merged) {
+          allNotifications = JSON.parse(merged);
+        } else {
+          // Fallback to just user notifications
+          allNotifications = getNotifications();
+          const publicNotifications = getPublicNotifications();
+          allNotifications = [...allNotifications, ...publicNotifications];
+        }
+      } catch (e) {
+        allNotifications = getNotifications();
+      }
+
+      // Merge API notifications (newest first)
+      allNotifications = [...apiNotifications, ...allNotifications];
+
+      // Remove duplicates by ID
+      const uniqueNotifications = [];
+      const seenIds = new Set();
+      for (const n of allNotifications) {
+        if (!seenIds.has(n.id)) {
+          seenIds.add(n.id);
+          uniqueNotifications.push(n);
+        }
+      }
+
+      const activeNotifications = uniqueNotifications.filter(n => {
+        // API notifications don't expire, only local ones do
+        if (n.created_at || n.timestamp) {
+          const timestamp = n.timestamp || (n.created_at ? new Date(n.created_at).getTime() : Date.now());
+          return !isExpired({ timestamp });
+        }
+        return true;
+      });
+
+      // Display notifications in the list section
+      if (notificationsList) {
+        if (activeNotifications.length === 0) {
+          notificationsList.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No notifications</div>';
+        } else {
+          notificationsList.innerHTML = activeNotifications.slice(0, 10).map((n, index) => {
+            const date = n.created_at ? new Date(n.created_at).toLocaleString() : (n.timestamp ? new Date(n.timestamp).toLocaleString() : 'Just now');
+            const icon = n.type === 'success' ? '✅' : n.type === 'payment' ? '💰' : n.type === 'task' ? '📋' : '🔔';
+            // Use database ID if available, otherwise use timestamp or generate unique ID
+            const notificationId = n.id ? n.id.toString() : (n.timestamp ? n.timestamp.toString() : `local-${Date.now()}-${index}`);
+            const isFromDatabase = !!n.id && !isNaN(parseInt(n.id));
+            // Escape the notificationId for use in HTML
+            const safeNotificationId = notificationId.replace(/'/g, "\\'");
+            return `
+              <div id="notification-${safeNotificationId.replace(/[^a-zA-Z0-9-]/g, '_')}" style="padding: 12px; border-bottom: 1px solid #eee; display: flex; gap: 12px; align-items: start; position: relative;">
+                <div style="font-size: 24px;">${icon}</div>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; margin-bottom: 4px;">${(n.title || 'Notification').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                  <div style="color: #666; font-size: 14px;">${(n.content || n.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                  <div style="color: #999; font-size: 12px; margin-top: 4px;">${date}</div>
+                </div>
+                <button onclick="deleteNotification('${safeNotificationId}', ${isFromDatabase})" class="delete-notification-btn" title="Delete notification">×</button>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Base promotional messages
+      let scrollingContent = '🎉 Welcome to CIC Agency - Earn rewards by completing tasks • 💰 Level up to increase your earnings • 📱 Complete daily tasks to maximize your income • 🚀 Start your journey to financial success today • ⭐ Join thousands of successful members • 💎 Unlock higher rewards as you progress • 🎯 Complete quizzes and earn instantly • 🌟 Your success is our mission';
+
+      // Add notifications to scrolling text
+      if (activeNotifications.length > 0) {
+        const notificationTexts = activeNotifications.map((notification, index) => {
+          const hoursRemaining = getHoursRemaining(notification.timestamp);
+          const isExpiring = hoursRemaining < 2;
+          const badgeClass = isExpiring ? 'notification-item expiring' : 'notification-item';
+
+          // Hide sensitive information - only show partial username/phone
+          let safeContent = notification.content;
+          if (notification.userInfo) {
+            // Hide partial credentials
+            const username = notification.userInfo.username || notification.userInfo.name || '';
+            const phone = notification.userInfo.phone || '';
+            if (username) {
+              const safeUsername = username.length > 2 ? username.substring(0, 2) + '***' : 'User***';
+              safeContent = safeContent.replace(new RegExp(username, 'gi'), safeUsername);
+            }
+            if (phone) {
+              const safePhone = phone.length > 4 ? phone.substring(0, 2) + '***' + phone.substring(phone.length - 2) : '***';
+              safeContent = safeContent.replace(new RegExp(phone, 'g'), safePhone);
+            }
+          }
+
+          return `<span class="${badgeClass}">🔔 ${notification.title}: ${safeContent}</span>`;
+        });
+
+        scrollingContent = notificationTexts.join(' • ') + ' • ' + scrollingContent;
+      }
+
+      // Set content to both scrolling text elements for seamless loop
+      scrollingContainer.innerHTML = scrollingContent;
+      const duplicateContainer = document.getElementById('scrolling-notifications-duplicate');
+      if (duplicateContainer) {
+        duplicateContainer.innerHTML = scrollingContent;
+      }
+    }
+
+    function getNotifications() {
+      try {
+        const stored = localStorage.getItem('cic-notifications');
+        return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        console.error('Error loading notifications:', e);
+        return [];
+      }
+    }
+
+    function saveNotifications(notifications) {
+      try {
+        localStorage.setItem('cic-notifications', JSON.stringify(notifications));
+      } catch (e) {
+        console.error('Error saving notifications:', e);
+      }
+    }
+
+    function addNotification(title, content, userInfo = null) {
+      const notifications = getNotifications();
+      const newNotification = {
+        id: Date.now().toString(),
+        title: title,
+        content: content,
+        timestamp: Date.now(),
+        userInfo: userInfo // Store user info but will hide sensitive parts when displaying
+      };
+      notifications.unshift(newNotification);
+      saveNotifications(notifications);
+      loadAndDisplayNotifications();
+
+      // Also save to a shared/public notifications storage (for other users to see)
+      savePublicNotification(newNotification);
+    }
+
+    function savePublicNotification(notification) {
+      try {
+        // Get existing public notifications
+        const existing = localStorage.getItem('cic-public-notifications');
+        const publicNotifications = existing ? JSON.parse(existing) : [];
+
+        // Add new notification (limit to last 50 to prevent storage bloat)
+        publicNotifications.unshift({
+          id: notification.id,
+          title: notification.title,
+          content: notification.content,
+          timestamp: notification.timestamp
+          // Don't store userInfo in public notifications
+        });
+
+        // Keep only last 50 public notifications
+        if (publicNotifications.length > 50) {
+          publicNotifications.splice(50);
+        }
+
+        localStorage.setItem('cic-public-notifications', JSON.stringify(publicNotifications));
+      } catch (e) {
+        console.error('Error saving public notification:', e);
+      }
+    }
+
+    function getPublicNotifications() {
+      try {
+        const stored = localStorage.getItem('cic-public-notifications');
+        return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        console.error('Error loading public notifications:', e);
+        return [];
+      }
+    }
+
+    function removeNotification(id) {
+      const notifications = getNotifications();
+      const filtered = notifications.filter(n => n.id !== id);
+      saveNotifications(filtered);
+      loadAndDisplayNotifications();
+    }
+
+    // Delete notification (both from API and local storage)
+    async function deleteNotification(notificationId, isFromDatabase) {
+      try {
+        // Sanitize notificationId for DOM element ID
+        const safeId = notificationId.replace(/[^a-zA-Z0-9-]/g, '_');
+
+        // Remove from DOM immediately for better UX
+        const notificationElement = document.getElementById(`notification-${safeId}`);
+        if (notificationElement) {
+          notificationElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+          notificationElement.style.opacity = '0';
+          notificationElement.style.transform = 'translateX(-20px)';
+          setTimeout(() => {
+            if (notificationElement.parentNode) {
+              notificationElement.remove();
+            }
+          }, 300);
+        }
+
+        // Delete from database if it's a database notification
+        if (isFromDatabase === true && notificationId && !isNaN(parseInt(notificationId))) {
+          const token = localStorage.getItem('token');
+          if (token) {
+            // Use API_CONFIG to get the correct backend URL
+            const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl(`notifications/${notificationId}`) : `https://cicagency.onrender.com/api/notifications/${notificationId}`;
+            try {
+              const response = await fetch(apiUrl, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Notification deleted from database:', data.message || 'Success');
+              } else {
+                console.log('⚠️ Could not delete from database (may not exist)');
+              }
+            } catch (error) {
+              console.log('Error deleting from database:', error);
+            }
+          }
+        }
+
+        // Remove from local storage notifications (by ID or timestamp)
+        const notifications = getNotifications();
+        const filtered = notifications.filter(n => {
+          const nId = n.id?.toString() || '';
+          const nTimestamp = n.timestamp?.toString() || '';
+          const searchId = notificationId.toString();
+
+          // Match by ID or by timestamp
+          return nId !== searchId &&
+            nTimestamp !== searchId &&
+            !nId.includes(searchId) &&
+            !nTimestamp.includes(searchId);
+        });
+        saveNotifications(filtered);
+
+        // Remove from public notifications
+        const publicNotifications = getPublicNotifications();
+        const filteredPublic = publicNotifications.filter(n => {
+          const nId = n.id?.toString() || '';
+          const nTimestamp = n.timestamp?.toString() || '';
+          const searchId = notificationId.toString();
+
+          return nId !== searchId &&
+            nTimestamp !== searchId &&
+            !nId.includes(searchId) &&
+            !nTimestamp.includes(searchId);
+        });
+        try {
+          localStorage.setItem('cic-public-notifications', JSON.stringify(filteredPublic));
+        } catch (e) {
+          console.error('Error saving public notifications:', e);
+        }
+
+        // Reload display after a short delay
+        setTimeout(() => {
+          loadAndDisplayNotifications();
+        }, 350);
+
+      } catch (error) {
+        console.error('Error deleting notification:', error);
+        // Still reload display even if there's an error
+        setTimeout(() => {
+          loadAndDisplayNotifications();
+        }, 100);
+      }
+    }
+
+    function removeExpiredNotifications() {
+      const notifications = getNotifications();
+      const active = notifications.filter(n => !isExpired(n));
+      if (active.length !== notifications.length) {
+        saveNotifications(active);
+      }
+    }
+
+    function isExpired(notification) {
+      const now = Date.now();
+      const notificationTime = notification.timestamp;
+      const hoursElapsed = (now - notificationTime) / (1000 * 60 * 60);
+      return hoursElapsed >= 24;
+    }
+
+    function getTimeAgo(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (hours < 1) {
+        return `${minutes}m ago`;
+      } else if (hours < 24) {
+        return `${hours}h ago`;
+      } else {
+        return 'Expired';
+      }
+    }
+
+    function getHoursRemaining(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const hoursElapsed = diff / (1000 * 60 * 60);
+      return 24 - hoursElapsed;
+    }
+
+    function getCompletedTodayCount() {
+      let completed = [];
+      try {
+        completed = JSON.parse(localStorage.getItem('completedTaskIds') || '[]');
+        if (!Array.isArray(completed)) completed = [];
+      } catch (_) { completed = [] }
+      return completed.length;
+    }
+
+    // Add sample notifications on first load (you can remove this and add real notifications from your system)
+    window.addEventListener('load', function () {
+      const notifications = getNotifications();
+      const publicNotifications = getPublicNotifications();
+
+      if (notifications.length === 0 && publicNotifications.length === 0) {
+        // Add welcome notification (public so others can see)
+        addNotification('Welcome to CIC!', 'Start completing tasks to earn rewards. Level up to increase your earnings potential.');
+
+        // Add system notifications
+        setTimeout(() => {
+          addNotification('Daily Tasks Available', 'New tasks are available! Complete them to earn rewards.');
+        }, 2000);
+
+        setTimeout(() => {
+          addNotification('Level Up Opportunity', 'Complete more tasks to level up and unlock higher rewards.');
+        }, 5000);
+      } else {
+        // Load existing public notifications
+        loadPublicNotifications();
+      }
+    });
+
+    // Make functions globally accessible
+    window.loadUserData = loadUserData;
+    window.userData = userData;
+    window.addNotification = addNotification;
+    window.removeNotification = removeNotification;
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title data-translate="withdrawal-records-title">Withdrawal Records - CIC</title>
+
+  <!-- Monarch Design System -->
+  <link rel="stylesheet" href="css/monarch-design-system.css">
+  <script src="js/api-config.js"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <style>
+    :root {
+      --brand-green: #00ff88;
+      --brand-maroon: #8b4513;
+      --brand-dark: #006633;
+      --brand-accent: #32ff7e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--brand-green);
+      padding: 20px;
+      color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      padding: 20px;
+    }
+
+    .summary-card {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--brand-green);
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 0 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin: 24px 0 16px 0;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+
+    .filter-tab {
+      padding: 8px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .filter-tab.active {
+      background: var(--brand-green);
+      color: white;
+      border-color: var(--brand-green);
+    }
+
+    /* Records List */
+    .records-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .record-card {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #e0e0e0;
+    }
+
+    .record-card.pending {
+      border-left-color: #ffc107;
+    }
+
+    .record-card.completed {
+      border-left-color: #4caf50;
+    }
+
+    .record-card.rejected,
+    .record-card.failed {
+      border-left-color: #f44336;
+    }
+
+    .record-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .record-amount {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .record-status {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-rejected,
+    .status-failed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .record-details {
+      display: grid;
+      gap: 8px;
+    }
+
+    .record-detail {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .record-label {
+      font-weight: 600;
+      color: #333;
+      margin-right: 8px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .empty-text {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-green);
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <button class="back-btn" onclick="window.history.back()">←</button>
+      <h1 class="header-title" data-translate="withdrawal-records-header">Withdrawal Records</h1>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="summary-label" data-translate="total-withdrawn-label">Total Withdrawn</div>
+      <div class="summary-value">KES <span id="total-withdrawn">0</span></div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label" data-translate="this-month-label">This Month</div>
+      <div class="summary-value">KES <span id="month-withdrawn">0</span></div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <h2 class="section-title" data-translate="transaction-history">Transaction History</h2>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterRecords('all')" data-translate="all">All</button>
+      <button class="filter-tab" onclick="filterRecords('pending')" data-translate="pending">Pending</button>
+      <button class="filter-tab" onclick="filterRecords('completed')" data-translate="completed">Completed</button>
+      <button class="filter-tab" onclick="filterRecords('failed')" data-translate="failed">Failed</button>
+    </div>
+
+    <!-- Records List -->
+    <div class="records-list" id="records-list">
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <div class="empty-text" data-translate="no-records-found">No withdrawal records yet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="task.html" class="nav-item">
+      <span class="nav-icon">📋</span>
+      <span>Tasks</span>
+    </a>
+    <a href="invest.html" class="nav-item">
+      <span class="nav-icon">💰</span>
+      <span>Invest</span>
+    </a>
+    <a href="withdrawal.html" class="nav-item">
+      <span class="nav-icon">💸</span>
+      <span>Withdraw</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="nav-icon">👤</span>
+      <span data-translate="profile">Profile</span>
+    </a>
+  </div>
+
+  <script>
+    let allRecords = [];
+    let currentFilter = 'all';
+
+    // Load withdrawal records
+    function loadRecords() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Use API_CONFIG to get the correct backend URL
+      const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/stats') : 'https://cicagency.onrender.com/api/auth/stats';
+      fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.withdrawals) {
+            allRecords = data.withdrawals;
+
+            // Update summary (count both 'completed' and 'approved' as completed)
+            const total = allRecords.reduce((sum, r) => {
+              const isCompleted = r.status === 'completed' || r.status === 'approved';
+              return sum + (isCompleted ? r.amount : 0);
+            }, 0);
+            document.getElementById('total-withdrawn').textContent = total.toFixed(2);
+
+            const thisMonth = allRecords.filter(r => {
+              const date = new Date(r.created_at);
+              const now = new Date();
+              return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+            }).reduce((sum, r) => {
+              const isCompleted = r.status === 'completed' || r.status === 'approved';
+              return sum + (isCompleted ? r.amount : 0);
+            }, 0);
+            document.getElementById('month-withdrawn').textContent = thisMonth.toFixed(2);
+
+            // Display records
+            displayRecords();
+          }
+        })
+        .catch(err => console.error('Error loading records:', err));
+    }
+
+    function displayRecords() {
+      const list = document.getElementById('records-list');
+
+      let filtered = allRecords;
+      if (currentFilter !== 'all') {
+        // Map filter to handle both old and new status names
+        filtered = allRecords.filter(r => {
+          const displayStatus = r.status === 'approved' ? 'completed' :
+            r.status === 'rejected' ? 'failed' :
+              r.status;
+          return displayStatus === currentFilter || r.status === currentFilter;
+        });
+      }
+
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div class="empty-text">No ${currentFilter !== 'all' ? currentFilter : ''} records found</div>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = filtered.map(record => {
+        // Map status for display: 'approved' -> 'completed', 'rejected' -> 'failed'
+        const displayStatus = record.status === 'approved' ? 'completed' :
+          record.status === 'rejected' ? 'failed' :
+            record.status;
+
+        return `
+        <div class="record-card ${displayStatus}">
+          <div class="record-header">
+            <div class="record-amount">KES ${record.amount.toFixed(2)}</div>
+            <span class="record-status status-${displayStatus}">${displayStatus}</span>
+          </div>
+          <div class="record-details">
+            <div class="record-detail">
+              <span class="record-label">Method:</span>
+              ${record.method || 'N/A'}
+            </div>
+            <div class="record-detail">
+              <span class="record-label">Account:</span>
+              ${record.account_number || 'N/A'}
+            </div>
+            <div class="record-detail">
+              <span class="record-label">Date:</span>
+              ${new Date(record.created_at).toLocaleString()}
+            </div>
+            ${record.processed_at ? `
+              <div class="record-detail">
+                <span class="record-label">Processed:</span>
+                ${new Date(record.processed_at).toLocaleString()}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    function filterRecords(filter) {
+      currentFilter = filter;
+
+      // Update tabs
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      displayRecords();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+      loadRecords();
+    });
+  </script>
+</body>
+
+</html>

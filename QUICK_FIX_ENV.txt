@@ -1,0 +1,50 @@
+═══════════════════════════════════════════════════════════════
+  QUICK FIX: Update Your .env File Manually
+═══════════════════════════════════════════════════════════════
+
+Your .env file needs this line added/updated:
+
+POSTGRES_URL=postgresql://postgres:Mirinewton%402005@db.gkavyanjmbidysinsqaz.supabase.co:5432/postgres
+
+═══════════════════════════════════════════════════════════════
+  METHOD 1: Double-click UPDATE_ENV.bat
+═══════════════════════════════════════════════════════════════
+
+I've created UPDATE_ENV.bat - just double-click it to update!
+
+═══════════════════════════════════════════════════════════════
+  METHOD 2: Manual Edit
+═══════════════════════════════════════════════════════════════
+
+1. Open: c:\Users\PC\Desktop\CIC GROUP\.env
+2. Find line starting with: POSTGRES_URL=
+3. Replace entire line with:
+   POSTGRES_URL=postgresql://postgres:Mirinewton%402005@db.gkavyanjmbidysinsqaz.supabase.co:5432/postgres
+4. Save file
+
+═══════════════════════════════════════════════════════════════
+  METHOD 3: Run PowerShell Script
+═══════════════════════════════════════════════════════════════
+
+powershell -ExecutionPolicy Bypass -File update-env.ps1
+
+═══════════════════════════════════════════════════════════════
+  METHOD 4: Run Node.js Script
+═══════════════════════════════════════════════════════════════
+
+node update-env-direct.js
+
+═══════════════════════════════════════════════════════════════
+  VERIFY IT WORKED
+═══════════════════════════════════════════════════════════════
+
+node -e "require('dotenv').config(); console.log(process.env.POSTGRES_URL ? '✅ FOUND' : '❌ NOT FOUND');"
+
+═══════════════════════════════════════════════════════════════
+
+
+
+
+
+
+

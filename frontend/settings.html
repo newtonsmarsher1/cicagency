@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - CIC</title>
+    <style>
+        :root {
+            --brand-green: #00ff88;
+            --brand-maroon: #8b4513;
+            --brand-dark: #006633;
+            --brand-accent: #32ff7e;
+            --icon-bg: #e8fff0;
+            --icon-color: #00ff88;
+            --menu-bg: #fff;
+            --menu-icon-active: var(--brand-accent);
+            --text-primary: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --bg-primary: #fff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e3f2fd;
+            --border-color: #e0e0e0;
+            --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Dark theme variables */
+        [data-theme="dark"] {
+            --text-primary: #fff;
+            --text-secondary: #ccc;
+            --text-muted: #999;
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3a3a3a;
+            --border-color: #404040;
+        }
+
+        /* Theme color variations */
+        [data-theme-color="blue"] {
+            --brand-green: #2196f3;
+            --brand-accent: #64b5f6;
+            --icon-bg: #e3f2fd;
+        }
+
+        [data-theme-color="purple"] {
+            --brand-green: #9c27b0;
+            --brand-accent: #ba68c8;
+            --icon-bg: #f3e5f5;
+        }
+
+        [data-theme-color="orange"] {
+            --brand-green: #ff9800;
+            --brand-accent: #ffb74d;
+            --icon-bg: #fff3e0;
+        }
+
+        [data-theme-color="red"] {
+            --brand-green: #f44336;
+            --brand-accent: #ef5350;
+            --icon-bg: #ffebee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            background: var(--brand-green);
+            padding: 20px 16px;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-light);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .container {
+            padding: 20px 16px 100px 16px;
+        }
+
+        .settings-section {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-light);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 20px 20px 0 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s ease;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .setting-description {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+
+        .setting-control {
+            margin-left: 16px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            background: var(--border-color);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--brand-green);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(22px);
+        }
+
+        .select-dropdown {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            font-size: 0.9em;
+            min-width: 120px;
+            cursor: pointer;
+        }
+
+        .select-dropdown:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .color-option.active {
+            border-color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        .color-option::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .color-option.active::after {
+            opacity: 1;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider {
+            flex: 1;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--brand-green);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--brand-green);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider-value {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .button {
+            background: var(--brand-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background: var(--brand-accent);
+            transform: translateY(-1px);
+        }
+
+        .button.secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .button.danger {
+            background: #f44336;
+        }
+
+        .button.danger:hover {
+            background: #d32f2f;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .modal-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons .button {
+            flex: 1;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--brand-green);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .preview-section {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-title {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .preview-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .preview-text {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .preview-subtext {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px 12px 100px 12px;
+            }
+
+            .setting-item {
+                padding: 14px 16px;
+            }
+
+            .color-picker {
+                gap: 6px;
+            }
+
+            .color-option {
+                width: 28px;
+                height: 28px;
+            }
+
+            .modal-content {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .bottom-nav {
+                padding: 6px 0;
+            }
+
+            .nav-item {
+                padding: 6px 8px;
+            }
+
+            .nav-icon {
+                font-size: 20px;
+            }
+
+            .nav-item span:last-child {
+                font-size: 9px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <button class="back-button" onclick="goBack()">←</button>
+            <h1 class="header-title" data-translate="settings-title">Settings</h1>
+            <div></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Account Section -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2 class="section-title" data-translate="account-management">Account Information</h2>
+                <p class="section-subtitle" data-translate="account-management-desc">Manage your account details and
+                    profile</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="profile-name">Profile Name</div>
+                    <div class="setting-description" id="user-name" data-translate="loading">Loading...</div>
+                </div>
+                <div class="setting-control">
+                    <button class="button secondary" onclick="editProfile()" data-translate="edit">Edit</button>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="phone-number">Phone Number</div>
+                    <div class="setting-description" id="user-phone" data-translate="loading">Loading...</div>
+                </div>
+                <div class="setting-control">
+                    <button class="button secondary" onclick="editPhone()" data-translate="change">Change</button>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="account-level">Account Level</div>
+                    <div class="setting-description" id="user-level" data-translate="loading">Loading...</div>
+                </div>
+                <div class="setting-control">
+                    <button class="button secondary" onclick="viewLevelInfo()" data-translate="info">Info</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appearance Section -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2 class="section-title" data-translate="appearance">Appearance</h2>
+                <p class="section-subtitle" data-translate="appearance-desc">Customize the look and feel of your app</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="theme-mode">Theme Mode</div>
+                    <div class="setting-description" data-translate="theme-mode-desc">Choose between light and dark
+                        themes</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" id="theme-toggle" onclick="toggleTheme()"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="accent-color">Accent Color</div>
+                    <div class="setting-description" data-translate="accent-color-desc">Select your preferred color
+                        scheme</div>
+                </div>
+                <div class="setting-control">
+                    <div class="color-picker">
+                        <div class="color-option active" data-color="green" style="background: #00ff88;"
+                            onclick="setThemeColor('green')"></div>
+                        <div class="color-option" data-color="blue" style="background: #2196f3;"
+                            onclick="setThemeColor('blue')"></div>
+                        <div class="color-option" data-color="purple" style="background: #9c27b0;"
+                            onclick="setThemeColor('purple')"></div>
+                        <div class="color-option" data-color="orange" style="background: #ff9800;"
+                            onclick="setThemeColor('orange')"></div>
+                        <div class="color-option" data-color="red" style="background: #f44336;"
+                            onclick="setThemeColor('red')"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="font-size">Font Size</div>
+                    <div class="setting-description" data-translate="font-size-desc">Adjust text size for better
+                        readability</div>
+                </div>
+                <div class="setting-control">
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="font-size-slider" min="12" max="20" value="16"
+                            onchange="setFontSize(this.value)">
+                        <span class="slider-value" id="font-size-value">16px</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <div class="preview-title" data-translate="preview">Preview</div>
+                <div class="preview-card">
+                    <div class="preview-text" data-translate="preview-text">Sample Text</div>
+                    <div class="preview-subtext" data-translate="preview-subtext">This is how your text will appear
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Language & Region Section -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2 class="section-title" data-translate="language-regional">Language & Region</h2>
+                <p class="section-subtitle" data-translate="language-regional-desc">Set your preferred language and
+                    regional settings</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="language">Language</div>
+                    <div class="setting-description" data-translate="language-desc">Choose your preferred language</div>
+                </div>
+                <div class="setting-control">
+                    <select class="select-dropdown" id="language-select" onchange="setLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="sw">Swahili</option>
+                        <option value="fr">French</option>
+                        <option value="ar">Arabic</option>
+                        <option value="hi">Hindi</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="country">Country</div>
+                    <div class="setting-description" data-translate="country-desc">Select your country for currency
+                        conversion</div>
+                </div>
+                <div class="setting-control">
+                    <select class="select-dropdown" id="country-select" onchange="setCountry(this.value)">
+                        <option value="US">United States</option>
+                        <option value="KE">Kenya</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="FR">France</option>
+                        <option value="DE">Germany</option>
+                        <option value="IN">India</option>
+                        <option value="CN">China</option>
+                        <option value="JP">Japan</option>
+                        <option value="CA">Canada</option>
+                        <option value="AU">Australia</option>
+                        <option value="ZA">South Africa</option>
+                        <option value="NG">Nigeria</option>
+                        <option value="EG">Egypt</option>
+                        <option value="TZ">Tanzania</option>
+                        <option value="UG">Uganda</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="currency">Currency</div>
+                    <div class="setting-description" data-translate="currency-desc">Set your preferred currency</div>
+                </div>
+                <div class="setting-control">
+                    <select class="select-dropdown" id="currency-select" onchange="setCurrency(this.value)">
+                        <option value="USD">US Dollar (USD)</option>
+                        <option value="KES">Kenyan Shilling (KES)</option>
+                        <option value="EUR">Euro (EUR)</option>
+                        <option value="GBP">British Pound (GBP)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="date-format">Date Format</div>
+                    <div class="setting-description" data-translate="date-format-desc">Choose how dates are displayed
+                    </div>
+                </div>
+                <div class="setting-control">
+                    <select class="select-dropdown" id="date-format-select" onchange="setDateFormat(this.value)">
+                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2 class="section-title" data-translate="notifications">Notifications</h2>
+                <p class="section-subtitle">Control how and when you receive notifications</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="push-notifications">Push Notifications</div>
+                    <div class="setting-description" data-translate="push-notifications-desc">Receive notifications on
+                        your device</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" id="push-toggle" onclick="togglePushNotifications()"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="task-reminders">Task Reminders</div>
+                    <div class="setting-description" data-translate="task-reminders-desc">Get reminded about available
+                        tasks</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" id="task-reminders-toggle" onclick="toggleTaskReminders()"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="payment-alerts">Payment Alerts</div>
+                    <div class="setting-description" data-translate="payment-alerts-desc">Notifications for payments and
+                        withdrawals</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" id="payment-alerts-toggle" onclick="togglePaymentAlerts()"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="marketing-updates">Marketing Updates</div>
+                    <div class="setting-description" data-translate="marketing-updates-desc">Receive updates about new
+                        features</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" id="marketing-toggle" onclick="toggleMarketing()"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy & Security Section -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2 class="section-title" data-translate="privacy-security">Privacy & Security</h2>
+                <p class="section-subtitle">Manage your privacy and security settings</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="two-factor">Two-Factor Authentication</div>
+                    <div class="setting-description" data-translate="two-factor-desc">Add an extra layer of security
+                    </div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" id="2fa-toggle" onclick="toggle2FA()"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="biometric-login">Biometric Login</div>
+                    <div class="setting-description" data-translate="biometric-login-desc">Use fingerprint or face
+                        recognition</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" id="biometric-toggle" onclick="toggleBiometric()"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="data-sharing">Data Sharing</div>
+                    <div class="setting-description" data-translate="data-sharing-desc">Control how your data is used
+                    </div>
+                </div>
+                <div class="setting-control">
+                    <button class="button secondary" onclick="manageDataSharing()"
+                        data-translate="manage">Manage</button>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="change-password">Change Password</div>
+                    <div class="setting-description" data-translate="change-password-desc">Update your account password
+                    </div>
+                </div>
+                <div class="setting-control">
+                    <button class="button secondary" onclick="changePassword()" data-translate="change">Change</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- App Settings Section -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2 class="section-title" data-translate="app-behavior">App Settings</h2>
+                <p class="section-subtitle">Customize app behavior and preferences</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="auto-refresh">Auto-refresh</div>
+                    <div class="setting-description" data-translate="auto-refresh-desc">Automatically refresh data</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" id="auto-refresh-toggle" onclick="toggleAutoRefresh()"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="haptic-feedback">Haptic Feedback</div>
+                    <div class="setting-description" data-translate="haptic-feedback-desc">Feel vibrations for
+                        interactions</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch active" id="haptic-toggle" onclick="toggleHaptic()"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label" data-translate="cache-management">Cache Management</div>
+                    <div class="setting-description" data-translate="cache-management-desc">Clear app cache and
+                        temporary files</div>
+                </div>
+                <div class="setting-control">
+                    <button class="button secondary" onclick="clearCache()" data-translate="clear">Clear</button>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label">App Version</div>
+                    <div class="setting-description">Check for updates</div>
+                </div>
+                <div class="setting-control">
+                    <button class="button secondary" onclick="checkUpdates()">Check</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Section -->
+        <div class="settings-section">
+            <div class="section-header">
+                <h2 class="section-title" data-translate="advanced">Advanced</h2>
+                <p class="section-subtitle">Advanced settings and developer options</p>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label">Debug Mode</div>
+                    <div class="setting-description">Enable debugging information</div>
+                </div>
+                <div class="setting-control">
+                    <div class="toggle-switch" id="debug-toggle" onclick="toggleDebug()"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label">Export Data</div>
+                    <div class="setting-description">Download your account data</div>
+                </div>
+                <div class="setting-control">
+                    <button class="button secondary" onclick="exportData()">Export</button>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-info">
+                    <div class="setting-label">Reset Settings</div>
+                    <div class="setting-description">Restore all settings to default</div>
+                </div>
+                <div class="setting-control">
+                    <button class="button danger" onclick="resetSettings()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="home.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a href="task.html" class="nav-item">
+            <span class="nav-icon">📋</span>
+            <span>Tasks</span>
+        </a>
+        <a href="invest.html" class="nav-item">
+            <span class="nav-icon">💰</span>
+            <span>Invest</span>
+        </a>
+        <a href="withdrawal.html" class="nav-item">
+            <span class="nav-icon">💸</span>
+            <span>Withdraw</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <span class="nav-icon">👤</span>
+            <span>Profile</span>
+        </a>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-content">
+            <h3 class="modal-title" id="modal-title">Confirm Action</h3>
+            <p id="modal-message">Are you sure you want to proceed?</p>
+            <div class="modal-buttons">
+                <button class="button secondary" onclick="closeModal()">Cancel</button>
+                <button class="button" id="modal-confirm-btn" onclick="confirmAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cic-settings-manager.js"></script>
+    <script src="js/cic-settings-init.js"></script>
+    <script>
+        // Settings state - now managed by global manager
+        let currentAction = null;
+
+        // Load settings from global manager
+        function loadSettings() {
+            const settings = window.CICSettings.settings;
+            applySettings(settings);
+        }
+
+        // Save settings using global manager
+        function saveSettings() {
+            // Settings are automatically saved by the global manager
+            console.log('✅ Settings saved globally');
+        }
+
+        // Apply settings to the UI
+        function applySettings(settings) {
+            // Apply theme
+            document.body.setAttribute('data-theme', settings.theme);
+            document.body.setAttribute('data-theme-color', settings.themeColor);
+
+            // Update theme toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.classList.toggle('active', settings.theme === 'dark');
+
+            // Update color picker
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.toggle('active', option.dataset.color === settings.themeColor);
+            });
+
+            // Update font size
+            document.body.style.fontSize = settings.fontSize + 'px';
+            document.getElementById('font-size-slider').value = settings.fontSize;
+            document.getElementById('font-size-value').textContent = settings.fontSize + 'px';
+
+            // Update language
+            document.getElementById('language-select').value = settings.language;
+
+            // Update country
+            if (document.getElementById('country-select')) {
+                document.getElementById('country-select').value = settings.country || 'US';
+            }
+
+            // Update currency
+            document.getElementById('currency-select').value = settings.currency;
+
+            // Update date format
+            document.getElementById('date-format-select').value = settings.dateFormat;
+
+            // Update notification toggles
+            document.getElementById('push-toggle').classList.toggle('active', settings.notifications.push);
+            document.getElementById('task-reminders-toggle').classList.toggle('active', settings.notifications.taskReminders);
+            document.getElementById('payment-alerts-toggle').classList.toggle('active', settings.notifications.paymentAlerts);
+            document.getElementById('marketing-toggle').classList.toggle('active', settings.notifications.marketing);
+
+            // Update security toggles
+            document.getElementById('2fa-toggle').classList.toggle('active', settings.security.twoFA);
+            document.getElementById('biometric-toggle').classList.toggle('active', settings.security.biometric);
+
+            // Update app toggles
+            document.getElementById('auto-refresh-toggle').classList.toggle('active', settings.app.autoRefresh);
+            document.getElementById('haptic-toggle').classList.toggle('active', settings.app.haptic);
+            document.getElementById('debug-toggle').classList.toggle('active', settings.app.debug);
+        }
+
+        // Theme functions - now use global manager
+        function toggleTheme() {
+            const newTheme = window.CICSettings.get('theme') === 'light' ? 'dark' : 'light';
+            window.CICSettings.set('theme', newTheme);
+            // Force refresh all settings across the system
+            setTimeout(() => {
+                if (window.refreshCICSettings) {
+                    window.refreshCICSettings();
+                }
+            }, 100);
+        }
+
+        function setThemeColor(color) {
+            window.CICSettings.set('themeColor', color);
+            // Force refresh all settings across the system
+            setTimeout(() => {
+                if (window.refreshCICSettings) {
+                    window.refreshCICSettings();
+                }
+            }, 100);
+        }
+
+        function setFontSize(size) {
+            window.CICSettings.set('fontSize', parseInt(size));
+            document.getElementById('font-size-value').textContent = size + 'px';
+            // Force refresh all settings across the system
+            setTimeout(() => {
+                if (window.refreshCICSettings) {
+                    window.refreshCICSettings();
+                }
+            }, 100);
+        }
+
+        // Language functions - now use global manager
+        function setLanguage(lang) {
+            window.CICSettings.set('language', lang);
+            // Force refresh all settings across the system
+            setTimeout(() => {
+                if (window.refreshCICSettings) {
+                    window.refreshCICSettings();
+                }
+            }, 100);
+        }
+
+        function setCountry(country) {
+            window.CICSettings.set('country', country);
+            // Auto-update currency based on country
+            const countryCurrencyMap = {
+                'US': 'USD',
+                'KE': 'KES',
+                'GB': 'GBP',
+                'FR': 'EUR',
+                'DE': 'EUR',
+                'IN': 'USD', // India uses INR but we'll use USD for now
+                'CN': 'USD',
+                'JP': 'USD',
+                'CA': 'USD',
+                'AU': 'USD',
+                'ZA': 'USD',
+                'NG': 'USD',
+                'EG': 'USD',
+                'TZ': 'KES',
+                'UG': 'USD'
+            };
+
+            const suggestedCurrency = countryCurrencyMap[country] || 'USD';
+            if (confirm(`Change currency to ${suggestedCurrency} for ${country}?`)) {
+                setCurrency(suggestedCurrency);
+                document.getElementById('currency-select').value = suggestedCurrency;
+            }
+        }
+
+        function setCurrency(currency) {
+            window.CICSettings.set('currency', currency);
+            // Trigger currency change event to update all pages
+            window.dispatchEvent(new CustomEvent('currencyChanged', {
+                detail: { currency: currency }
+            }));
+            // Force refresh all settings across the system
+            setTimeout(() => {
+                if (window.refreshCICSettings) {
+                    window.refreshCICSettings();
+                }
+            }, 100);
+        }
+
+        function setDateFormat(format) {
+            window.CICSettings.set('dateFormat', format);
+            // Force refresh all settings across the system
+            setTimeout(() => {
+                if (window.refreshCICSettings) {
+                    window.refreshCICSettings();
+                }
+            }, 100);
+        }
+
+        // Notification functions - now use global manager
+        function togglePushNotifications() {
+            const current = window.CICSettings.get('notifications.push');
+            window.CICSettings.set('notifications.push', !current);
+        }
+
+        function toggleTaskReminders() {
+            const current = window.CICSettings.get('notifications.taskReminders');
+            window.CICSettings.set('notifications.taskReminders', !current);
+        }
+
+        function togglePaymentAlerts() {
+            const current = window.CICSettings.get('notifications.paymentAlerts');
+            window.CICSettings.set('notifications.paymentAlerts', !current);
+        }
+
+        function toggleMarketing() {
+            const current = window.CICSettings.get('notifications.marketing');
+            window.CICSettings.set('notifications.marketing', !current);
+        }
+
+        // Security functions - now use global manager
+        function toggle2FA() {
+            const current = window.CICSettings.get('security.twoFA');
+            window.CICSettings.set('security.twoFA', !current);
+        }
+
+        function toggleBiometric() {
+            const current = window.CICSettings.get('security.biometric');
+            const newValue = !current;
+
+            // Check if Web Authentication API is available
+            if (newValue && 'credentials' in navigator && 'create' in navigator.credentials) {
+                // Request biometric authentication
+                if (navigator.credentials && navigator.credentials.create) {
+                    const publicKeyCredentialCreationOptions = {
+                        challenge: new Uint8Array(32),
+                        rp: {
+                            name: "CIC System",
+                            id: window.location.hostname,
+                        },
+                        user: {
+                            id: new Uint8Array(16),
+                            name: document.getElementById('user-name').textContent || "user",
+                            displayName: document.getElementById('user-name').textContent || "User",
+                        },
+                        pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                        authenticatorSelection: {
+                            authenticatorAttachment: "platform",
+                            userVerification: "required"
+                        },
+                        timeout: 60000,
+                        attestation: "direct"
+                    };
+
+                    navigator.credentials.create({
+                        publicKey: publicKeyCredentialCreationOptions
+                    }).then((credential) => {
+                        // Store credential ID for future authentication
+                        localStorage.setItem('biometric-credential-id', JSON.stringify(credential));
+                        window.CICSettings.set('security.biometric', true);
+                        alert('Biometric login enabled successfully!');
+                    }).catch((error) => {
+                        console.error('Biometric setup failed:', error);
+                        alert('Biometric authentication is not available on this device or browser.');
+                    });
+                } else {
+                    // Fallback: Just enable the setting
+                    window.CICSettings.set('security.biometric', true);
+                    alert('Biometric login enabled. Note: Full biometric support requires a compatible device.');
+                }
+            } else if (!newValue) {
+                // Disable biometric
+                localStorage.removeItem('biometric-credential-id');
+                localStorage.removeItem('biometric-login-data');
+                window.CICSettings.set('security.biometric', false);
+                alert('Biometric login disabled.');
+            } else {
+                alert('Biometric authentication is not supported on this device or browser.');
+            }
+        }
+
+        // App functions - now use global manager
+        function toggleAutoRefresh() {
+            const current = window.CICSettings.get('app.autoRefresh');
+            window.CICSettings.set('app.autoRefresh', !current);
+        }
+
+        function toggleHaptic() {
+            const current = window.CICSettings.get('app.haptic');
+            window.CICSettings.set('app.haptic', !current);
+        }
+
+        function toggleDebug() {
+            const current = window.CICSettings.get('app.debug');
+            window.CICSettings.set('app.debug', !current);
+        }
+
+        // Action functions
+        function editProfile() {
+            alert('Profile editing feature coming soon!');
+        }
+
+        function editPhone() {
+            alert('Phone number change feature coming soon!');
+        }
+
+        function viewLevelInfo() {
+            alert('Level information feature coming soon!');
+        }
+
+        function manageDataSharing() {
+            alert('Data sharing management feature coming soon!');
+        }
+
+        function changePassword() {
+            alert('Password change feature coming soon!');
+        }
+
+        function clearCache() {
+            showConfirmModal('Clear Cache', 'This will clear all cached data. Continue?', () => {
+                alert('Cache cleared successfully!');
+            });
+        }
+
+        function checkUpdates() {
+            alert('Checking for updates...\nYou are using the latest version!');
+        }
+
+        function exportData() {
+            showConfirmModal('Export Data', 'This will download all your account data. Continue?', () => {
+                alert('Data export started! You will receive an email when ready.');
+            });
+        }
+
+        function resetSettings() {
+            showConfirmModal('Reset Settings', 'This will restore all settings to default. This action cannot be undone. Continue?', () => {
+                if (window.CICSettings) {
+                    // Use CICSettings to reset
+                    const defaultSettings = {
+                        theme: 'light',
+                        themeColor: 'green',
+                        language: 'en',
+                        currency: 'USD',
+                        country: 'US',
+                        dateFormat: 'DD/MM/YYYY',
+                        fontSize: 16,
+                        notifications: {
+                            push: true,
+                            taskReminders: true,
+                            paymentAlerts: true,
+                            marketing: false
+                        },
+                        security: {
+                            twoFA: false,
+                            biometric: false
+                        },
+                        app: {
+                            autoRefresh: true,
+                            haptic: true,
+                            debug: false
+                        }
+                    };
+
+                    // Reset each setting
+                    Object.keys(defaultSettings).forEach(key => {
+                        if (typeof defaultSettings[key] === 'object' && !Array.isArray(defaultSettings[key])) {
+                            Object.keys(defaultSettings[key]).forEach(subKey => {
+                                window.CICSettings.set(`${key}.${subKey}`, defaultSettings[key][subKey]);
+                            });
+                        } else {
+                            window.CICSettings.set(key, defaultSettings[key]);
+                        }
+                    });
+
+                    // Reload settings UI
+                    loadSettings();
+                    alert('Settings reset to default!');
+                } else {
+                    // Fallback if CICSettings not available
+                    localStorage.removeItem('cic-settings');
+                    location.reload();
+                }
+            });
+        }
+
+        // Modal functions
+        function showConfirmModal(title, message, action) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('confirm-modal').style.display = 'flex';
+            currentAction = action;
+        }
+
+        function closeModal() {
+            document.getElementById('confirm-modal').style.display = 'none';
+            currentAction = null;
+        }
+
+        function confirmAction() {
+            if (currentAction) {
+                currentAction();
+            }
+            closeModal();
+        }
+
+        // Navigation
+        function goBack() {
+            window.history.back();
+        }
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    document.getElementById('user-name').textContent = 'Not logged in';
+                    document.getElementById('user-phone').textContent = 'Please log in';
+                    document.getElementById('user-level').textContent = 'N/A';
+                    return;
+                }
+
+                const apiBaseUrl = window.API_BASE_URL || window.location.origin;
+                const response = await fetch(`${apiBaseUrl}/api/auth/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const userData = data.success === false ? null : data;
+
+                    if (userData) {
+                        document.getElementById('user-name').textContent = userData.name || 'User';
+                        document.getElementById('user-phone').textContent = userData.phone || 'Not provided';
+                        document.getElementById('user-level').textContent = `Level ${userData.level || 0}`;
+                    } else {
+                        document.getElementById('user-name').textContent = 'Error loading data';
+                        document.getElementById('user-phone').textContent = 'Please refresh';
+                        document.getElementById('user-level').textContent = 'N/A';
+                    }
+                } else {
+                    document.getElementById('user-name').textContent = 'Error loading data';
+                    document.getElementById('user-phone').textContent = 'Please refresh';
+                    document.getElementById('user-level').textContent = 'N/A';
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                document.getElementById('user-name').textContent = 'Error loading data';
+                document.getElementById('user-phone').textContent = 'Please refresh';
+                document.getElementById('user-level').textContent = 'N/A';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            loadSettings();
+            loadUserData();
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('confirm-modal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

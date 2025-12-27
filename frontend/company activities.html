@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title data-translate="company-activities-title">CIC company activities</title>
+  <script src="js/api-config.js"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(to bottom, #2979ff 0%, #e3f0ff 100%);
+      min-height: 100vh;
+      color: #1a237e;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #2979ff;
+      display: flex;
+      align-items: center;
+      height: 54px;
+      z-index: 1002;
+      box-shadow: 0 2px 8px rgba(41, 121, 255, 0.10);
+      border-bottom: 1px solid #2979ff33;
+    }
+
+    .logo-row {
+      width: 48px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .hexagon {
+      width: 40px;
+      height: 40px;
+      background: #2979ff;
+      clip-path: polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0% 50%);
+      box-shadow: 0 2px 10px rgba(41, 121, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .hexagon-text {
+      color: white;
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-size: 1.2em;
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      top: 50%;
+      transform: translateY(-50%);
+      user-select: none;
+    }
+
+    .company-logo-box {
+      width: 60px;
+      height: 40px;
+      margin-left: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .uai-logo {
+      width: 60px;
+      height: 40px;
+      display: block;
+    }
+
+    .task-header-title {
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.15em;
+      margin-left: 14px;
+      flex: 1;
+      text-align: left;
+      letter-spacing: 1.2px;
+    }
+
+    main {
+      margin-top: 70px;
+      padding-bottom: 80px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Bottom nav */
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #fff;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid #e3f0ff;
+      z-index: 1000;
+    }
+
+    nav.bottom-nav a {
+      background: transparent;
+      border: none;
+      color: #282828;
+      font-size: 0.85em;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      transition: color 0.3s;
+      padding: 2px 4px;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+
+    nav.bottom-nav a.active,
+    nav.bottom-nav a:focus {
+      color: var(--menu-icon-active);
+    }
+
+    nav.bottom-nav a svg {
+      width: 22px;
+      height: 22px;
+      margin-bottom: 2px;
+      fill: currentColor;
+    }
+
+    /* Activities Styles */
+    .activities-container {
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .activities-title {
+      color: #1a237e;
+      font-size: 2em;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 0 2px 4px rgba(26, 35, 126, 0.1);
+    }
+
+    .timeline {
+      position: relative;
+      margin-bottom: 40px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #2979ff;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 30px;
+      padding-left: 60px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 8px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #2979ff;
+      border: 3px solid white;
+      box-shadow: 0 2px 4px rgba(41, 121, 255, 0.3);
+    }
+
+    .timeline-date {
+      background: #2979ff;
+      color: white;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .timeline-content {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(41, 121, 255, 0.1);
+      border: 1px solid #e3f0ff;
+    }
+
+    .timeline-content h3 {
+      color: #1a237e;
+      font-size: 1.3em;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .timeline-content p {
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .activities-list {
+      margin: 15px 0;
+      padding-left: 20px;
+    }
+
+    .activities-list li {
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .stats-section {
+      margin-top: 40px;
+    }
+
+    .stats-section h2 {
+      color: #1a237e;
+      font-size: 1.6em;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(41, 121, 255, 0.1);
+      border: 1px solid #e3f0ff;
+    }
+
+    .stat-number {
+      color: #2979ff;
+      font-size: 2em;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      color: #1a237e;
+      font-size: 0.9em;
+      font-weight: 600;
+    }
+
+    @media (max-width: 720px) {
+      .activities-container {
+        padding: 15px;
+      }
+
+      .activities-title {
+        font-size: 1.6em;
+      }
+
+      .timeline-item {
+        padding-left: 50px;
+      }
+
+      .timeline-content {
+        padding: 15px;
+      }
+
+      .timeline-content h3 {
+        font-size: 1.1em;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+
+      .stat-card {
+        padding: 20px;
+      }
+
+      .stat-number {
+        font-size: 1.6em;
+      }
+    }
+
+    @media (max-width:540px) {
+      main {
+        margin-top: 64px;
+      }
+
+      .task-thumb {
+        width: 54px;
+        height: 54px;
+      }
+
+      .company-logo-box {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="top-bar">
+    <div class="task-header-title" data-translate="company-activities-header">Company Activities</div>
+    <div class="logo-row">
+      <div class="hexagon">
+        <span class="hexagon-text">CIC</span>
+      </div>
+    </div>
+    <div class="company-logo-box">
+      <svg class="uai-logo" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"
+        aria-label="UAI Company Activities Logo">
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#2979ff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#90caf9;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <!-- Building/Company Icon -->
+        <rect x="20" y="60" width="40" height="35" fill="url(#grad1)" rx="2" />
+        <rect x="25" y="65" width="8" height="8" fill="white" />
+        <rect x="47" y="65" width="8" height="8" fill="white" />
+        <rect x="25" y="78" width="8" height="8" fill="white" />
+        <rect x="47" y="78" width="8" height="8" fill="white" />
+        <rect x="35" y="85" width="10" height="10" fill="white" />
+        <!-- Timeline/Activity Lines -->
+        <line x1="80" y1="30" x2="120" y2="30" stroke="#2979ff" stroke-width="3" />
+        <line x1="80" y1="45" x2="120" y2="45" stroke="#2979ff" stroke-width="3" />
+        <line x1="80" y1="60" x2="120" y2="60" stroke="#2979ff" stroke-width="3" />
+        <line x1="80" y1="75" x2="120" y2="75" stroke="#2979ff" stroke-width="3" />
+        <!-- Activity Dots -->
+        <circle cx="85" cy="30" r="3" fill="#2979ff" />
+        <circle cx="85" cy="45" r="3" fill="#2979ff" />
+        <circle cx="85" cy="60" r="3" fill="#2979ff" />
+        <circle cx="85" cy="75" r="3" fill="#2979ff" />
+        <text x="130" y="65" font-family="Segoe UI, Arial" font-size="24" fill="#2979ff"
+          font-weight="700">Activities</text>
+      </svg>
+    </div>
+  </div>
+  <main>
+    <div class="activities-container">
+      <h1 class="activities-title" data-translate="uai-company-activities">UAI Company Activities</h1>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-date" data-translate="august-8-2019">August 8, 2019</div>
+          <div class="timeline-content">
+            <h3 data-translate="company-founded">🏢 Company Founded</h3>
+            <p data-translate="company-founded-desc">UAI (United American Investments) was officially founded in
+              Florida, USA. The company began with a vision to democratize investment opportunities and create financial
+              freedom for people worldwide.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date" data-translate="2019-2020">2019 - 2020</div>
+          <div class="timeline-content">
+            <h3 data-translate="initial-development">🚀 Initial Development Phase</h3>
+            <p data-translate="initial-development-desc">Developed core investment platform and established first
+              partnerships with financial institutions. Launched basic investment products and began building our user
+              base.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">2021</div>
+          <div class="timeline-content">
+            <h3 data-translate="digital-platform-launch">📱 Digital Platform Launch</h3>
+            <p data-translate="digital-platform-launch-desc">Launched our comprehensive digital platform featuring task
+              management systems, user authentication, and basic investment tracking capabilities.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">2022</div>
+          <div class="timeline-content">
+            <h3 data-translate="global-expansion">🌍 Global Expansion</h3>
+            <p data-translate="global-expansion-desc">Expanded operations internationally, supporting multiple languages
+              and currencies. Established partnerships with banks and financial institutions worldwide.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">2023</div>
+          <div class="timeline-content">
+            <h3 data-translate="security-enhancements">🔒 Security Enhancements</h3>
+            <p data-translate="security-enhancements-desc">Implemented advanced security measures including multi-factor
+              authentication, encrypted transactions, and real-time fraud detection systems to protect user investments.
+            </p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date">2024</div>
+          <div class="timeline-content">
+            <h3 data-translate="wealth-fund-launch">💎 UAI Wealth Fund Launch</h3>
+            <p data-translate="wealth-fund-launch-desc">Launched our comprehensive wealth management platform featuring
+              9 different investment funds including UAI Starter Fund, Micro Fund, Agriculture Fund, Tech Growth Fund,
+              Real Estate Fund, Crypto Mining Fund, Wells Fargo & Citibank partnerships, Gold Investment Fund, and
+              Diamond Elite Fund.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-date" data-translate="present">Present</div>
+          <div class="timeline-content">
+            <h3 data-translate="current-activities">🎯 Current Activities</h3>
+            <ul class="activities-list">
+              <li data-translate="activity-1">Managing thousands of active user accounts worldwide</li>
+              <li data-translate="activity-2">Processing millions in investment transactions</li>
+              <li data-translate="activity-3">Expanding partnership network with major financial institutions</li>
+              <li data-translate="activity-4">Developing new investment products and services</li>
+              <li data-translate="activity-5">Enhancing platform security and user experience</li>
+              <li data-translate="activity-6">Supporting multiple languages and currencies</li>
+              <li data-translate="activity-7">Providing 24/7 customer support</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-section">
+        <h2 data-translate="company-statistics">📊 Company Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number">5+</div>
+            <div class="stat-label" data-translate="years-operation">Years of Operation</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" data-translate="global">Global</div>
+            <div class="stat-label" data-translate="market-presence">Market Presence</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">9</div>
+            <div class="stat-label" data-translate="investment-funds">Investment Funds</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label" data-translate="customer-support">Customer Support</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav" role="navigation" aria-label="Bottom Navigation">
+    <a href="home.html" class="active" aria-current="page" id="nav-home">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 21v-7.5l9-6.5 9 6.5V21H3z" />
+      </svg>
+      <span id="nav-home-label" data-translate="home">Home</span>
+    </a>
+    <a href="task.html" id="nav-task">
+      <svg viewBox="0 0 24 24">
+        <rect x="4" y="4" width="16" height="16" rx="2" />
+        <path d="M8 10h8M8 14h4" />
+      </svg>
+      <span id="nav-task-label" data-translate="tasks">Task</span>
+    </a>
+    <a href="team management.html" id="nav-team">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="3" />
+        <path d="M12 15c-4 0-8 2-8 4v1h16v-1c0-2-4-4-8-4z" />
+      </svg>
+      <span id="nav-team-label" data-translate="team-management">Team Management</span>
+    </a>
+    <a href="level.html" id="nav-level">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        <path d="M2 7v10l10 5 10-5V7" />
+      </svg>
+      <span id="nav-level-label" data-translate="level">Level</span>
+    </a>
+    <a href="profile.html" id="nav-profile">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M2 20v-2a8 8 0 0 1 16 0v2" />
+      </svg>
+      <span id="nav-profile-label" data-translate="profile">Profile</span>
+    </a>
+  </nav>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.CICLanguageManager) {
+        window.CICLanguageManager.applyLanguage();
+      }
+    });
+  </script>
+</body>
+
+</html>

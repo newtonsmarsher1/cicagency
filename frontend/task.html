@@ -1,0 +1,5139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title data-translate="task-list-title">Task List - CIC</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00ff88">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="CIC">
+  <link rel="apple-touch-icon" href="images/cic-logo-192x192.png">
+
+  <!-- PWA Icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="images/cic-logo-72x72.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="images/cic-logo-72x72.png">
+  <style>
+    :root {
+      --brand-green: #00ff88;
+      --brand-maroon: #8b4513;
+      --brand-dark: #006633;
+      --brand-accent: #32ff7e;
+      --icon-bg: #e8fff0;
+      --icon-color: #00ff88;
+      --menu-bg: #fff;
+      --menu-icon-active: var(--brand-accent);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #e3f2fd;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      padding-top: 0;
+    }
+
+    .main-content {
+      padding-top: 200px;
+      transition: padding-top 0.3s ease-in-out;
+    }
+
+    .main-content.header-hidden {
+      padding-top: 0;
+    }
+
+    /* Header */
+    .header {
+      background: #fff;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      transition: transform 0.3s ease-in-out;
+      transform: translateY(0);
+    }
+
+    .header.hidden {
+      transform: translateY(-100%);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--brand-green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 2px;
+    }
+
+    .user-level {
+      font-size: 12px;
+      color: #666;
+      background: var(--icon-bg);
+      padding: 2px 8px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 8px;
+      background: var(--icon-bg);
+      color: var(--brand-green);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-btn:hover {
+      background: var(--brand-green);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .header-btn.active {
+      background: var(--brand-green);
+      color: white;
+    }
+
+    /* Restriction Banner */
+    .restriction-banner {
+      background: linear-gradient(135deg, #ff9800, #f57c00);
+      color: white;
+      padding: 16px;
+      margin: 0 16px 16px 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+      animation: slideDown 0.5s ease-out;
+    }
+
+    .restriction-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .restriction-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .restriction-text {
+      flex: 1;
+    }
+
+    .restriction-title {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .restriction-message {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin: 0 0 16px 0;
+    }
+
+    /* Quick Stats Section */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--icon-bg);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 136, 0.2);
+    }
+
+    /* Hide tasks area until initialization completes to prevent extra interactions */
+    .tasks-loading #task-list {
+      display: none !important;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--brand-green);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    /* Search and Filter Bar */
+    .search-filter-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px 12px 40px;
+      border: 1px solid #e0e0e0;
+      border-radius: 25px;
+      font-size: 14px;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--brand-green);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(0, 255, 136, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+      font-size: 16px;
+    }
+
+    .filter-btn {
+      background: var(--icon-bg);
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--brand-green);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+      background: var(--brand-green);
+      color: white;
+    }
+
+    .filter-btn.active {
+      background: var(--brand-green);
+      color: white;
+    }
+
+    /* Summary Section */
+    .summary-section {
+      background: var(--brand-accent);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 0 16px 20px 16px;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Task Limit Display */
+    .task-limit-display {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 0 16px 16px 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .task-limit-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #00ff88;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .task-limit-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+
+    .task-limit-table th,
+    .task-limit-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .task-limit-table th {
+      background: #f5f5f5;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .task-limit-table td {
+      color: #666;
+    }
+
+    .task-limit-progress {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .task-limit-bar {
+      flex: 1;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .task-limit-bar-fill {
+      height: 100%;
+      background: #00ff88;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .task-limit-stats {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+
+
+
+    .summary-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ongoing-count {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .ongoing-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .progress-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-circle::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: var(--progress-height, 0%);
+      background: linear-gradient(180deg, #4CAF50 0%, #45a049 100%);
+      transition: height 1s ease-in-out;
+      z-index: 1;
+    }
+
+    /* Wave animation on water surface */
+    .progress-circle::after {
+      content: '';
+      position: absolute;
+      bottom: var(--progress-height, 0%);
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.4) 25%,
+          rgba(255, 255, 255, 0.8) 50%,
+          rgba(255, 255, 255, 0.4) 75%,
+          transparent 100%);
+      animation: wave 3s ease-in-out infinite;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Show waves only when there's water */
+    .progress-circle.has-water::after {
+      opacity: 1;
+    }
+
+    /* Second wave layer for more depth */
+    .progress-circle .wave-layer {
+      position: absolute;
+      bottom: var(--progress-height, 0%);
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.2) 20%,
+          rgba(255, 255, 255, 0.5) 50%,
+          rgba(255, 255, 255, 0.2) 80%,
+          transparent 100%);
+      animation: wave2 2s ease-in-out infinite reverse;
+      z-index: 3;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    /* Show waves only when there's water */
+    .progress-circle.has-water .wave-layer {
+      opacity: 1;
+    }
+
+    @keyframes wave {
+      0% {
+        transform: translateX(-100%);
+        opacity: 0.6;
+      }
+
+      50% {
+        transform: translateX(0%);
+        opacity: 0.9;
+      }
+
+      100% {
+        transform: translateX(100%);
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes wave2 {
+      0% {
+        transform: translateX(100%);
+        opacity: 0.4;
+      }
+
+      50% {
+        transform: translateX(0%);
+        opacity: 0.7;
+      }
+
+      100% {
+        transform: translateX(-100%);
+        opacity: 0.4;
+      }
+    }
+
+    /* Ripple effect when progress changes */
+    .progress-circle.ripple::before {
+      animation: ripple 1s ease-out;
+    }
+
+    @keyframes ripple {
+      0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+      }
+
+      100% {
+        box-shadow: 0 0 0 20px rgba(76, 175, 80, 0);
+      }
+    }
+
+    .progress-circle span {
+      position: relative;
+      z-index: 2;
+      color: #333;
+      font-weight: 700;
+    }
+
+    .completed-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .completed-count {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .completed-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* Filter Buttons */
+    .filter-section {
+      padding: 0 16px 16px 16px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .filter-btn {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter-btn.active {
+      background: var(--brand-accent);
+      color: white;
+      border-color: var(--brand-accent);
+    }
+
+    /* Task List */
+    .task-list {
+      flex: 1;
+      padding: 0 16px 90px 16px;
+    }
+
+    .task-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .task-info {
+      flex: 1;
+      width: 100%;
+    }
+
+    .task-question-preview {
+      margin-top: 10px;
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      font-size: 13px;
+      border-left: 4px solid #00ff88;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .question-text {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .choices-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .choice-preview {
+      color: #666;
+      font-size: 12px;
+      line-height: 1.4;
+      padding: 4px 8px;
+      background: #fff;
+      border-radius: 4px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .task-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .task-earning {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .task-user-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+      font-style: italic;
+    }
+
+    .install-btn {
+      background: var(--brand-accent);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 12px;
+      align-self: flex-end;
+      min-width: 120px;
+    }
+
+    .install-btn:hover {
+      background: #1e5bb8;
+    }
+
+    .install-btn.downloading {
+      background: #666;
+      cursor: not-allowed;
+    }
+
+    .install-btn.completed {
+      background: #4caf50 !important;
+      color: white !important;
+      cursor: not-allowed;
+    }
+
+    .task-card.completed {
+      opacity: 0.8;
+      background: #f8f9fa;
+    }
+
+    .task-card.completed .task-name {
+      color: #666;
+    }
+
+    .task-card.in-progress {
+      border: 2px solid #ff9800;
+      background: #fff8e1;
+    }
+
+    .task-card.in-progress .task-name {
+      color: #ff9800;
+      font-weight: 600;
+    }
+
+    /* Download Progress Bar */
+    .download-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 0 0 12px 12px;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .download-progress.show {
+      opacity: 1;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--brand-accent);
+      width: 0%;
+      transition: width 0.1s ease;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .download-status {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 3000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 18px;
+      max-width: 320px;
+      width: 90%;
+      padding: 32px 20px;
+      text-align: center;
+      box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
+      margin: 20px;
+    }
+
+    .modal-emoji {
+      font-size: 3em;
+      margin-bottom: 15px;
+    }
+
+    .modal-title {
+      font-size: 1.3em;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .modal-message {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .modal-button {
+      background: #00ff88;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-size: 1.1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .modal-button:hover {
+      background: #1565c0;
+    }
+
+    /* Quiz Modal Styles */
+    .quiz-modal-content {
+      background: #fff;
+      border-radius: 18px;
+      max-width: 500px;
+      width: 90%;
+      padding: 30px 25px;
+      box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
+      margin: 20px;
+      text-align: left;
+    }
+
+    .quiz-header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .quiz-app-name {
+      display: none;
+      /* Hide app name */
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #00ff88;
+      margin-bottom: 8px;
+    }
+
+    .quiz-reward {
+      font-size: 1.1em;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .quiz-question {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .quiz-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .quiz-choice {
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 15px 20px;
+      font-size: 1em;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .quiz-choice:hover {
+      background: #e8f5e9;
+      border-color: #00ff88;
+      transform: translateX(5px);
+    }
+
+    .quiz-choice.selected {
+      background: #e3f2fd;
+      border-color: #2196f3;
+    }
+
+    .quiz-choice.correct {
+      background: #c8e6c9;
+      border-color: #4caf50;
+      animation: correctPulse 0.6s ease;
+    }
+
+    .quiz-choice.wrong {
+      background: #ffcdd2;
+      border-color: #f44336;
+      animation: wrongShake 0.5s ease;
+    }
+
+    .quiz-choice.disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .choice-letter {
+      font-weight: 700;
+      font-size: 1.1em;
+      color: #00ff88;
+      min-width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .quiz-choice.correct .choice-letter {
+      background: #4caf50;
+      color: #fff;
+    }
+
+    .quiz-choice.wrong .choice-letter {
+      background: #f44336;
+      color: #fff;
+    }
+
+    .choice-text {
+      flex: 1;
+      font-weight: 500;
+    }
+
+    .quiz-feedback {
+      text-align: center;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 1.1em;
+      font-weight: 600;
+      display: none;
+    }
+
+    .quiz-feedback.show {
+      display: block;
+    }
+
+    .quiz-feedback.correct {
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+
+    .quiz-feedback.wrong {
+      background: #ffcdd2;
+      color: #c62828;
+    }
+
+    .quiz-feedback.thinking {
+      background: linear-gradient(90deg, #e3f2fd, #bbdefb, #e3f2fd);
+      background-size: 200% 100%;
+      color: #1976d2;
+      animation: thinkingGradient 1.5s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    @keyframes thinkingGradient {
+
+      0%,
+      100% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .thinking-dots {
+      display: inline-flex;
+      gap: 4px;
+    }
+
+    .thinking-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1976d2;
+      animation: thinkingBounce 1.4s ease-in-out infinite;
+    }
+
+    .thinking-dots span:nth-child(1) {
+      animation-delay: 0s;
+    }
+
+    .thinking-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .thinking-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes thinkingBounce {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+        opacity: 0.7;
+      }
+
+      30% {
+        transform: translateY(-10px);
+        opacity: 1;
+      }
+    }
+
+    .quiz-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .quiz-submit-btn {
+      background: #00ff88;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 30px;
+      font-size: 1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      flex: 1;
+      max-width: 200px;
+    }
+
+    .quiz-submit-btn:hover {
+      background: #00cc6a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+    }
+
+    .quiz-submit-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .quiz-cancel-btn {
+      background: #f44336;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 30px;
+      font-size: 1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .quiz-cancel-btn:hover {
+      background: #d32f2f;
+    }
+
+    @keyframes correctPulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes wrongShake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-10px);
+      }
+
+      75% {
+        transform: translateX(10px);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        padding: 12px;
+      }
+
+      .main-content {
+        padding-top: 180px;
+      }
+
+      .main-content.header-hidden {
+        padding-top: 0;
+      }
+
+      .header-top {
+        margin-bottom: 12px;
+      }
+
+      .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+      }
+
+      .user-name {
+        font-size: 14px;
+      }
+
+      .user-level {
+        font-size: 10px;
+        padding: 1px 6px;
+      }
+
+      .header-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+      }
+
+      .header-title {
+        font-size: 20px;
+        margin-bottom: 12px;
+      }
+
+      .quick-stats {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .stat-card {
+        padding: 8px;
+      }
+
+      .stat-value {
+        font-size: 16px;
+      }
+
+      .stat-label {
+        font-size: 10px;
+      }
+
+      .search-filter-bar {
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .search-input {
+        padding: 10px 14px 10px 36px;
+        font-size: 13px;
+      }
+
+      .search-icon {
+        left: 10px;
+        font-size: 14px;
+      }
+
+      .filter-btn {
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      .summary-section {
+        margin: 0 12px 16px 12px;
+        padding: 16px;
+      }
+
+      .filter-section {
+        padding: 0 12px 12px 12px;
+      }
+
+      .task-list {
+        padding: 0 12px 90px 12px;
+      }
+
+      .modal-content {
+        max-width: 240px;
+        padding: 20px 12px;
+        margin: 12px;
+      }
+
+      .modal-emoji {
+        font-size: 2em;
+      }
+
+      .modal-title {
+        font-size: 1em;
+      }
+
+      .modal-message {
+        font-size: 0.9em;
+      }
+
+      .modal-button {
+        padding: 8px 20px;
+        font-size: 0.95em;
+      }
+
+      /* Quiz modal responsive */
+      .quiz-modal-content {
+        max-width: 95%;
+        padding: 20px 15px;
+      }
+
+      .quiz-app-name {
+        font-size: 1.2em;
+      }
+
+      .quiz-reward {
+        font-size: 0.95em;
+      }
+
+      .quiz-question {
+        font-size: 1em;
+      }
+
+      .quiz-choice {
+        padding: 12px 15px;
+        font-size: 0.9em;
+      }
+
+      .choice-letter {
+        min-width: 25px;
+        height: 25px;
+        font-size: 0.95em;
+      }
+
+      .quiz-submit-btn,
+      .quiz-cancel-btn {
+        padding: 10px 20px;
+        font-size: 0.9em;
+      }
+
+      /* Task card responsive */
+      .task-card {
+        padding: 12px;
+      }
+
+      .task-name {
+        font-size: 15px;
+      }
+
+      .task-question-preview {
+        font-size: 12px;
+        padding: 10px;
+      }
+
+      .question-text {
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+
+      .choice-preview {
+        font-size: 11px;
+        padding: 3px 6px;
+      }
+
+      .install-btn {
+        padding: 8px 20px;
+        font-size: 13px;
+        min-width: 100px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-content {
+        padding-top: 160px;
+      }
+
+      .main-content.header-hidden {
+        padding-top: 0;
+      }
+
+      .quick-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+
+      .stat-card {
+        padding: 6px;
+      }
+
+      .stat-value {
+        font-size: 14px;
+      }
+
+      .stat-label {
+        font-size: 9px;
+      }
+
+      .search-filter-bar {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .search-box {
+        order: 1;
+      }
+
+      .filter-btn {
+        order: 2;
+        align-self: flex-end;
+      }
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-green);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 4px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .nav-icon {
+      font-size: 20px;
+    }
+
+    /* Hide old sidebar components */
+    .hamburger,
+    .sidebar,
+    .sidebar-overlay {
+      display: none !important;
+    }
+
+    /* Bottom Nav Responsive */
+    @media (max-width: 480px) {
+      .bottom-nav {
+        padding: 3px 0;
+      }
+
+      .nav-item {
+        padding: 3px 6px;
+        gap: 1px;
+      }
+
+      .nav-icon {
+        font-size: 18px;
+      }
+
+      .nav-item span:last-child {
+        font-size: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body class="tasks-loading">
+  <!-- Bottom Navigation Bar -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span data-translate="home">Home</span>
+    </a>
+    <a href="task.html" class="nav-item active">
+      <span class="nav-icon">📋</span>
+      <span data-translate="tasks">Tasks</span>
+    </a>
+    <a href="level.html" class="nav-item">
+      <span class="nav-icon">📊</span>
+      <span data-translate="level">Level</span>
+    </a>
+    <a href="withdrawal.html" class="nav-item">
+      <span class="nav-icon">💸</span>
+      <span data-translate="withdraw">Withdraw</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="nav-icon">👤</span>
+      <span data-translate="profile">Profile</span>
+    </a>
+  </div>
+
+  <!-- Enhanced Header -->
+  <div class="header">
+    <div class="header-top">
+      <div class="header-left">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div class="user-info">
+          <div class="user-name" id="user-name">Loading...</div>
+          <div class="user-level" id="user-level">Level 0</div>
+        </div>
+      </div>
+      <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
+        <button class="header-btn" onclick="toggleNotifications()" title="Notifications">
+          <span class="icon-bell">🔔</span>
+        </button>
+        <div id="trial-banner"
+          style="display:none;padding:6px 14px;margin:0;background:#fff4e6;border-radius:18px;text-align:center;color:#a65c04;font-weight:bold;font-size:15px;white-space:nowrap;vertical-align:middle;">
+        </div>
+        <button class="header-btn" onclick="openSettings()" title="Settings">
+          <span class="icon-settings">⚙️</span>
+        </button>
+      </div>
+    </div>
+
+    <h1 class="header-title" data-translate="task-list-title">Task List - CIC</h1>
+
+    <div class="quick-stats">
+      <div class="stat-card">
+        <div class="stat-value" id="today-earnings"><span data-currency>KES</span> 0.00</div>
+        <div class="stat-label" data-translate="today">Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="total-tasks">0</div>
+        <div class="stat-label" data-translate="completed">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="wallet-balance"><span data-currency>KES</span> 0</div>
+        <div class="stat-label" data-translate="balance">Balance</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="streak-days">0</div>
+        <div class="stat-label" data-translate="streak">Streak</div>
+      </div>
+    </div>
+
+    <div class="search-filter-bar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input" data-translate-placeholder="search-tasks"
+          placeholder="Search tasks..." onkeyup="searchTasks(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Wrapper -->
+  <div class="main-content" id="main-content">
+
+    <!-- Restriction Banner -->
+    <div class="restriction-banner" id="restriction-banner" style="display: none;">
+      <div class="restriction-content">
+        <div class="restriction-icon">🚫</div>
+        <div class="restriction-text">
+          <div class="restriction-title" id="restriction-title">Tasks Not Available</div>
+          <div class="restriction-message" id="restriction-message">Please try again tomorrow</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Task Limit Display -->
+    <div class="task-limit-display" id="task-limit-display" style="display: none;">
+      <div class="task-limit-title" data-translate="daily-task-progress">Daily Task Progress</div>
+      <table class="task-limit-table">
+        <tr>
+          <th data-translate="time-unit">Time Unit</th>
+          <th data-translate="tasks-completed-header">Tasks Completed</th>
+          <th data-translate="daily-limit">Daily Limit</th>
+          <th data-translate="reward-per-task">Reward per Task</th>
+        </tr>
+        <tr>
+          <td data-translate="daily">Daily</td>
+          <td><span id="completed-today">0</span></td>
+          <td><span id="max-tasks-per-day">5</span></td>
+          <td>KES <span id="reward-per-task">11.00</span></td>
+        </tr>
+      </table>
+      <div class="task-limit-progress">
+        <div class="task-limit-bar">
+          <div class="task-limit-bar-fill" id="task-limit-bar-fill" style="width: 0%"></div>
+        </div>
+        <div class="task-limit-stats">
+          <span data-translate="level">Level</span> <span id="current-user-level">0</span> • <span id="progress-text">0%
+            <span data-translate="complete">Complete</span></span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="summary-section"
+      style="display: flex; justify-content: space-around; background: #f8f9fa; margin: 0 16px 16px 16px; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 500;">
+      <div class="summary-item">
+        <span class="summary-label" data-translate="ongoing-label">Ongoing</span>:
+        <span class="ongoing-count" id="ongoing-count">0</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label" data-translate="completed-label">Completed</span>:
+        <span class="completed-count" id="completed-count">0</span>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <button class="filter-btn" onclick="filterTasks('ongoing', event)" data-translate="ongoing-label">Ongoing</button>
+      <button class="filter-btn active" onclick="filterTasks('all', event)" data-translate="all-label">All</button>
+      <button class="filter-btn" onclick="filterTasks('completed', event)"
+        data-translate="completed-label">Completed</button>
+    </div>
+
+    <div class="task-list" id="task-list">
+      <!-- Tasks will be loaded here -->
+    </div>
+
+    <!-- Modal for task completion notifications -->
+    <div id="notification-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div id="modal-emoji" class="modal-emoji">🎉</div>
+        <div id="modal-title" class="modal-title" data-translate="default-modal-title">Congratulations!</div>
+        <div id="modal-message" class="modal-message" data-translate="default-modal-message">You have successfully
+          completed the task.</div>
+        <button id="modal-button" class="modal-button" type="button" onclick="hideModal()"
+          data-translate="ok">OK</button>
+      </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="modal-overlay">
+      <div class="quiz-modal-content">
+        <div class="quiz-header">
+          <!-- App name hidden -->
+          <div class="quiz-reward" id="quiz-reward">Earn KES 11.00</div>
+        </div>
+
+        <div class="quiz-question" id="quiz-question">
+          Your question will appear here
+        </div>
+
+        <div class="quiz-choices" id="quiz-choices">
+          <!-- Choices will be dynamically inserted here -->
+        </div>
+
+        <div class="quiz-feedback" id="quiz-feedback">
+          Feedback will appear here
+        </div>
+
+        <div class="quiz-buttons">
+          <button class="quiz-cancel-btn" onclick="closeQuizModal()" data-translate="cancel">Cancel</button>
+          <button class="quiz-submit-btn" id="quiz-submit-btn" onclick="submitQuizAnswer()" disabled
+            data-translate="submit-answer">Submit
+            Answer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trial Period Countdown Banner -->
+    <div id="trial-banner"
+      style="display:none; padding:16px; margin:0 0 16px 0;background:#fff4e6; border-radius:8px; text-align:center; color:#a65c04; font-weight:bold; font-size:18px; position:relative; z-index:1000;">
+    </div>
+
+  </div> <!-- End main-content wrapper -->
+
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <script src="js/api-config.js"></script>
+  <script src="js/activity-tracker.js"></script>
+  <script>
+    // API Configuration - Use current origin for cross-device compatibility
+    // This will automatically use the correct host and port on any device
+    if (!window.API_BASE_URL) {
+      window.API_BASE_URL = window.location.origin;
+    }
+    console.log('🔗 API Base URL:', window.API_BASE_URL);
+
+    // Enhanced Task Page Features
+
+    // Search functionality
+    function searchTasks(query) {
+      const taskCards = document.querySelectorAll('.task-card');
+      const searchTerm = query.toLowerCase();
+
+      taskCards.forEach(card => {
+        const taskNameElement = card.querySelector('.task-name');
+        const questionTextElement = card.querySelector('.question-text');
+        const taskName = taskNameElement ? taskNameElement.textContent.toLowerCase() : '';
+        const questionText = questionTextElement ? questionTextElement.textContent.toLowerCase() : '';
+        const isVisible = taskName.includes(searchTerm) || questionText.includes(searchTerm);
+
+        card.style.display = isVisible ? 'block' : 'none';
+      });
+    }
+
+    // Toggle notifications
+    function toggleNotifications() {
+      const notifBtn = document.querySelector('.header-btn[onclick="toggleNotifications()"]');
+      notifBtn.classList.toggle('active');
+
+      // Show notification settings or toggle notifications
+      if (notifBtn.classList.contains('active')) {
+        showModal('info', 'Notifications enabled! You will receive alerts for new tasks and updates.');
+      } else {
+        showModal('info', 'Notifications disabled. You can enable them in settings.');
+      }
+    }
+
+    // Currency conversion rates (approximate - should be fetched from API in production)
+    const currencyRates = {
+      USD: 1.0,      // Base currency
+      KES: 130.0,    // 1 USD = 130 KES (approximate)
+      EUR: 0.92,     // 1 USD = 0.92 EUR (approximate)
+      GBP: 0.79      // 1 USD = 0.79 GBP (approximate)
+    };
+
+    // Get current currency from settings
+    function getCurrentCurrency() {
+      if (window.CICSettings) {
+        return window.CICSettings.get('currency') || 'KES';
+      }
+      return localStorage.getItem('cic-currency') || 'KES';
+    }
+
+    // Convert amount to current currency
+    function convertCurrency(amount, fromCurrency = 'KES', toCurrency = null) {
+      if (!toCurrency) {
+        toCurrency = getCurrentCurrency();
+      }
+
+      if (fromCurrency === toCurrency) {
+        return amount;
+      }
+
+      // Convert to USD first (base currency)
+      let amountInUSD = amount;
+      if (fromCurrency !== 'USD') {
+        amountInUSD = amount / currencyRates[fromCurrency];
+      }
+
+      // Convert from USD to target currency
+      if (toCurrency !== 'USD') {
+        return amountInUSD * currencyRates[toCurrency];
+      }
+
+      return amountInUSD;
+    }
+
+    // Format currency amount
+    function formatCurrency(amount, currency = null) {
+      if (!currency) {
+        currency = getCurrentCurrency();
+      }
+
+      const convertedAmount = convertCurrency(amount, 'KES', currency);
+      const currencySymbols = {
+        'USD': '$',
+        'KES': 'KES ',
+        'EUR': '€',
+        'GBP': '£'
+      };
+
+      const symbol = currencySymbols[currency] || currency + ' ';
+      return `${symbol}${convertedAmount.toFixed(2)}`;
+    }
+
+    // Open settings
+    function openSettings() {
+      window.location.href = 'settings.html';
+    }
+
+    // Function to check completed tasks (for debugging)
+    function checkCompletedTasks() {
+      const completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+
+      console.log('📋 Completed Tasks:', completedTasks);
+      console.log('💰 Current User Info:', userInfo);
+      console.log('📊 Total completed tasks:', completedTasks.length);
+      console.log('💵 Total earnings:', userInfo.total_earnings || 0);
+      console.log('📅 Today earnings:', userInfo.today_earning || 0);
+      console.log('💳 Wallet balance:', userInfo.wallet_balance || 0);
+
+      return {
+        completedTasks,
+        userInfo,
+        totalCompleted: completedTasks.length,
+        totalEarnings: userInfo.total_earnings || 0,
+        todayEarnings: userInfo.today_earning || 0,
+        walletBalance: userInfo.wallet_balance || 0
+      };
+    }
+
+
+    // Load user data for header
+    async function loadUserData() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log('⚠️ No token found, showing guest user');
+          document.getElementById('user-name').textContent = 'Guest User';
+          document.getElementById('user-level').textContent = 'Level 0';
+          document.getElementById('user-avatar').textContent = 'G';
+
+          // Set default values for guest user
+          document.getElementById('today-earnings').innerHTML = formatCurrency(0);
+          document.getElementById('wallet-balance').innerHTML = formatCurrency(0);
+          document.getElementById('total-tasks').textContent = '0';
+          document.getElementById('streak-days').textContent = '0';
+          return;
+        }
+
+        console.log('🔄 Loading user data from API...');
+        const url = (window.API_CONFIG && typeof window.API_CONFIG.getUrl === 'function')
+          ? window.API_CONFIG.getUrl('auth/stats')
+          : (window.API_BASE_URL || '').replace(/\/api$/, '') + '/api/auth/stats';
+
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        console.log('📊 User data response status:', response.status);
+
+        if (response.ok) {
+          const userData = await response.json();
+          console.log('✅ User data loaded successfully:', userData);
+          console.log('💰 Today earning raw value:', userData.today_earning);
+          console.log('💰 Today earning type:', typeof userData.today_earning);
+
+          const userName = userData.name || 'User';
+          const userLevel = userData.level || 0;
+
+          // Update user info
+          document.getElementById('user-name').textContent = userName;
+          document.getElementById('user-level').textContent = `Level ${userLevel}`;
+          document.getElementById('user-avatar').textContent = userName.charAt(0).toUpperCase();
+
+          // Update stats with real data
+          // Ensure values are numbers before using toFixed
+          const todayEarning = parseFloat(userData.today_earning) || 0;
+          const walletBalance = parseFloat(userData.wallet_balance) || 0;
+          const tasksCompleted = parseInt(userData.tasks_completed_today) || 0;
+          const streakDays = parseInt(userData.streak_days) || 0;
+
+          console.log('💰 Parsed today earning:', todayEarning);
+          console.log('💰 Formatted today earning:', formatCurrency(todayEarning));
+
+          document.getElementById('today-earnings').innerHTML = formatCurrency(todayEarning);
+          document.getElementById('wallet-balance').innerHTML = formatCurrency(walletBalance);
+          document.getElementById('total-tasks').textContent = tasksCompleted;
+          document.getElementById('streak-days').textContent = streakDays;
+
+          // Store comprehensive user info
+          localStorage.setItem('userInfo', JSON.stringify({
+            level: userLevel,
+            name: userName,
+            wallet_balance: userData.wallet_balance,
+            today_earning: userData.today_earning,
+            tasks_completed_today: userData.tasks_completed_today,
+            total_earnings: userData.total_earnings,
+            streak_days: userData.streak_days,
+            invitation_code: userData.invitation_code,
+            phone: userData.phone
+          }));
+
+          console.log('✅ User data updated in header and localStorage');
+        } else {
+          console.error('❌ Failed to load user data:', response.status, response.statusText);
+          const errorText = await response.text();
+          console.error('❌ Error response:', errorText);
+
+          // Show error state
+          document.getElementById('user-name').textContent = 'Error';
+          document.getElementById('user-level').textContent = 'Level 0';
+          document.getElementById('user-avatar').textContent = 'E';
+
+          // Set error values
+          document.getElementById('today-earnings').innerHTML = formatCurrency(0);
+          document.getElementById('wallet-balance').innerHTML = formatCurrency(0);
+          document.getElementById('total-tasks').textContent = '0';
+          document.getElementById('streak-days').textContent = '0';
+        }
+      } catch (error) {
+        console.error('❌ Error loading user data:', error);
+
+        // Show error state
+        document.getElementById('user-name').textContent = 'Error';
+        document.getElementById('user-level').textContent = 'Level 0';
+        document.getElementById('user-avatar').textContent = 'E';
+
+        // Set error values
+        document.getElementById('today-earnings').innerHTML = formatCurrency(0);
+        document.getElementById('wallet-balance').innerHTML = formatCurrency(0);
+        document.getElementById('total-tasks').textContent = '0';
+        document.getElementById('streak-days').textContent = '0';
+      }
+    }
+
+    // Refresh user data after task completion
+    async function refreshUserDataAfterCompletion() {
+      try {
+        await loadUserData();
+        await loadUserInfo();
+        updateHeaderStats();
+        console.log('✅ User data refreshed after task completion');
+      } catch (error) {
+        console.error('❌ Error refreshing user data:', error);
+      }
+    }
+
+    // Update header stats
+    function updateHeaderStats() {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+
+      if (userInfo.today_earning !== undefined) {
+        const todayEarning = parseFloat(userInfo.today_earning) || 0;
+        document.getElementById('today-earnings').innerHTML = formatCurrency(todayEarning);
+      }
+
+      if (userInfo.wallet_balance !== undefined) {
+        const walletBalance = parseFloat(userInfo.wallet_balance) || 0;
+        document.getElementById('wallet-balance').innerHTML = formatCurrency(walletBalance);
+      }
+
+      if (userInfo.tasks_completed_today !== undefined) {
+        document.getElementById('total-tasks').textContent = userInfo.tasks_completed_today;
+      }
+    }
+
+    // Register service worker for PWA functionality
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((registration) => {
+            console.log('✅ CIC Service Worker registered:', registration);
+          })
+          .catch((error) => {
+            console.log('❌ CIC Service Worker registration failed:', error);
+          });
+      });
+    }
+
+    // Updated task data with 50 popular apps and services - now with quiz questions!
+    // Each task has a question with 4 choices (a, b, c, d) and correct answer
+    const sampleTasks = [
+      {
+        id: 1,
+        name: "Task 1",
+        icon: "https://cdn-icons-png.flaticon.com/512/3046/3046120.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the capital city of Kenya?",
+        choices: ["Mombasa", "Nairobi", "Kisumu", "Nakuru"],
+        correctAnswer: 1 // Index of correct answer (b - Nairobi)
+      },
+      {
+        id: 2,
+        name: "Task 2",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174855.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many continents are there in the world?",
+        choices: ["5", "6", "7", "8"],
+        correctAnswer: 2
+      },
+      {
+        id: 3,
+        name: "Task 3",
+        icon: "https://cdn-icons-png.flaticon.com/512/1384/1384023.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the largest ocean on Earth?",
+        choices: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+        correctAnswer: 3
+      },
+      {
+        id: 4,
+        name: "Task 4",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174872.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many days are in a leap year?",
+        choices: ["364", "365", "366", "367"],
+        correctAnswer: 2
+      },
+      {
+        id: 5,
+        name: "Task 5",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174872.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 15 + 27?",
+        choices: ["40", "41", "42", "43"],
+        correctAnswer: 2
+      },
+      {
+        id: 6,
+        name: "Task 6",
+        icon: "https://cdn-icons-png.flaticon.com/512/1384/1384023.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which planet is known as the Red Planet?",
+        choices: ["Venus", "Mars", "Jupiter", "Saturn"],
+        correctAnswer: 1
+      },
+      {
+        id: 7,
+        name: "Task 7",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174848.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the currency of Kenya?",
+        choices: ["Dollar", "Shilling", "Pound", "Rand"],
+        correctAnswer: 1
+      },
+      {
+        id: 8,
+        name: "Task 8",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174876.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many hours are in a day?",
+        choices: ["12", "20", "24", "36"],
+        correctAnswer: 2
+      },
+      {
+        id: 9,
+        name: "Task 9",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174863.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the smallest prime number?",
+        choices: ["0", "1", "2", "3"],
+        correctAnswer: 2
+      },
+      {
+        id: 10,
+        name: "Task 10",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174857.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 12 × 8?",
+        choices: ["84", "92", "96", "100"],
+        correctAnswer: 2
+      },
+      {
+        id: 11,
+        name: "Task 11",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174864.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which country is known as the Land of the Rising Sun?",
+        choices: ["China", "Japan", "Korea", "Thailand"],
+        correctAnswer: 1
+      },
+      {
+        id: 12,
+        name: "Task 12",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174865.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many sides does a hexagon have?",
+        choices: ["4", "5", "6", "7"],
+        correctAnswer: 2
+      },
+      {
+        id: 13,
+        name: "Task 13",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174856.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the largest mammal in the world?",
+        choices: ["Elephant", "Blue Whale", "Giraffe", "Polar Bear"],
+        correctAnswer: 1
+      },
+      {
+        id: 14,
+        name: "Task 14",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174861.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many colors are in a rainbow?",
+        choices: ["5", "6", "7", "8"],
+        correctAnswer: 2
+      },
+      {
+        id: 15,
+        name: "Task 15",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968819.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 100 ÷ 4?",
+        choices: ["20", "25", "30", "35"],
+        correctAnswer: 1
+      },
+      {
+        id: 16,
+        name: "Task 16",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968926.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which language is most spoken in the world?",
+        choices: ["English", "Mandarin Chinese", "Spanish", "Hindi"],
+        correctAnswer: 1
+      },
+      {
+        id: 17,
+        name: "Task 17",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968350.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the square root of 64?",
+        choices: ["6", "7", "8", "9"],
+        correctAnswer: 2
+      },
+      {
+        id: 18,
+        name: "Task 18",
+        icon: "https://cdn-icons-png.flaticon.com/512/2111/2111320.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many minutes are in an hour?",
+        choices: ["50", "55", "60", "65"],
+        correctAnswer: 2
+      },
+      {
+        id: 19,
+        name: "Task 19",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968827.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the freezing point of water in Celsius?",
+        choices: ["-5°C", "0°C", "5°C", "10°C"],
+        correctAnswer: 1
+      },
+      {
+        id: 20,
+        name: "Task 20",
+        icon: "https://cdn-icons-png.flaticon.com/512/2111/2111340.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many months have 31 days?",
+        choices: ["5", "6", "7", "8"],
+        correctAnswer: 2
+      },
+      {
+        id: 21,
+        name: "Task 21",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174861.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 50% of 200?",
+        choices: ["50", "75", "100", "125"],
+        correctAnswer: 2
+      },
+      {
+        id: 22,
+        name: "Task 22",
+        icon: "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which animal is known as the King of the Jungle?",
+        choices: ["Tiger", "Lion", "Elephant", "Leopard"],
+        correctAnswer: 1
+      },
+      {
+        id: 23,
+        name: "Task 23",
+        icon: "https://cdn-icons-png.flaticon.com/512/552/552489.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many legs does a spider have?",
+        choices: ["4", "6", "8", "10"],
+        correctAnswer: 2
+      },
+      {
+        id: 24,
+        name: "Task 24",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968885.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the capital of France?",
+        choices: ["London", "Berlin", "Paris", "Madrid"],
+        correctAnswer: 2
+      },
+      {
+        id: 25,
+        name: "Task 25",
+        icon: "https://cdn-icons-png.flaticon.com/512/2991/2991112.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many seconds are in one minute?",
+        choices: ["30", "45", "60", "90"],
+        correctAnswer: 2
+      },
+      {
+        id: 26,
+        name: "Task 26",
+        icon: "https://cdn-icons-png.flaticon.com/512/2111/2111615.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 7 × 7?",
+        choices: ["42", "45", "49", "56"],
+        correctAnswer: 2
+      },
+      {
+        id: 27,
+        name: "Task 27",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174864.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which is the tallest mountain in the world?",
+        choices: ["K2", "Mount Everest", "Kilimanjaro", "Mount Kenya"],
+        correctAnswer: 1
+      },
+      {
+        id: 28,
+        name: "Task 28",
+        icon: "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many weeks are in a year?",
+        choices: ["48", "50", "52", "54"],
+        correctAnswer: 2
+      },
+      {
+        id: 29,
+        name: "Task 29",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968749.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the boiling point of water in Celsius?",
+        choices: ["90°C", "95°C", "100°C", "105°C"],
+        correctAnswer: 2
+      },
+      {
+        id: 30,
+        name: "Task 30",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174836.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many vowels are in the English alphabet?",
+        choices: ["3", "4", "5", "6"],
+        correctAnswer: 2
+      },
+      {
+        id: 31,
+        name: "Task 31",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174872.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 20 × 5?",
+        choices: ["90", "95", "100", "105"],
+        correctAnswer: 2
+      },
+      {
+        id: 32,
+        name: "Task 32",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174872.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which continent is Egypt in?",
+        choices: ["Asia", "Africa", "Europe", "Middle East"],
+        correctAnswer: 1
+      },
+      {
+        id: 33,
+        name: "Task 33",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174872.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many sides does a triangle have?",
+        choices: ["2", "3", "4", "5"],
+        correctAnswer: 1
+      },
+      {
+        id: 34,
+        name: "Task 34",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174872.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the largest country by land area?",
+        choices: ["China", "Canada", "Russia", "USA"],
+        correctAnswer: 2
+      },
+      {
+        id: 35,
+        name: "Task 35",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174872.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many degrees are in a right angle?",
+        choices: ["45", "60", "90", "180"],
+        correctAnswer: 2
+      },
+      {
+        id: 36,
+        name: "Task 36",
+        icon: "https://cdn-icons-png.flaticon.com/512/5977/5977590.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the speed of light approximately?",
+        choices: ["200,000 km/s", "300,000 km/s", "400,000 km/s", "500,000 km/s"],
+        correctAnswer: 1
+      },
+      {
+        id: 37,
+        name: "Task 37",
+        icon: "https://cdn-icons-png.flaticon.com/512/5977/5977590.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many players are on a soccer team?",
+        choices: ["9", "10", "11", "12"],
+        correctAnswer: 2
+      },
+      {
+        id: 38,
+        name: "Task 38",
+        icon: "https://cdn-icons-png.flaticon.com/512/5977/5977590.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 144 ÷ 12?",
+        choices: ["10", "11", "12", "13"],
+        correctAnswer: 2
+      },
+      {
+        id: 39,
+        name: "Task 39",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968529.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which is the smallest continent?",
+        choices: ["Europe", "Australia", "Antarctica", "Africa"],
+        correctAnswer: 1
+      },
+      {
+        id: 40,
+        name: "Task 40",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174872.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many zeros are in one million?",
+        choices: ["4", "5", "6", "7"],
+        correctAnswer: 2
+      },
+      {
+        id: 41,
+        name: "Task 41",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968907.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the capital of the USA?",
+        choices: ["New York", "Los Angeles", "Washington D.C.", "Chicago"],
+        correctAnswer: 2
+      },
+      {
+        id: 42,
+        name: "Task 42",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968926.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many letters are in the English alphabet?",
+        choices: ["24", "25", "26", "27"],
+        correctAnswer: 2
+      },
+      {
+        id: 43,
+        name: "Task 43",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968907.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 3³ (3 to the power of 3)?",
+        choices: ["9", "18", "27", "36"],
+        correctAnswer: 2
+      },
+      {
+        id: 44,
+        name: "Task 44",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968756.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which planet is closest to the Sun?",
+        choices: ["Mercury", "Venus", "Earth", "Mars"],
+        correctAnswer: 0
+      },
+      {
+        id: 45,
+        name: "Task 45",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968350.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many sides does a pentagon have?",
+        choices: ["4", "5", "6", "7"],
+        correctAnswer: 1
+      },
+      {
+        id: 46,
+        name: "Task 46",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968756.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the largest organ in the human body?",
+        choices: ["Heart", "Brain", "Skin", "Liver"],
+        correctAnswer: 2
+      },
+      {
+        id: 47,
+        name: "Task 47",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968350.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many bones are in the adult human body?",
+        choices: ["186", "196", "206", "216"],
+        correctAnswer: 2
+      },
+      {
+        id: 48,
+        name: "Task 48",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968350.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the currency of Japan?",
+        choices: ["Yuan", "Yen", "Won", "Rupee"],
+        correctAnswer: 1
+      },
+      {
+        id: 49,
+        name: "Task 49",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968269.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many sides does an octagon have?",
+        choices: ["6", "7", "8", "9"],
+        correctAnswer: 2
+      },
+      {
+        id: 50,
+        name: "Task 50",
+        icon: "https://cdn.brandfetch.io/id_eF5X4DY/w/800/h/403/theme/dark/symbol.png?c=1bxid64Mup7aczewSAYMX&t=1668078223326",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 25% of 80?",
+        choices: ["15", "20", "25", "30"],
+        correctAnswer: 1
+      },
+      {
+        id: 51,
+        name: "Task 51",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174872.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the chemical symbol for oxygen?",
+        choices: ["Ox", "O", "Og", "On"],
+        correctAnswer: 1
+      },
+      {
+        id: 52,
+        name: "Task 52",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174848.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many chambers does a human heart have?",
+        choices: ["2", "3", "4", "5"],
+        correctAnswer: 2
+      },
+      {
+        id: 53,
+        name: "Task 53",
+        icon: "https://cdn-icons-png.flaticon.com/512/1384/1384023.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 15% of 200?",
+        choices: ["25", "30", "35", "40"],
+        correctAnswer: 1
+      },
+      {
+        id: 54,
+        name: "Task 54",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174876.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which is the longest river in Africa?",
+        choices: ["Congo", "Nile", "Niger", "Zambezi"],
+        correctAnswer: 1
+      },
+      {
+        id: 55,
+        name: "Task 55",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174863.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many years are in a century?",
+        choices: ["90", "100", "110", "120"],
+        correctAnswer: 1
+      },
+      {
+        id: 56,
+        name: "Task 56",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174864.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the square root of 81?",
+        choices: ["7", "8", "9", "10"],
+        correctAnswer: 2
+      },
+      {
+        id: 57,
+        name: "Task 57",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174865.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which gas makes up most of Earth's atmosphere?",
+        choices: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Argon"],
+        correctAnswer: 2
+      },
+      {
+        id: 58,
+        name: "Task 58",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174856.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many teeth does an adult human typically have?",
+        choices: ["28", "30", "32", "34"],
+        correctAnswer: 2
+      },
+      {
+        id: 59,
+        name: "Task 59",
+        icon: "https://cdn-icons-png.flaticon.com/512/174/174861.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the capital of Brazil?",
+        choices: ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"],
+        correctAnswer: 2
+      },
+      {
+        id: 60,
+        name: "Task 60",
+        icon: "https://cdn-icons-png.flaticon.com/512/5968/5968819.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is 8 × 9?",
+        choices: ["64", "70", "72", "80"],
+        correctAnswer: 2
+      },
+      {
+        id: 61,
+        name: "Task 61",
+        icon: "https://cdn-icons-png.flaticon.com/512/2919/2919600.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the largest organ in the human body?",
+        choices: ["Heart", "Liver", "Skin", "Lungs"],
+        correctAnswer: 2
+      },
+      {
+        id: 62,
+        name: "Task 62",
+        icon: "https://cdn-icons-png.flaticon.com/512/993/993762.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which element has the chemical symbol 'Au'?",
+        choices: ["Silver", "Gold", "Copper", "Iron"],
+        correctAnswer: 1
+      },
+      {
+        id: 63,
+        name: "Task 63",
+        icon: "https://cdn-icons-png.flaticon.com/512/3063/3063823.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the capital of Canada?",
+        choices: ["Toronto", "Vancouver", "Montreal", "Ottawa"],
+        correctAnswer: 3
+      },
+      {
+        id: 64,
+        name: "Task 64",
+        icon: "https://cdn-icons-png.flaticon.com/512/1046/1046269.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many bones are in the adult human body?",
+        choices: ["206", "208", "210", "212"],
+        correctAnswer: 0
+      },
+      {
+        id: 65,
+        name: "Task 65",
+        icon: "https://cdn-icons-png.flaticon.com/512/2645/2645897.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which planet is known as the 'Red Planet'?",
+        choices: ["Venus", "Jupiter", "Mars", "Saturn"],
+        correctAnswer: 2
+      },
+      {
+        id: 66,
+        name: "Task 66",
+        icon: "https://cdn-icons-png.flaticon.com/512/1162/1162485.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What comes next in the sequence: 2, 4, 8, 16, ...?",
+        choices: ["24", "30", "32", "36"],
+        correctAnswer: 2
+      },
+      {
+        id: 67,
+        name: "Task 67",
+        icon: "https://cdn-icons-png.flaticon.com/512/2704/2704332.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Who painted the Mona Lisa?",
+        choices: ["Van Gogh", "Picasso", "Da Vinci", "Rembrandt"],
+        correctAnswer: 2
+      },
+      {
+        id: 68,
+        name: "Task 68",
+        icon: "https://cdn-icons-png.flaticon.com/512/2881/2881142.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the hardest natural substance on Earth?",
+        choices: ["Gold", "Iron", "Diamond", "Platinum"],
+        correctAnswer: 2
+      },
+      {
+        id: 69,
+        name: "Task 69",
+        icon: "https://cdn-icons-png.flaticon.com/512/2910/2910795.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which ocean is the largest?",
+        choices: ["Atlantic", "Indian", "Arctic", "Pacific"],
+        correctAnswer: 3
+      },
+      {
+        id: 70,
+        name: "Task 70",
+        icon: "https://cdn-icons-png.flaticon.com/512/2037/2037061.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the speed of light?",
+        choices: ["300,000 km/s", "150,000 km/s", "1,000 km/s", "Light speed"],
+        correctAnswer: 0
+      },
+      {
+        id: 71,
+        name: "Task 71",
+        icon: "https://cdn-icons-png.flaticon.com/512/3135/3135768.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which country is famous for the Great Wall?",
+        choices: ["Japan", "India", "China", "Russia"],
+        correctAnswer: 2
+      },
+      {
+        id: 72,
+        name: "Task 72",
+        icon: "https://cdn-icons-png.flaticon.com/512/2555/2555024.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the main ingredient in guacamole?",
+        choices: ["Tomato", "Avocado", "Onion", "Pepper"],
+        correctAnswer: 1
+      },
+      {
+        id: 73,
+        name: "Task 73",
+        icon: "https://cdn-icons-png.flaticon.com/512/2276/2276931.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many sides does a hexagon have?",
+        choices: ["5", "6", "7", "8"],
+        correctAnswer: 1
+      },
+      {
+        id: 74,
+        name: "Task 74",
+        icon: "https://cdn-icons-png.flaticon.com/512/2821/2821805.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Who wrote 'Romeo and Juliet'?",
+        choices: ["Charles Dickens", "Jane Austen", "William Shakespeare", "Mark Twain"],
+        correctAnswer: 2
+      },
+      {
+        id: 75,
+        name: "Task 75",
+        icon: "https://cdn-icons-png.flaticon.com/512/3209/3209931.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the chemical formula for water?",
+        choices: ["H2O", "CO2", "O2", "NaCl"],
+        correctAnswer: 0
+      },
+      {
+        id: 76,
+        name: "Task 76",
+        icon: "https://cdn-icons-png.flaticon.com/512/2510/2510106.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which is the tallest mountain in the world?",
+        choices: ["K2", "Mount Everest", "Kilimanjaro", "Denali"],
+        correctAnswer: 1
+      },
+      {
+        id: 77,
+        name: "Task 77",
+        icon: "https://cdn-icons-png.flaticon.com/512/2316/2316999.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many continents are there?",
+        choices: ["5", "6", "7", "8"],
+        correctAnswer: 2
+      },
+      {
+        id: 78,
+        name: "Task 78",
+        icon: "https://cdn-icons-png.flaticon.com/512/3069/3069172.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the currency of Japan?",
+        choices: ["Yuan", "Won", "Yen", "Dollar"],
+        correctAnswer: 2
+      },
+      {
+        id: 79,
+        name: "Task 79",
+        icon: "https://cdn-icons-png.flaticon.com/512/2913/2913491.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which gas do plants absorb from the atmosphere?",
+        choices: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Helium"],
+        correctAnswer: 1
+      },
+      {
+        id: 80,
+        name: "Task 80",
+        icon: "https://cdn-icons-png.flaticon.com/512/3574/3574820.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the square root of 144?",
+        choices: ["10", "11", "12", "14"],
+        correctAnswer: 2
+      },
+      {
+        id: 81,
+        name: "Task 81",
+        icon: "https://cdn-icons-png.flaticon.com/512/3135/3135810.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which mammal lay eggs?",
+        choices: ["Kangaroo", "Platypus", "Whale", "Bat"],
+        correctAnswer: 1
+      },
+      {
+        id: 82,
+        name: "Task 82",
+        icon: "https://cdn-icons-png.flaticon.com/512/3208/3208726.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the capital of Italy?",
+        choices: ["Venice", "Milan", "Rome", "Naples"],
+        correctAnswer: 2
+      },
+      {
+        id: 83,
+        name: "Task 83",
+        icon: "https://cdn-icons-png.flaticon.com/512/1089/1089129.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Who discovered penicillin?",
+        choices: ["Marie Curie", "Louis Pasteur", "Alexander Fleming", "Isaac Newton"],
+        correctAnswer: 2
+      },
+      {
+        id: 84,
+        name: "Task 84",
+        icon: "https://cdn-icons-png.flaticon.com/512/2906/2906274.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many players are in a standard soccer team?",
+        choices: ["10", "11", "12", "9"],
+        correctAnswer: 1
+      },
+      {
+        id: 85,
+        name: "Task 85",
+        icon: "https://cdn-icons-png.flaticon.com/512/2554/2554900.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the smallest prime number?",
+        choices: ["0", "1", "2", "3"],
+        correctAnswer: 2
+      },
+      {
+        id: 86,
+        name: "Task 86",
+        icon: "https://cdn-icons-png.flaticon.com/512/2919/2919575.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which instrument is used to measure earthquakes?",
+        choices: ["Barometer", "Thermometer", "Seismograph", "Hygrometer"],
+        correctAnswer: 2
+      },
+      {
+        id: 87,
+        name: "Task 87",
+        icon: "https://cdn-icons-png.flaticon.com/512/2038/2038022.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the main language spoken in Brazil?",
+        choices: ["Spanish", "English", "Portuguese", "French"],
+        correctAnswer: 2
+      },
+      {
+        id: 88,
+        name: "Task 88",
+        icon: "https://cdn-icons-png.flaticon.com/512/3257/3257134.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Who is known as the 'Father of Computers'?",
+        choices: ["Alan Turing", "Charles Babbage", "Bill Gates", "Steve Jobs"],
+        correctAnswer: 1
+      },
+      {
+        id: 89,
+        name: "Task 89",
+        icon: "https://cdn-icons-png.flaticon.com/512/2702/2702134.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "In which year did the Titanic sink?",
+        choices: ["1910", "1912", "1914", "1916"],
+        correctAnswer: 1
+      },
+      {
+        id: 90,
+        name: "Task 90",
+        icon: "https://cdn-icons-png.flaticon.com/512/3062/3062331.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the boiling point of water at sea level?",
+        choices: ["90°C", "100°C", "110°C", "120°C"],
+        correctAnswer: 1
+      },
+      {
+        id: 91,
+        name: "Task 91",
+        icon: "https://cdn-icons-png.flaticon.com/512/2821/2821812.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which planet is closest to the Sun?",
+        choices: ["Venus", "Earth", "Mercury", "Mars"],
+        correctAnswer: 2
+      },
+      {
+        id: 92,
+        name: "Task 92",
+        icon: "https://cdn-icons-png.flaticon.com/512/3003/3003202.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the largest bone in the human body?",
+        choices: ["Humerus", "Femur", "Tibia", "Fibula"],
+        correctAnswer: 1
+      },
+      {
+        id: 93,
+        name: "Task 93",
+        icon: "https://cdn-icons-png.flaticon.com/512/2910/2910761.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which is the longest river in the world?",
+        choices: ["Amazon", "Nile", "Yangtze", "Mississippi"],
+        correctAnswer: 1
+      },
+      {
+        id: 94,
+        name: "Task 94",
+        icon: "https://cdn-icons-png.flaticon.com/512/921/921347.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the symbol for Iron?",
+        choices: ["Ir", "In", "Fe", "F"],
+        correctAnswer: 2
+      },
+      {
+        id: 95,
+        name: "Task 95",
+        icon: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Who was the first person to walk on the moon?",
+        choices: ["Yuri Gagarin", "Buzz Aldrin", "Neil Armstrong", "Michael Collins"],
+        correctAnswer: 2
+      },
+      {
+        id: 96,
+        name: "Task 96",
+        icon: "https://cdn-icons-png.flaticon.com/512/2903/2903556.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "How many degrees are in a circle?",
+        choices: ["180", "270", "360", "90"],
+        correctAnswer: 2
+      },
+      {
+        id: 97,
+        name: "Task 97",
+        icon: "https://cdn-icons-png.flaticon.com/512/2965/2965300.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the chemical symbol for Oxygen?",
+        choices: ["O", "Ox", "Og", "On"],
+        correctAnswer: 0
+      },
+      {
+        id: 98,
+        name: "Task 98",
+        icon: "https://cdn-icons-png.flaticon.com/512/1162/1162344.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Who painted the ceiling of the Sistine Chapel?",
+        choices: ["Raphael", "Donatello", "Leonardo", "Michelangelo"],
+        correctAnswer: 3
+      },
+      {
+        id: 99,
+        name: "Task 99",
+        icon: "https://cdn-icons-png.flaticon.com/512/3304/3304567.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "What is the hardest rock?",
+        choices: ["Granite", "Marble", "Diamond", "Limestone"],
+        correctAnswer: 2
+      },
+      {
+        id: 100,
+        name: "Task 100",
+        icon: "https://cdn-icons-png.flaticon.com/512/2165/2165061.png",
+        earning: 11.00,
+        status: "ongoing",
+        question: "Which bird is the symbol of peace?",
+        choices: ["Eagle", "Dove", "Swan", "Owl"],
+        correctAnswer: 1
+      }
+    ];
+
+    function normalizeChoices(rawChoices) {
+      if (Array.isArray(rawChoices) && rawChoices.length > 0) {
+        return rawChoices
+          .map(choice => {
+            const normalizedChoice = (choice !== undefined && choice !== null) ? choice : '';
+            return typeof normalizedChoice === 'string' ? normalizedChoice : String(normalizedChoice);
+          })
+          .filter(choice => choice.trim().length > 0);
+      }
+
+      if (typeof rawChoices === 'string' && rawChoices.trim().length > 0) {
+        try {
+          const parsed = JSON.parse(rawChoices);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed
+              .map(choice => {
+                const normalizedChoice = (choice !== undefined && choice !== null) ? choice : '';
+                return typeof normalizedChoice === 'string' ? normalizedChoice : String(normalizedChoice);
+              })
+              .filter(choice => choice.trim().length > 0);
+          }
+        } catch (error) {
+          // Not valid JSON, try splitting by common delimiters
+          const splitChoices = rawChoices.split(/[,|;]/).map(choice => choice.trim()).filter(choice => choice.length > 0);
+          if (splitChoices.length > 0) {
+            return splitChoices;
+          }
+          console.warn('⚠️ Could not parse quiz choices string:', rawChoices, error);
+        }
+      }
+
+      return ['Option A', 'Option B', 'Option C', 'Option D'];
+    }
+
+    function normalizeCorrectAnswer(value, totalChoices = 4) {
+      const numericValue = Number(value);
+      if (!Number.isNaN(numericValue) && numericValue >= 0 && numericValue < totalChoices) {
+        return numericValue;
+      }
+      return 0;
+    }
+
+    function getChoiceLetter(index) {
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+      if (index >= 0 && index < alphabet.length) {
+        return alphabet[index];
+      }
+      return `#${index + 1}`;
+    }
+
+    function firstDefined(...values) {
+      for (const value of values) {
+        if (value !== undefined && value !== null) {
+          return value;
+        }
+      }
+      return undefined;
+    }
+
+    let currentFilter = 'all';
+    let tasks = [...sampleTasks];
+    let isTaskInProgress = false; // Global flag to track if a task is currently running
+    window.isRestricted = false; // Flag to track if tasks are restricted today
+
+    // Function to check if tasks are restricted today (called by startTask)
+    function checkDayRestrictions() {
+      // Check for specific holidays first
+      if (typeof window.HOLIDAYS !== 'undefined' && Array.isArray(window.HOLIDAYS)) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
+        if (window.HOLIDAYS.includes(todayStr)) {
+          return true;
+        }
+      }
+
+      // Return the general restricted flag status
+      return window.isRestricted;
+    }
+
+    let currentTaskId = null; // Track the currently running task ID
+    let completedTaskIds = []; // Track completed task IDs (right or wrong)
+    let taskOrder = []; // Randomized order of tasks
+
+    // Holiday configuration
+    window.HOLIDAYS = ['2025-12-25']; // Christmas Day
+
+    // Check for midnight refresh
+    function checkMidnightRefresh() {
+      const now = new Date();
+      const today = now.toDateString();
+      const savedDate = localStorage.getItem('lastRefreshDate');
+
+      // Check if it's a new day (past midnight)
+      if (savedDate !== today) {
+        console.log('🔄 Midnight refresh detected - Resetting daily tasks');
+        console.log('🔄 Previous date:', savedDate, 'New date:', today);
+
+        // Reset completed task IDs ONLY if it's actually a new day
+        completedTaskIds = [];
+        localStorage.removeItem('completedTaskIds');
+        localStorage.removeItem('completedTasks'); // Also clear old completed tasks storage
+        console.log('🔄 Cleared completedTaskIds for new day');
+
+        // Reset task order for new day
+        if (tasks.length > 0) {
+          taskOrder = shuffleArray([...Array(tasks.length).keys()]);
+          localStorage.setItem('taskOrder', JSON.stringify(taskOrder));
+        }
+
+        // Update last refresh date
+        localStorage.setItem('lastRefreshDate', today);
+        localStorage.setItem('taskOrderDate', today);
+
+        // Reset today's earnings display to 0.00
+        document.getElementById('today-earnings').innerHTML = formatCurrency(0);
+
+        // Update localStorage to reset today's earnings
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        userInfo.today_earning = 0;
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+
+        // Call backend to reset daily task counts first
+        resetDailyTaskCounts().then(() => {
+          // Reload user data to refresh task counts
+          return loadUserData();
+        }).then(() => {
+          // Reload task limits table
+          return loadUserInfo();
+        }).then(() => {
+          // Reload tasks from API to get fresh task list
+          return loadTasksFromAPI();
+        }).then(() => {
+          // After loading tasks, reload completed tasks from backend (should be empty for new day)
+          return loadCompletedTasksFromBackend();
+        }).then(() => {
+          // Re-initialize task order after loading
+          initializeTaskOrder();
+          // Render tasks with fresh data
+          renderTasks();
+          updateSummary();
+
+          // Show notification
+          showModal('success', '🔄 Daily tasks have been refreshed! All tasks are now available again.');
+        }).catch(error => {
+          console.error('❌ Error during midnight refresh:', error);
+        });
+
+        return true;
+      } else {
+        console.log('📅 Same day - No midnight refresh needed');
+        console.log('📅 Current date:', today, 'Saved date:', savedDate);
+      }
+
+      return false;
+    }
+
+    // Reset daily task counts on backend
+    async function resetDailyTaskCounts() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const apiBaseUrl = window.API_BASE_URL || '';
+        // Fix: Use correct endpoint without duplicating /api if apiBaseUrl already has it
+        const url = apiBaseUrl.endsWith('/api') ? `${apiBaseUrl}/tasks/reset-daily` : `${apiBaseUrl}/api/tasks/reset-daily`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          console.log('✅ Daily task counts reset on server');
+        } else {
+          console.log('⚠️ Failed to reset daily task counts on server');
+        }
+      } catch (error) {
+        console.error('❌ Error resetting daily task counts:', error);
+      }
+    }
+
+    // Load completed task IDs from backend (so records persist on refresh)
+    async function loadCompletedTasksFromBackend() {
+      const today = new Date().toISOString().split('T')[0];
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log('⚠️ No token - cannot load completed tasks from backend');
+          // Fallback to localStorage if available
+          const savedCompleted = localStorage.getItem('completedTaskIds');
+          if (savedCompleted) {
+            try {
+              const parsed = JSON.parse(savedCompleted);
+              // Handle new object format {date, ids} and legacy array format
+              if (!Array.isArray(parsed) && parsed.date && Array.isArray(parsed.ids)) {
+                if (parsed.date === today) {
+                  completedTaskIds = parsed.ids;
+                  console.log(`📋 Loaded ${completedTaskIds.length} completed tasks from localStorage (today's cache)`);
+                } else {
+                  console.log('🔄 Stored tasks are from previous day, resetting');
+                  completedTaskIds = [];
+                }
+              } else if (Array.isArray(parsed)) {
+                // Legacy format: relying on checkMidnightRefresh to have cleared it if needed
+                completedTaskIds = parsed;
+                console.log(`📋 Loaded ${completedTaskIds.length} completed tasks from localStorage (legacy format)`);
+              } else {
+                completedTaskIds = [];
+              }
+            } catch (e) {
+              console.error('Error parsing saved completed tasks:', e);
+              completedTaskIds = [];
+            }
+          }
+          return;
+        }
+
+        // Get today's date
+        console.log(`🔍 Loading completed tasks for today: ${today}`);
+
+        // Fetch today's completed tasks from backend
+        const apiBaseUrl = window.API_BASE_URL || '';
+        // Fix: Use correct endpoint without duplicating /api
+        const url = apiBaseUrl.endsWith('/api') ? `${apiBaseUrl}/tasks/history?limit=100&offset=0` : `${apiBaseUrl}/api/tasks/history?limit=100&offset=0`;
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const records = data.records || data.data || [];
+
+          console.log(`📊 Fetched ${records.length} total task records from backend`);
+
+          // Filter to today's tasks only
+          const todayRecords = records.filter(record => {
+            if (!record.completed_at) return false;
+            try {
+              const recordDate = new Date(record.completed_at).toISOString().split('T')[0];
+              return recordDate === today;
+            } catch (e) {
+              console.warn('Error parsing date:', record.completed_at, e);
+              return false;
+            }
+          });
+
+          console.log(`📅 Found ${todayRecords.length} task records for today`);
+
+          // Extract task IDs that were completed today
+          const todayTaskIds = todayRecords.map(record => record.task_id).filter(id => id !== null && id !== undefined);
+
+          // REPLACE completedTaskIds with backend data (backend is the source of truth)
+          // Remove duplicates using Set
+          completedTaskIds = [...new Set(todayTaskIds)];
+
+          // Save to localStorage with date stamp
+          localStorage.setItem('completedTaskIds', JSON.stringify({
+            date: today,
+            ids: completedTaskIds
+          }));
+
+          console.log(`✅ Loaded ${completedTaskIds.length} unique completed tasks from backend for today:`, completedTaskIds);
+          return completedTaskIds;
+        } else {
+          console.log('⚠️ Could not load completed tasks from backend:', response.status);
+          // Fallback to localStorage if backend fails
+          const savedCompleted = localStorage.getItem('completedTaskIds');
+          if (savedCompleted) {
+            try {
+              const parsed = JSON.parse(savedCompleted);
+              if (!Array.isArray(parsed) && parsed.date === today && Array.isArray(parsed.ids)) {
+                completedTaskIds = parsed.ids;
+                console.log(`📋 Fallback: Loaded ${completedTaskIds.length} completed tasks from localStorage (today's cache)`);
+              } else if (Array.isArray(parsed)) {
+                completedTaskIds = parsed;
+                console.log(`📋 Fallback: Loaded ${completedTaskIds.length} completed tasks from localStorage (legacy)`);
+              } else {
+                completedTaskIds = [];
+              }
+            } catch (e) {
+              console.error('Error parsing saved completed tasks:', e);
+              completedTaskIds = [];
+            }
+          } else {
+            completedTaskIds = [];
+          }
+          return completedTaskIds;
+        }
+      } catch (error) {
+        console.error('❌ Error loading completed tasks from backend:', error);
+        // Fallback to localStorage if there's an error
+        const savedCompleted = localStorage.getItem('completedTaskIds');
+        if (savedCompleted) {
+          try {
+            const parsed = JSON.parse(savedCompleted);
+            if (!Array.isArray(parsed) && parsed.date === today && Array.isArray(parsed.ids)) {
+              completedTaskIds = parsed.ids;
+              console.log(`📋 Fallback: Loaded ${completedTaskIds.length} completed tasks from localStorage (network error)`);
+            } else if (Array.isArray(parsed)) {
+              completedTaskIds = parsed;
+              console.log(`📋 Fallback: Loaded ${completedTaskIds.length} completed tasks from localStorage (legacy)`);
+            } else {
+              completedTaskIds = [];
+            }
+          } catch (e) {
+            console.error('Error parsing saved completed tasks:', e);
+            completedTaskIds = [];
+          }
+        } else {
+          completedTaskIds = [];
+        }
+        return completedTaskIds;
+      }
+    }
+
+    // Initialize task randomization
+    function initializeTaskOrder() {
+      const today = new Date().toDateString();
+      const savedDate = localStorage.getItem('taskOrderDate');
+      const savedOrder = localStorage.getItem('taskOrder');
+
+      // Check for midnight refresh first (only clears if it's actually a new day)
+      const isNewDay = checkMidnightRefresh();
+
+      // Check if we need to reshuffle (new day or no saved order)
+      if (savedDate !== today || !savedOrder) {
+        // New day - reset everything at midnight
+        console.log('🔄 New day detected - Reshuffling tasks');
+        if (tasks.length > 0) {
+          taskOrder = shuffleArray([...Array(tasks.length).keys()]);
+          localStorage.setItem('taskOrder', JSON.stringify(taskOrder));
+        }
+        localStorage.setItem('taskOrderDate', today);
+        localStorage.setItem('lastRefreshDate', today);
+        // Don't clear completedTaskIds here - checkMidnightRefresh() already handled it if it's a new day
+        // For same day refresh, completedTaskIds should remain intact until loadCompletedTasksFromBackend() loads from backend
+      } else {
+        // Same day - load saved order
+        taskOrder = savedOrder ? JSON.parse(savedOrder) : [];
+        // IMPORTANT: Don't clear or modify completedTaskIds here on same-day refresh
+        // It will be loaded from backend in loadCompletedTasksFromBackend() which is the source of truth
+        console.log('📋 Same day - Task order loaded from localStorage');
+        console.log('📋 Current completedTaskIds before backend load:', completedTaskIds.length, 'tasks');
+      }
+    }
+
+    // Set up interval to check for midnight refresh
+    function setupMidnightRefreshChecker() {
+      // Check immediately on load
+      checkMidnightRefresh();
+
+      // Calculate milliseconds until next midnight
+      function getMillisecondsUntilMidnightEAT() {
+        // Get the current UTC time, then compute EAT (UTC+3)
+        const nowUTC = new Date(Date.now());
+        // Get the UTC+3 equivalent of current time
+        const eatOffsetMs = 3 * 60 * 60 * 1000;
+        const nowEAT = new Date(nowUTC.getTime() + eatOffsetMs);
+
+        // Calculate next midnight EAT in terms of UTC, then subtract current UTC
+        const nextMidnightEAT = new Date(nowEAT);
+        nextMidnightEAT.setUTCHours(21, 0, 0, 0); // 24:00 EAT = 21:00 UTC that same day
+        // If already past midnight, schedule for the NEXT day
+        if (nowEAT.getUTCHours() >= 24) {
+          nextMidnightEAT.setUTCDate(nextMidnightEAT.getUTCDate() + 1);
+        }
+        return nextMidnightEAT.getTime() - nowEAT.getTime();
+      }
+
+      // Set timeout to check at exactly midnight
+      const msUntilEATMidnight = getMillisecondsUntilMidnightEAT();
+      setTimeout(() => {
+        checkMidnightRefresh();
+        // After first midnight check, set up interval to check every hour
+        setInterval(() => {
+          checkMidnightRefresh();
+        }, 3600000); // Check every hour
+      }, msUntilEATMidnight);
+
+      // Also check every minute as backup
+      setInterval(() => {
+        checkMidnightRefresh();
+      }, 60000); // Check every minute
+
+      // Also check when page becomes visible (user returns to tab)
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          checkMidnightRefresh();
+        }
+      });
+
+      // Check when window gains focus
+      window.addEventListener('focus', () => {
+        checkMidnightRefresh();
+      });
+    }
+
+    // Fisher-Yates shuffle algorithm
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    // Get tasks in randomized order
+    function getRandomizedTasks() {
+      // If taskOrder is empty or doesn't match tasks length, create a new one
+      if (!taskOrder || taskOrder.length !== tasks.length) {
+        console.warn('⚠️ Task order mismatch, regenerating...');
+        taskOrder = shuffleArray([...Array(tasks.length).keys()]);
+        localStorage.setItem('taskOrder', JSON.stringify(taskOrder));
+      }
+
+      // Filter out any undefined tasks (in case of index mismatch)
+      return taskOrder.map(index => tasks[index]).filter(task => task !== undefined);
+    }
+
+    // Check if task is completed today
+    function isTaskCompleted(taskId) {
+      return completedTaskIds.includes(taskId);
+    }
+
+    // Mark task as completed (stores locally and on server)
+    function markTaskCompleted(taskId, isCorrect) {
+      if (!completedTaskIds.includes(taskId)) {
+        completedTaskIds.push(taskId);
+
+        // Save with date stamp for day-specific tracking
+        const today = new Date().toISOString().split('T')[0];
+        localStorage.setItem('completedTaskIds', JSON.stringify({
+          date: today,
+          ids: completedTaskIds
+        }));
+
+        console.log('✅ Task', taskId, 'marked as completed. Correct:', isCorrect);
+
+        // Update UI immediately
+        updateSummary();
+        if (typeof updateCompletedStatCard === 'function') {
+          updateCompletedStatCard();
+        }
+      }
+    }
+
+    function renderTasks() {
+      const taskList = document.getElementById('task-list');
+      if (!taskList) {
+        console.error('❌ Task list element not found - DOM may not be ready yet');
+        // Retry after a short delay if DOM not ready
+        setTimeout(() => {
+          const retryList = document.getElementById('task-list');
+          if (retryList && tasks && tasks.length > 0) {
+            console.log('🔄 Retrying renderTasks after DOM ready');
+            renderTasks();
+          }
+        }, 100);
+        return;
+      }
+
+      // If restricted, don't overwrite the banner
+      if (window.isRestricted) {
+        console.log('🚫 Restricted state active - skipping renderTasks');
+        return;
+      }
+
+      // Clear any existing countdown interval
+      if (window.restrictedCountdownInterval) {
+        clearInterval(window.restrictedCountdownInterval);
+        window.restrictedCountdownInterval = null;
+      }
+
+      // Ensure tasks array exists and is not empty
+      if (!tasks || tasks.length === 0) {
+        console.warn('⚠️ No tasks to render, using sample tasks');
+        tasks = [...sampleTasks];
+
+        // Update rewards based on user level
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        const userLevel = userInfo.level || 0;
+        const getLevelReward = (level) => {
+          const levelRewards = {
+            0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+            5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+          };
+          return levelRewards[level] || 7.00;
+        };
+        const levelReward = getLevelReward(userLevel);
+
+        // Update all sample tasks with level-based reward
+        tasks = tasks.map(task => ({
+          ...task,
+          earning: levelReward,
+          reward: levelReward
+        }));
+      }
+
+      console.log('🎨 Rendering tasks:', tasks.length, 'tasks available');
+      taskList.innerHTML = '';
+
+      // Get tasks in randomized order
+      const randomizedTasks = getRandomizedTasks();
+      console.log('📋 Randomized tasks count:', randomizedTasks.length);
+      console.log('📋 Current filter:', currentFilter);
+
+      const filteredTasks = randomizedTasks.filter(task => {
+        const isCompleted = isTaskCompleted(task.id);
+
+        // Hide completed tasks from "all" view until midnight reset
+        if (currentFilter === 'all') {
+          // Only show tasks that are NOT completed
+          return !isCompleted && task.status !== 'completed' && !task.completedToday;
+        }
+        if (currentFilter === 'completed') {
+          return isCompleted || task.status === 'completed' || task.completedToday === true;
+        }
+        if (currentFilter === 'ongoing') {
+          return !isCompleted && task.status === 'ongoing' && !task.completedToday;
+        }
+        return task.status === currentFilter;
+      });
+
+      console.log('📋 Filtered tasks count:', filteredTasks.length);
+      console.log('📋 Total tasks:', randomizedTasks.length);
+      console.log('📋 Completed tasks:', randomizedTasks.filter(t => isTaskCompleted(t.id) || t.status === 'completed' || t.completedToday).length);
+
+      if (filteredTasks.length === 0) {
+        console.warn('⚠️ No tasks to display after filtering with filter:', currentFilter);
+        // If no tasks match the current filter, try showing all tasks
+        if (currentFilter !== 'all' && randomizedTasks.length > 0) {
+          console.log('🔄 Switching to "all" filter to show tasks');
+          currentFilter = 'all';
+          // Update filter button
+          document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+            const onclickAttr = btn.getAttribute('onclick');
+            if (btn.textContent.includes('All') || (onclickAttr && onclickAttr.includes("'all'"))) {
+              btn.classList.add('active');
+            }
+          });
+          // Recursively call renderTasks with 'all' filter
+          return renderTasks();
+        }
+
+        // If still no tasks, show a helpful message
+        if (randomizedTasks.length === 0) {
+          taskList.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No tasks loaded. Please refresh the page or check your connection.</div>';
+        } else {
+          taskList.innerHTML = `<div style="padding: 20px; text-align: center; color: #666;">
+            No ${currentFilter} tasks available. 
+            <button onclick="filterTasks('all', event)" style="margin-top: 10px; padding: 8px 16px; background: var(--brand-green); color: white; border: none; border-radius: 4px; cursor: pointer;">
+              task completed come back tommorow !
+            </button>
+          </div>`;
+        }
+        return;
+      }
+
+      // Get user info from localStorage or API
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const userLevel = userInfo.level || 0;
+
+      // Create user-specific labels (removed invitation code)
+      const getUserLabel = () => {
+        if (userLevel === 0) {
+          return 'Temporary Worker';
+        } else {
+          return `Level ${userLevel} Worker`;
+        }
+      };
+
+      // Get level-based rewards
+      const getLevelReward = (userLevel) => {
+        const levelRewards = {
+          0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+          5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+        };
+        return levelRewards[userLevel] || 7.00;
+      };
+
+      filteredTasks.forEach(task => {
+        const taskCard = document.createElement('div');
+        taskCard.className = 'task-card';
+        const levelReward = getLevelReward(userLevel);
+
+        // Ensure task has valid choices, fallback to defaults if needed
+        let taskChoices = normalizeChoices(task.choices);
+        if (!taskChoices || taskChoices.length === 0) {
+          console.warn(`⚠️ Task ${task.id} has no valid choices, using defaults`);
+          taskChoices = ['Option A', 'Option B', 'Option C', 'Option D'];
+        }
+
+        const normalizedCorrectAnswer = normalizeCorrectAnswer(task.correctAnswer, taskChoices.length);
+        task.choices = taskChoices;
+        task.correctAnswer = normalizedCorrectAnswer;
+
+        // Ensure task has a valid question
+        const questionText = (task.question && task.question.trim().length > 0)
+          ? task.question
+          : 'Complete this quiz to earn rewards.';
+
+        // Check if task is completed (either from API or locally)
+        const isCompletedLocally = isTaskCompleted(task.id);
+        const isCompleted = isCompletedLocally || task.status === 'completed' || task.completedToday === true;
+
+        taskCard.innerHTML = `
+          <div class="task-info">
+            <div class="task-earning">Earn ${formatCurrency(levelReward)}</div>
+            <div class="task-user-label">${getUserLabel()}</div>
+            <div class="task-question-preview">
+              <div class="question-text">${questionText}</div>
+              <div class="choices-preview">
+                ${taskChoices.map((choice, index) => `
+                  <div class="choice-preview">${getChoiceLetter(index)}. ${choice}</div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+          <button class="install-btn ${isCompleted ? 'completed' : ''}" onclick="startTask(${task.id})" ${isCompleted ? 'disabled' : ''}>
+            ${isCompleted ? 'Task Done' : 'Start Task'}
+          </button>
+          <div class="download-progress">
+            <div class="progress-bar"></div>
+          </div>
+        `;
+
+        // Add completed styling
+        if (isCompleted) {
+          taskCard.classList.add('completed');
+          const installBtn = taskCard.querySelector('.install-btn');
+          installBtn.style.background = '#4caf50';
+          installBtn.style.color = 'white';
+        }
+
+        // Add in-progress styling
+        if (isTaskInProgress && currentTaskId === task.id) {
+          taskCard.classList.add('in-progress');
+          const installBtn = taskCard.querySelector('.install-btn');
+          installBtn.style.background = '#ff9800';
+          installBtn.style.color = 'white';
+          installBtn.textContent = 'In Progress...';
+        }
+
+        taskList.appendChild(taskCard);
+      });
+    }
+
+    function filterTasks(filter, event) {
+      currentFilter = filter;
+
+      // Update filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Find and activate the clicked button
+      if (event && event.target) {
+        event.target.classList.add('active');
+      } else {
+        // Fallback: find button by filter value
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          const onclickAttr = btn.getAttribute('onclick');
+          if (onclickAttr && onclickAttr.includes(`'${filter}'`)) {
+            btn.classList.add('active');
+          }
+        });
+      }
+
+      renderTasks();
+    }
+
+    // Quiz-related variables
+    let currentQuizTaskId = null;
+    let selectedChoiceIndex = null;
+
+    // Load question for a specific task from API
+    async function loadTaskQuestion(taskId) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log('⚠️ No token found, cannot load question from API');
+          return null;
+        }
+
+        console.log('🔄 Loading question for task ID:', taskId);
+        const apiBaseUrl = window.API_BASE_URL || '';
+        const url = apiBaseUrl.endsWith('/api') ? `${apiBaseUrl}/app-tasks/${taskId}/question` : `${apiBaseUrl}/api/app-tasks/${taskId}/question`;
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const questionData = await response.json();
+          console.log('✅ Question loaded from API:', questionData);
+
+          // Validate the response data
+          if (!questionData.question || (typeof questionData.question === 'string' && questionData.question.trim().length === 0)) {
+            console.warn('⚠️ API returned empty or invalid question');
+            return null;
+          }
+
+          // Validate choices
+          const choices = normalizeChoices(firstDefined(questionData.choices, questionData.quiz_choices));
+          if (!choices || choices.length === 0) {
+            console.warn('⚠️ API returned empty or invalid choices');
+            return null;
+          }
+
+          return {
+            question: questionData.question,
+            choices: choices,
+            correctAnswer: normalizeCorrectAnswer(
+              firstDefined(questionData.correct_answer, questionData.quiz_correct_answer, questionData.correctAnswer),
+              choices.length
+            ),
+            difficulty: questionData.difficulty,
+            category: questionData.category
+          };
+        } else {
+          const errorText = await response.text().catch(() => 'Unknown error');
+          console.warn(`⚠️ Failed to load question (${response.status}):`, errorText);
+          return null;
+        }
+      } catch (error) {
+        console.error('❌ Error loading question:', error);
+        return null;
+      }
+    }
+
+    // Function to start a task by showing the quiz modal
+    async function startTask(taskId) {
+      // Check if task is already completed today
+      if (isTaskCompleted(taskId)) {
+        showModal('error', 'You have already attempted this task today. Please try another task or come back tomorrow.');
+        return;
+      }
+
+      // Check for day restrictions first
+      if (checkDayRestrictions()) {
+        showModal('error', 'Task completion is not allowed today. Please try again tomorrow.');
+        return;
+      }
+
+      // Check if another task is already in progress
+      if (isTaskInProgress) {
+        showModal('error', 'Another task is currently in progress. Please wait for it to complete before starting a new one.');
+        return;
+      }
+
+      const task = tasks.find(t => t.id === taskId);
+
+      // Check if task exists
+      if (!task) {
+        showModal('error', 'Task not found. Please refresh the page and try again.');
+        return;
+      }
+
+      // Check if user is logged in
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showModal('error', 'Please log in to complete tasks');
+        return;
+      }
+
+      // Ensure task has a valid question and choices before proceeding
+      if (!task.question || !task.choices || task.choices.length === 0) {
+        console.log('🔄 Task missing question/choices, attempting to load from API...');
+        const freshQuestion = await loadTaskQuestion(taskId);
+
+        if (freshQuestion && freshQuestion.question && freshQuestion.choices && freshQuestion.choices.length > 0) {
+          // Update task with fresh question data
+          task.question = freshQuestion.question;
+          task.choices = normalizeChoices(freshQuestion.choices);
+          task.correctAnswer = normalizeCorrectAnswer(
+            freshQuestion.correctAnswer,
+            task.choices.length
+          );
+          task.difficulty = freshQuestion.difficulty;
+          task.category = freshQuestion.category;
+
+          console.log('✅ Task updated with fresh question from API:', {
+            question: task.question,
+            choices: task.choices,
+            correctAnswer: task.correctAnswer
+          });
+        } else {
+          // If API fails, try to find a matching sample task
+          const sampleTask = sampleTasks.find(st => st.id === taskId);
+          if (sampleTask && sampleTask.question && sampleTask.choices) {
+            console.log('📝 Using question from sample tasks as fallback');
+            task.question = sampleTask.question;
+            task.choices = normalizeChoices(sampleTask.choices);
+            task.correctAnswer = normalizeCorrectAnswer(sampleTask.correctAnswer, task.choices.length);
+          } else {
+            // Last resort: use a default question
+            console.warn('⚠️ No question available, using default question');
+            task.question = task.question || 'Answer the question below to continue.';
+            task.choices = task.choices && task.choices.length > 0 ? task.choices : ['Option A', 'Option B', 'Option C', 'Option D'];
+            task.correctAnswer = task.correctAnswer !== undefined ? task.correctAnswer : 0;
+          }
+        }
+      } else {
+        // Task already has question, but try to refresh it from API
+        console.log('🔄 Task has question, attempting to load fresh question from API...');
+        const freshQuestion = await loadTaskQuestion(taskId);
+
+        if (freshQuestion && freshQuestion.question && freshQuestion.choices && freshQuestion.choices.length > 0) {
+          // Update task with fresh question data
+          task.question = freshQuestion.question;
+          task.choices = normalizeChoices(freshQuestion.choices);
+          task.correctAnswer = normalizeCorrectAnswer(
+            freshQuestion.correctAnswer,
+            task.choices.length
+          );
+          task.difficulty = freshQuestion.difficulty;
+          task.category = freshQuestion.category;
+
+          console.log('✅ Task updated with fresh question:', {
+            question: task.question,
+            choices: task.choices,
+            correctAnswer: task.correctAnswer
+          });
+        } else {
+          console.log('📝 Using existing question from task data');
+        }
+      }
+
+      // Final validation - ensure we have valid question and choices
+      if (!task.question || !task.choices || task.choices.length === 0) {
+        console.error('❌ Task still missing question/choices after all attempts');
+        showModal('error', 'Unable to load question for this task. Please refresh the page and try again.');
+        return;
+      }
+
+      // Show the quiz modal
+      showQuizModal(task);
+    }
+
+    // Function to show the quiz modal with task question
+    function showQuizModal(task) {
+      if (!task) {
+        console.error('❌ showQuizModal called with null/undefined task');
+        showModal('error', 'Task data is missing. Please refresh the page and try again.');
+        return;
+      }
+
+      console.log('🎯 Setting currentQuizTaskId to:', task.id);
+      currentQuizTaskId = task.id;
+      selectedChoiceIndex = null;
+
+      const modal = document.getElementById('quiz-modal');
+      if (!modal) {
+        console.error('❌ Quiz modal element not found');
+        return;
+      }
+
+      const appName = document.getElementById('quiz-app-name');
+      const reward = document.getElementById('quiz-reward');
+      const question = document.getElementById('quiz-question');
+      const choicesContainer = document.getElementById('quiz-choices');
+      const feedback = document.getElementById('quiz-feedback');
+      const submitBtn = document.getElementById('quiz-submit-btn');
+
+      if (!reward || !question || !choicesContainer || !feedback || !submitBtn) {
+        console.error('❌ Quiz modal elements not found');
+        return;
+      }
+
+      // Validate and normalize choices
+      const quizChoices = normalizeChoices(task.choices);
+      if (!quizChoices || quizChoices.length === 0) {
+        console.error('❌ Task has no valid choices');
+        showModal('error', 'Task data is incomplete. Please refresh the page and try again.');
+        return;
+      }
+
+      const quizCorrectAnswer = normalizeCorrectAnswer(task.correctAnswer, quizChoices.length);
+      task.choices = quizChoices;
+      task.correctAnswer = quizCorrectAnswer;
+
+      // Validate question
+      const modalQuestion = task.question && task.question.trim().length > 0
+        ? task.question
+        : 'Answer the question below to continue.';
+
+      console.log('🎯 Displaying quiz modal with:', {
+        question: modalQuestion,
+        choices: quizChoices,
+        correctAnswer: quizCorrectAnswer
+      });
+
+      // Get user info to display correct reward
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const userLevel = userInfo.level || 0;
+
+      const getLevelReward = (userLevel) => {
+        const levelRewards = {
+          0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+          5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+        };
+        return levelRewards[userLevel] || 7.00;
+      };
+
+      const levelReward = getLevelReward(userLevel);
+
+      // Set modal content (app name hidden)
+      // appName.textContent = task.name; // Removed - app name hidden
+      reward.textContent = `Earn ${formatCurrency(levelReward)}`;
+      question.textContent = modalQuestion;
+
+      // Reset feedback
+      feedback.classList.remove('show', 'correct', 'wrong');
+      feedback.textContent = '';
+
+      // Reset submit button
+      submitBtn.disabled = true;
+
+      // Generate choices
+      choicesContainer.innerHTML = '';
+
+      quizChoices.forEach((choice, index) => {
+        const choiceDiv = document.createElement('div');
+        choiceDiv.className = 'quiz-choice';
+        choiceDiv.onclick = () => selectQuizChoice(index);
+        choiceDiv.innerHTML = `
+          <div class="choice-letter">${getChoiceLetter(index)}</div>
+          <div class="choice-text">${choice}</div>
+        `;
+        choicesContainer.appendChild(choiceDiv);
+      });
+
+      // Show modal
+      modal.style.display = 'flex';
+    }
+
+    // Function to select a quiz choice
+    function selectQuizChoice(index) {
+      selectedChoiceIndex = index;
+
+      // Remove selected class from all choices
+      document.querySelectorAll('.quiz-choice').forEach(choice => {
+        choice.classList.remove('selected');
+      });
+
+      // Add selected class to clicked choice
+      document.querySelectorAll('.quiz-choice')[index].classList.add('selected');
+
+      // Enable submit button
+      document.getElementById('quiz-submit-btn').disabled = false;
+    }
+
+    // Function to submit quiz answer
+    function submitQuizAnswer() {
+      if (selectedChoiceIndex === null) {
+        return;
+      }
+
+      const task = tasks.find(t => t.id === currentQuizTaskId);
+      if (!task) {
+        console.error('❌ Task not found for currentQuizTaskId:', currentQuizTaskId);
+        showModal('error', 'Task data is missing. Please refresh the page and try again.');
+        closeQuizModal();
+        return;
+      }
+
+      const feedback = document.getElementById('quiz-feedback');
+      const submitBtn = document.getElementById('quiz-submit-btn');
+      const choices = document.querySelectorAll('.quiz-choice');
+
+      if (!feedback || !submitBtn) {
+        console.error('❌ Quiz modal elements not found');
+        return;
+      }
+
+      // Disable all choices and submit button
+      choices.forEach(choice => choice.classList.add('disabled'));
+      submitBtn.disabled = true;
+
+      // Show thinking animation
+      feedback.innerHTML = `
+        <span>🤔 Checking your answer</span>
+        <div class="thinking-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      `;
+      feedback.classList.add('show', 'thinking');
+
+      // Wait 1.5 seconds before showing result (simulate thinking)
+      setTimeout(() => {
+        feedback.classList.remove('thinking');
+
+        // Check if answer is correct
+        const isCorrect = selectedChoiceIndex === task.correctAnswer;
+
+        if (isCorrect) {
+          // Show correct feedback immediately
+          choices[selectedChoiceIndex].classList.add('correct');
+          feedback.textContent = '✅ Correct! Well done!';
+          feedback.classList.add('show', 'correct');
+
+          // Calculate reward based on user level
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          const userLevel = userInfo.level || 0;
+          const getLevelReward = (level) => {
+            const levelRewards = {
+              0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+              5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+            };
+            return levelRewards[level] || 7.00;
+          };
+          const reward = getLevelReward(userLevel);
+
+          // Record the correct answer attempt with reward
+          recordTaskAttempt(task.id, selectedChoiceIndex, true, reward).then((result) => {
+            if (result && result.success) {
+              console.log('✅ Correct answer recorded successfully with reward:', reward);
+
+              // Mark as completed locally only AFTER backend success
+              markTaskCompleted(task.id, true);
+
+              // Show earnings notification
+              if (result.data && result.data.reward_amount) {
+                showEarningsNotification(result.data.reward_amount, task.name);
+              } else {
+                showEarningsNotification(reward, task.name);
+              }
+
+              // Update user data
+              refreshUserDataAfterCompletion();
+
+              // Close modal and update UI
+              setTimeout(() => {
+                closeQuizModal();
+                renderTasks();
+                updateSummary();
+              }, 1500);
+            } else {
+              // Backend reported failure
+              console.error('❌ Backend failed to record correct answer:', result);
+              feedback.textContent = `❌ ${result?.message || 'Failed to record your reward. Please try again.'}`;
+              feedback.classList.remove('correct');
+              feedback.classList.add('show', 'wrong');
+
+              // Re-enable submit button so they can try again if it was a network error
+              // OR close modal if it was a logic error like "already completed"
+              if (result?.message?.includes('already completed')) {
+                markTaskCompleted(task.id, true); // It's already done
+                setTimeout(() => {
+                  closeQuizModal();
+                  renderTasks();
+                }, 2000);
+              } else {
+                submitBtn.disabled = false;
+                choices.forEach(choice => choice.classList.remove('disabled'));
+              }
+            }
+          }).catch(err => {
+            console.error('❌ Error recording correct answer:', err);
+            feedback.textContent = '❌ Connection error. Please check your internet and try again.';
+            feedback.classList.remove('correct');
+            feedback.classList.add('show', 'wrong');
+            submitBtn.disabled = false;
+            choices.forEach(choice => choice.classList.remove('disabled'));
+          });
+        } else {
+          // Show wrong feedback
+          choices[selectedChoiceIndex].classList.add('wrong');
+          choices[task.correctAnswer].classList.add('correct');
+          feedback.textContent = `❌ Wrong Answer! The correct answer was (${getChoiceLetter(task.correctAnswer)}) ${task.choices[task.correctAnswer]}. No reward earned.`;
+          feedback.classList.add('show', 'wrong');
+
+          // Record the wrong attempt (always record if they answered)
+          recordTaskAttempt(task.id, selectedChoiceIndex, false, 0).then((result) => {
+            console.log('✅ Wrong answer attempt processed by backend');
+            markTaskCompleted(task.id, false);
+            refreshUserDataAfterCompletion();
+
+            setTimeout(() => {
+              closeQuizModal();
+              showModal('error', 'You answered incorrectly. No reward was earned for this attempt. Try another task!');
+              renderTasks();
+            }, 3000);
+          }).catch(err => {
+            console.error('❌ Error recording wrong answer:', err);
+            // Even if recording fails for a wrong answer, we close the modal and mark as completed
+            markTaskCompleted(task.id, false);
+            setTimeout(() => {
+              closeQuizModal();
+              renderTasks();
+            }, 3000);
+          });
+        }
+      }, 1500); // End of thinking timeout
+    }
+
+    // Record task attempt on server (for wrong answers)
+    async function recordTaskAttempt(taskId, selectedChoice, isCorrect, reward) {
+      const token = localStorage.getItem('token');
+      const task = tasks.find(t => t.id === taskId);
+      try {
+        // Record attempt on backend
+        const apiBaseUrl = window.API_BASE_URL || '';
+        const recordUrl = apiBaseUrl.endsWith('/api') ? `${apiBaseUrl}/tasks/record-attempt` : `${apiBaseUrl}/api/tasks/record-attempt`;
+
+        const response = await fetch(recordUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            task_id: taskId,
+            task_name: task.name,
+            question: task.question,
+            user_answer: `(${getChoiceLetter(selectedChoice)}) ${task.choices[selectedChoice]}`,
+            correct_answer: `(${getChoiceLetter(task.correctAnswer)}) ${task.choices[task.correctAnswer]}`,
+            is_correct: isCorrect,
+            reward_amount: reward
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('✅ Task attempt recorded:', result);
+
+          // Store task record in localStorage for quick access
+          storeTaskRecord({
+            taskId: taskId,
+            taskName: task.name,
+            question: task.question,
+            userAnswer: `(${getChoiceLetter(selectedChoice)}) ${task.choices[selectedChoice]}`,
+            correctAnswer: `(${getChoiceLetter(task.correctAnswer)}) ${task.choices[task.correctAnswer]}`,
+            isCorrect: isCorrect,
+            reward: reward,
+            completedAt: new Date().toISOString()
+          });
+
+          return result;
+        } else {
+          const errorResult = await response.json().catch(() => ({ success: false, message: `Server error: ${response.status}` }));
+          console.error('❌ Failed to record task attempt:', response.status, errorResult);
+          return errorResult;
+        }
+      } catch (error) {
+        console.error('❌ Error recording task attempt:', error);
+        return null;
+      }
+    }
+
+    // Store task record in localStorage
+    function storeTaskRecord(record) {
+      try {
+        const records = JSON.parse(localStorage.getItem('taskRecords') || '[]');
+        records.push(record);
+        // Keep only last 100 records to avoid localStorage bloat
+        if (records.length > 100) {
+          records.shift();
+        }
+        localStorage.setItem('taskRecords', JSON.stringify(records));
+        console.log('📝 Task record stored locally');
+      } catch (error) {
+        console.error('❌ Error storing task record:', error);
+      }
+    }
+
+    // Get task records from localStorage
+    function getTaskRecords() {
+      try {
+        return JSON.parse(localStorage.getItem('taskRecords') || '[]');
+      } catch (error) {
+        console.error('❌ Error getting task records:', error);
+        return [];
+      }
+    }
+
+    // Function to close quiz modal
+    function closeQuizModal() {
+      const modal = document.getElementById('quiz-modal');
+      modal.style.display = 'none';
+
+      // Reset quiz state
+      currentQuizTaskId = null;
+      selectedChoiceIndex = null;
+
+      // Reset submit button
+      const submitBtn = document.getElementById('quiz-submit-btn');
+      submitBtn.textContent = 'Submit Answer';
+      submitBtn.onclick = () => submitQuizAnswer();
+    }
+
+
+    // Function to reset global task state and re-enable all buttons
+    function resetTaskState() {
+      isTaskInProgress = false;
+      currentTaskId = null;
+
+      // Re-enable all task buttons
+      document.querySelectorAll('.install-btn').forEach(btn => {
+        if (!btn.disabled) {
+          btn.style.opacity = '1';
+          btn.style.pointerEvents = 'auto';
+        }
+      });
+    }
+
+    function updateSummary() {
+      // Optional: Holiday check support
+      if (window.HOLIDAYS && Array.isArray(window.HOLIDAYS)) {
+        const today = new Date().toISOString().split('T')[0];
+        if (window.HOLIDAYS.includes(today)) {
+          console.log('🎉 Today is a holiday, showing 0 stats');
+          const ongoingElement = document.querySelector('.ongoing-count');
+          const completedElement = document.querySelector('.completed-count');
+          if (ongoingElement) ongoingElement.textContent = '0';
+          if (completedElement) completedElement.textContent = '0';
+
+          // Also disable start buttons or show holiday message
+          const taskList = document.getElementById('task-list');
+          if (taskList) {
+            // Check if we already showed the holiday banner to avoid spamming
+            if (!document.querySelector('.holiday-banner')) {
+              const banner = document.createElement('div');
+              banner.className = 'holiday-banner restriction-banner';
+              banner.style.marginTop = '20px'; // Add spacing
+              banner.style.position = 'relative'; // Ensure z-index works
+              banner.style.zIndex = '1001'; // Above other content
+              banner.innerHTML = '<div class="restriction-content"><div class="restriction-icon">🎉</div><div class="restriction-text"><div class="restriction-title">Merry Christmas!</div><div class="restriction-message">Today is a holiday! Enjoy your time off. Tasks will resume tomorrow.</div></div></div>';
+
+              // Insert at the VERY TOP of main content, before summary section
+              const mainContent = document.querySelector('.main-content');
+              if (mainContent) {
+                mainContent.insertBefore(banner, mainContent.firstChild);
+                // Scroll to top to ensure visibility
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }
+          }
+          return; // Stop update
+        }
+      }
+
+      // Calculate summary from current tasks and completedTaskIds
+      const ongoingTasks = tasks.filter(task => !isTaskCompleted(task.id));
+      const completedTasks = tasks.filter(task => isTaskCompleted(task.id));
+
+      // Update summary elements if they exist
+      const ongoingElement = document.querySelector('.ongoing-count');
+      const completedElement = document.querySelector('.completed-count');
+
+      if (ongoingElement) {
+        ongoingElement.textContent = ongoingTasks.length;
+        console.log('✅ Updated ongoing count:', ongoingTasks.length);
+      } else {
+        console.warn('⚠️ .ongoing-count element not found');
+      }
+
+      if (completedElement) {
+        completedElement.textContent = completedTasks.length;
+        console.log('✅ Updated completed count:', completedTasks.length);
+      } else {
+        console.warn('⚠️ .completed-count element not found');
+      }
+
+      console.log(`📊 Summary updated: ${ongoingTasks.length} ongoing, ${completedTasks.length} completed`);
+    }
+
+    function updateProgressCircle(completed, maxTasks) {
+      const progressCircle = document.querySelector('.progress-circle');
+      if (!progressCircle) return;
+
+      const progressSpan = progressCircle.querySelector('span');
+      if (!progressSpan) return;
+
+      const percentage = Math.min(Math.round((completed / maxTasks) * 100), 100);
+
+      // Update the text
+      progressSpan.textContent = `${completed}/${maxTasks}`;
+
+      // Update the circle progress
+      const circumference = 2 * Math.PI * 45; // radius = 45
+      const offset = circumference - (percentage / 100) * circumference;
+
+      progressCircle.querySelector('circle').style.strokeDashoffset = offset;
+
+      console.log(`📊 Progress circle updated: ${completed}/${maxTasks} (${percentage}%)`);
+    }
+
+    // Load user information and task limits
+    async function loadUserInfo() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log('No token found, using default values');
+          return;
+        }
+
+        console.log('Loading user info...');
+        const url = (window.API_CONFIG && typeof window.API_CONFIG.getUrl === 'function')
+          ? window.API_CONFIG.getUrl('auth/stats')
+          : (window.API_BASE_URL || '').replace(/\/api$/, '') + '/api/auth/stats';
+
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          console.log('User data loaded:', userData);
+
+          // Update localStorage with fresh data
+          localStorage.setItem('userInfo', JSON.stringify(userData));
+
+          // Update task limit display
+          updateTaskLimitDisplay(userData);
+        } else {
+          console.log('Error loading user info:', response.status);
+        }
+      } catch (error) {
+        console.log('Error loading user info:', error);
+      }
+    }
+
+    // Update task limit display based on user level
+    function updateTaskLimitDisplay(userData) {
+      const taskLimitDisplay = document.getElementById('task-limit-display');
+      const completedToday = document.getElementById('completed-today');
+      const maxTasksPerDay = document.getElementById('max-tasks-per-day');
+      const rewardPerTask = document.getElementById('reward-per-task');
+
+      // Defensive check: If essential elements are missing, exit early
+      if (!taskLimitDisplay || !completedToday || !maxTasksPerDay || !rewardPerTask) {
+        // console.warn('One or more task limit display elements are missing');
+        // This is expected on some variations of the page, so just return
+        return;
+      }
+
+      // Get task limit based on level (same as profile.html)
+      const getTaskLimit = (level) => {
+        const limits = {
+          0: 8, 1: 8, 2: 10, 3: 15, 4: 15,
+          5: 20, 6: 25, 7: 30, 8: 35, 9: 40
+        };
+        return limits[level] || 8;
+      };
+
+      // Get level-based reward
+      const getLevelReward = (level) => {
+        const levelRewards = {
+          0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+          5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+        };
+        return levelRewards[level] || 7.00;
+      };
+
+      const userLevel = userData.level || 0;
+      const limit = getTaskLimit(userLevel);
+      const reward = getLevelReward(userLevel);
+
+      if (taskLimitDisplay) {
+        taskLimitDisplay.textContent = `Level ${userLevel} - ${limit} tasks/day`;
+      }
+
+      let completedCount = 0;
+      if (userData && userData.tasks_completed_today !== undefined) {
+        completedCount = parseInt(userData.tasks_completed_today);
+      } else {
+        try {
+          const loc = JSON.parse(localStorage.getItem('completedTaskIds') || '[]');
+          completedCount = Array.isArray(loc) ? loc.length : 0;
+        } catch (_) { completedCount = 0; }
+      }
+      completedToday.textContent = completedCount;
+
+      // Update progress circle
+      updateProgressCircle(completedCount, limit);
+
+      if (maxTasksPerDay) {
+        maxTasksPerDay.textContent = limit;
+      }
+
+      if (rewardPerTask) {
+        const currency = getCurrentCurrency();
+        const currencySymbols = {
+          'USD': '$',
+          'KES': 'KES ',
+          'EUR': '€',
+          'GBP': '£'
+        };
+        const symbol = currencySymbols[currency] || 'KES ';
+        const convertedReward = convertCurrency(reward, 'KES', currency);
+        rewardPerTask.textContent = `${symbol}${convertedReward.toFixed(2)}`;
+      }
+    }
+
+    // Load tasks with real questions and answers from API
+    async function loadTasksFromAPI() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.log('⚠️ No token found, using sample tasks');
+          tasks = [...sampleTasks];
+
+          // Use default level 0 reward
+          const levelReward = 7.00;
+          tasks = tasks.map(task => ({
+            ...task,
+            earning: levelReward,
+            reward: levelReward
+          }));
+
+          updateSummary();
+          renderTasks(); // Render tasks when no token (using sample tasks)
+          return;
+        }
+
+        console.log('🔄 Loading tasks with questions from API...');
+        const apiBaseUrl = window.API_BASE_URL || '';
+        // Try to fetch tasks from API (if endpoint exists)
+        // If not available, fall back to sample tasks
+        let response;
+        try {
+          // Fix: Use correct endpoint without duplicating /api
+          const url = apiBaseUrl.endsWith('/api') ? `${apiBaseUrl}/tasks` : `${apiBaseUrl}/api/tasks`;
+          response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        } catch (error) {
+          console.log('⚠️ Tasks API endpoint not available, using sample tasks');
+          tasks = [...sampleTasks];
+
+          // Update rewards based on user level
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          const userLevel = userInfo.level || 0;
+          const getLevelReward = (level) => {
+            const levelRewards = {
+              0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+              5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+            };
+            return levelRewards[level] || 7.00;
+          };
+          const levelReward = getLevelReward(userLevel);
+
+          // Update all sample tasks with level-based reward
+          tasks = tasks.map(task => ({
+            ...task,
+            earning: levelReward,
+            reward: levelReward
+          }));
+
+          updateSummary();
+          renderTasks(); // Render tasks when fetch fails
+          return;
+        }
+
+        console.log('📊 Tasks API response status:', response.status);
+
+        if (response.ok) {
+          const apiData = await response.json();
+          console.log('✅ Tasks API response:', apiData);
+
+          if (apiData.tasks && Array.isArray(apiData.tasks)) {
+            console.log(`📱 API returned ${apiData.tasks.length} tasks with questions`);
+
+            // Use API tasks directly - they should contain real questions and answers
+            tasks = apiData.tasks.map(apiTask => {
+              const normalizedChoices = normalizeChoices(firstDefined(apiTask.choices, apiTask.quiz_choices));
+              const normalizedCorrectAnswer = normalizeCorrectAnswer(
+                firstDefined(apiTask.correct_answer, apiTask.quiz_correct_answer),
+                normalizedChoices.length
+              );
+
+              // Get question from API, with proper fallback
+              const apiQuestion = firstDefined(apiTask.question, apiTask.quiz_question);
+
+              // Validate that we have a valid question
+              if (!apiQuestion || (typeof apiQuestion === 'string' && apiQuestion.trim().length === 0)) {
+                console.warn(`⚠️ Task ${apiTask.id} missing question, will try to load from question endpoint`);
+              }
+
+              // Validate choices - if empty or default, log warning
+              if (normalizedChoices.length === 0 || (normalizedChoices.length === 4 && normalizedChoices[0] === 'Option A')) {
+                console.warn(`⚠️ Task ${apiTask.id} has invalid or missing choices`);
+              }
+
+              return {
+                id: apiTask.id,
+                name: apiTask.name || apiTask.app_name || `Task ${apiTask.id}`,
+                icon: apiTask.icon || apiTask.app_icon || 'https://cdn-icons-png.flaticon.com/512/3046/3046120.png',
+                earning: firstDefined(apiTask.reward, apiTask.earning, 11),
+                reward: firstDefined(apiTask.reward, apiTask.earning, 11),
+                status: apiTask.status || 'ongoing',
+                completedToday: apiTask.completedToday || false,
+                completion_time: apiTask.completion_time,
+                reward_earned: apiTask.reward_earned,
+                // Real questions and answers from API - use fallback only if truly missing
+                question: apiQuestion || null, // Set to null if missing, will be loaded later
+                choices: normalizedChoices.length > 0 ? normalizedChoices : null, // Set to null if invalid
+                correctAnswer: normalizedCorrectAnswer,
+                // Additional API data
+                difficulty: apiTask.difficulty || 'easy',
+                category: apiTask.category || 'general',
+                created_at: apiTask.created_at,
+                updated_at: apiTask.updated_at
+              };
+            });
+
+            // Filter out tasks without valid questions/choices and log them
+            const tasksWithoutQuestions = tasks.filter(t => !t.question || !t.choices || t.choices.length === 0);
+            if (tasksWithoutQuestions.length > 0) {
+              console.warn(`⚠️ Found ${tasksWithoutQuestions.length} tasks without valid questions/choices:`, tasksWithoutQuestions.map(t => t.id));
+            }
+
+            console.log('✅ Tasks loaded with real questions:', tasks.length);
+
+            // Check if tasks array is empty - fall back to sample tasks if so
+            if (tasks.length === 0) {
+              console.warn('⚠️ API returned empty tasks array, using sample tasks');
+              tasks = [...sampleTasks];
+
+              // Update rewards based on user level
+              const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+              const userLevel = userInfo.level || 0;
+              const getLevelReward = (level) => {
+                const levelRewards = {
+                  0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+                  5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+                };
+                return levelRewards[level] || 7.00;
+              };
+              const levelReward = getLevelReward(userLevel);
+
+              // Update all sample tasks with level-based reward
+              tasks = tasks.map(task => ({
+                ...task,
+                earning: levelReward,
+                reward: levelReward
+              }));
+
+              updateSummary();
+              renderTasks(); // Render tasks with sample tasks fallback
+              return;
+            }
+
+            const sampleTaskForLog = tasks.length > 0 ? tasks[0] : null;
+            if (sampleTaskForLog) {
+              console.log('📝 Sample question:', sampleTaskForLog.question);
+              console.log('📝 Sample choices:', sampleTaskForLog.choices);
+              console.log('📝 Sample correct answer:', sampleTaskForLog.correctAnswer);
+            }
+
+            // Update summary with real data from API
+            const totalTasks = tasks.length;
+            const completedToday = apiData.completedToday || 0;
+            const ongoingToday = totalTasks - completedToday;
+
+            // Update blue container with daily progress
+            const ongoingElement = document.querySelector('.ongoing-count');
+            const completedElement = document.querySelector('.completed-count');
+
+            if (ongoingElement) {
+              ongoingElement.textContent = ongoingToday;
+            }
+            if (completedElement) {
+              completedElement.textContent = completedToday;
+            }
+
+            // Store API data for use by updateSummary function
+            localStorage.setItem('apiTaskData', JSON.stringify({
+              completedToday: completedToday,
+              maxTasksPerDay: apiData.maxTasksPerDay || 5,
+              userLevel: apiData.userLevel,
+              totalEarnings: apiData.totalEarnings,
+              todayEarnings: apiData.todayEarnings
+            }));
+
+            // Update progress circle with animation
+            updateProgressCircle(completedToday, apiData.maxTasksPerDay || 5);
+
+            console.log(`✅ Updated blue container: ${completedToday}/${apiData.maxTasksPerDay || 5} tasks completed today`);
+            console.log(`🔍 Note: API completedToday (${completedToday}) includes ALL completed tasks`);
+            console.log(`📱 App tasks in array: ${tasks.filter(t => t.status === 'completed' || t.completedToday).length} marked as completed`);
+
+            // Ensure tasks are rendered after loading from API
+            updateSummary();
+            renderTasks(); // Render tasks after loading from API
+
+          } else {
+            console.warn('⚠️ API response does not contain tasks array, using sample tasks');
+            tasks = [...sampleTasks];
+
+            // Update rewards based on user level
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            const userLevel = userInfo.level || 0;
+            const getLevelReward = (level) => {
+              const levelRewards = {
+                0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+                5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+              };
+              return levelRewards[level] || 7.00;
+            };
+            const levelReward = getLevelReward(userLevel);
+
+            // Update all sample tasks with level-based reward
+            tasks = tasks.map(task => ({
+              ...task,
+              earning: levelReward,
+              reward: levelReward
+            }));
+
+            updateSummary();
+            renderTasks(); // Render tasks when using sample tasks fallback
+          }
+        } else if (response.status === 403) {
+          // Check if it's a restricted date
+          try {
+            const errorData = await response.json();
+            if (errorData.restricted) {
+              console.log('🚫 Tasks restricted:', errorData.message);
+              window.isRestricted = true;
+              showRestrictedDateMessage(errorData.message, errorData.holidayName);
+              tasks = []; // Clear tasks
+              updateSummary();
+              return;
+            }
+          } catch (e) {
+            console.error('❌ Could not parse error response');
+          }
+
+          // Fallback to sample tasks if API fails
+          console.log('📦 Falling back to sample tasks due to API error');
+          tasks = [...sampleTasks];
+        } else {
+          console.error('❌ Failed to load tasks from API:', response.status, response.statusText);
+          try {
+            const errorText = await response.text();
+            console.error('❌ Error response:', errorText);
+          } catch (e) {
+            console.error('❌ Could not read error response');
+          }
+
+          // Fallback to sample tasks if API fails
+          console.log('📦 Falling back to sample tasks due to API error');
+          tasks = [...sampleTasks];
+
+          // Update rewards based on user level
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          const userLevel = userInfo.level || 0;
+          const getLevelReward = (level) => {
+            const levelRewards = {
+              0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+              5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+            };
+            return levelRewards[level] || 7.00;
+          };
+          const levelReward = getLevelReward(userLevel);
+
+          // Update all sample tasks with level-based reward
+          tasks = tasks.map(task => ({
+            ...task,
+            earning: levelReward,
+            reward: levelReward
+          }));
+
+          updateSummary();
+          renderTasks(); // Render tasks when API fails
+        }
+      } catch (error) {
+        console.error('❌ Error loading tasks from API:', error);
+        console.error('❌ Error details:', error.message, error.stack);
+        // Fallback to sample tasks if API fails
+        console.log('📦 Falling back to sample tasks due to network error');
+        tasks = [...sampleTasks];
+      }
+
+      // Show restricted date message with countdown
+      function showRestrictedDateMessage(message, holidayName = 'Holiday') {
+        const taskList = document.getElementById('task-list');
+        if (!taskList) return;
+
+        // Calculate next available date (tomorrow, or next non-restricted day)
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        // Check if tomorrow is restricted, if so find next available day
+        let nextAvailable = tomorrow;
+        let attempts = 0;
+        while (attempts < 7) {
+          const dayOfWeek = nextAvailable.getDay();
+          const dayOfMonth = nextAvailable.getDate();
+
+          // Check if it's Sunday
+          if (dayOfWeek === 0) {
+            nextAvailable.setDate(nextAvailable.getDate() + 1);
+            attempts++;
+            continue;
+          }
+
+          // Check if it's 4th Friday (between 22-28)
+          if (dayOfWeek === 5 && dayOfMonth >= 22 && dayOfMonth <= 28) {
+            // Count Fridays to check if it's the 4th
+            let fridayCount = 0;
+            const checkDate = new Date(nextAvailable.getFullYear(), nextAvailable.getMonth(), 1);
+            while (checkDate <= nextAvailable) {
+              if (checkDate.getDay() === 5) fridayCount++;
+              checkDate.setDate(checkDate.getDate() + 1);
+            }
+            if (fridayCount === 4) {
+              nextAvailable.setDate(nextAvailable.getDate() + 1);
+              attempts++;
+              continue;
+            }
+          }
+
+          // If we get here, it's not restricted
+          break;
+        }
+
+        const timeUntilAvailable = nextAvailable - now;
+        const hours = Math.floor(timeUntilAvailable / (1000 * 60 * 60));
+        const minutes = Math.floor((timeUntilAvailable % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeUntilAvailable % (1000 * 60)) / 1000);
+
+        const countdownHTML = `
+        <div class="holiday-banner" style="display: block; background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border: 2px solid #ffc107; border-radius: 12px; margin: 20px 0; padding: 24px; text-align: center; box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);">
+          <div style="font-size: 40px; margin-bottom: 12px;">🚫</div>
+          <h2 style="color: #856404; margin-bottom: 8px; font-size: 20px; font-weight: 700;">${holidayName} Notice</h2>
+          <p style="color: #856404; margin-bottom: 16px; font-size: 15px;">${message}</p>
+          <div style="background: white; padding: 16px; border-radius: 10px; display: inline-flex; gap: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px;">
+            <div style="text-align: center;">
+              <div id="countdown-hours" style="font-size: 24px; font-weight: 800; color: var(--brand-green);">${hours.toString().padStart(2, '0')}</div>
+              <div style="font-size: 11px; color: #666; font-weight: normal; text-transform: uppercase;">Hours</div>
+            </div>
+            <div style="text-align: center;">
+              <div id="countdown-minutes" style="font-size: 24px; font-weight: 800; color: var(--brand-green);">${minutes.toString().padStart(2, '0')}</div>
+              <div style="font-size: 11px; color: #666; font-weight: normal; text-transform: uppercase;">Mins</div>
+            </div>
+            <div style="text-align: center;">
+              <div id="countdown-seconds" style="font-size: 24px; font-weight: 800; color: var(--brand-green);">${seconds.toString().padStart(2, '0')}</div>
+              <div style="font-size: 11px; color: #666; font-weight: normal; text-transform: uppercase;">Secs</div>
+            </div>
+          </div>
+          <p style="color: #856404; font-size: 13px; font-weight: 500;">Next available: ${nextAvailable.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        </div>
+      `;
+
+        taskList.innerHTML = countdownHTML;
+
+        // Update countdown every second
+        const countdownInterval = setInterval(() => {
+          const now = new Date();
+          const timeLeft = nextAvailable - now;
+
+          if (timeLeft <= 0) {
+            clearInterval(countdownInterval);
+            // Reload tasks when countdown reaches zero
+            loadTasksFromAPI();
+            return;
+          }
+
+          const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+          const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+          const hoursEl = document.getElementById('countdown-hours');
+          const minutesEl = document.getElementById('countdown-minutes');
+          const secondsEl = document.getElementById('countdown-seconds');
+
+          if (hoursEl) hoursEl.textContent = hours;
+          if (minutesEl) minutesEl.textContent = minutes;
+          if (secondsEl) secondsEl.textContent = seconds;
+        }, 1000);
+
+        // Store interval to clear it if needed
+        window.restrictedCountdownInterval = countdownInterval;
+
+        // Update rewards based on user level
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        const userLevel = userInfo.level || 0;
+        const getLevelReward = (level) => {
+          const levelRewards = {
+            0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+            5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+          };
+          return levelRewards[level] || 7.00;
+        };
+        const levelReward = getLevelReward(userLevel);
+
+        // Update all sample tasks with level-based reward
+        tasks = tasks.map(task => ({
+          ...task,
+          earning: levelReward,
+          reward: levelReward
+        }));
+
+        // Initialize task order for sample tasks
+        initializeTaskOrder();
+
+        updateSummary();
+        renderTasks(); // Render tasks when network error occurs
+        console.log('✅ Sample tasks loaded and rendered:', tasks.length);
+      }
+    }
+
+    // Show modal notification
+    function showModal(type, message) {
+      const modal = document.getElementById('notification-modal');
+      const emoji = document.getElementById('modal-emoji');
+      const title = document.getElementById('modal-title');
+      const msg = document.getElementById('modal-message');
+
+      if (!modal || !emoji || !title || !msg) return;
+
+      // Set emoji based on type
+      if (type === 'success') {
+        emoji.textContent = '✅';
+        title.textContent = 'Success!';
+        modal.style.borderColor = '#4caf50';
+      } else if (type === 'error') {
+        emoji.textContent = '❌';
+        title.textContent = 'Error!';
+        modal.style.borderColor = '#f44336';
+      } else if (type === 'warning') {
+        emoji.textContent = '⚠️';
+        title.textContent = 'Warning!';
+        modal.style.borderColor = '#ff9800';
+      } else if (type === 'limit') {
+        emoji.textContent = '📅';
+        title.textContent = 'Daily Limit Reached!';
+        modal.style.borderColor = '#ff9800';
+      } else {
+        emoji.textContent = 'ℹ️';
+        title.textContent = 'Info';
+        modal.style.borderColor = '#2196f3';
+      }
+
+      msg.textContent = message;
+      modal.style.display = 'flex';
+
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 3000);
+    }
+
+    function hideModal() {
+      document.getElementById('notification-modal').style.display = 'none';
+    }
+
+    // Show earnings notification using modal
+    function showEarningsNotification(amount, appName, customMessage = null) {
+      const formattedAmount = formatCurrency(amount);
+      const message = customMessage || `You have earned ${formattedAmount} from completing ${appName}! 🎉\n\n💰 Money has been added to your wallet!`;
+      showModal('success', message);
+    }
+
+    function updateDailyEarningTracking(amount) {
+      const today = new Date().toDateString();
+      const dailyEarnings = JSON.parse(localStorage.getItem('dailyEarnings') || '{}');
+
+      if (!dailyEarnings[today]) {
+        dailyEarnings[today] = 0;
+      }
+
+      dailyEarnings[today] += amount;
+      localStorage.setItem('dailyEarnings', JSON.stringify(dailyEarnings));
+
+      console.log(`💰 Daily earnings updated: ${dailyEarnings[today]} for ${today}`);
+    }
+
+    // Show daily limit reached notification using modal
+    function showDailyLimitNotification(completedToday, maxTasksPerDay) {
+      const message = `Daily limit reached! You have completed ${completedToday} tasks today.\n\n📅 Daily limit for your level is ${maxTasksPerDay} tasks.\n\n⏰ Come back tomorrow for more tasks!`;
+      showModal('limit', message);
+    }
+
+    let lastScrollTop = 0;
+    function handleScroll() {
+      const header = document.querySelector('.header');
+      if (!header) return;
+
+      const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+      // Hide header completely when scrolling down to give more space for tasks
+      if (currentScrollTop > lastScrollTop && currentScrollTop > 50) {
+        // Scrolling down - hide header completely
+        header.classList.add('hidden');
+      } else if (currentScrollTop < lastScrollTop) {
+        // Scrolling up - show header
+        header.classList.remove('hidden');
+      }
+
+      // Always show header at the top of the page
+      if (currentScrollTop <= 30) {
+        header.classList.remove('hidden');
+      }
+
+      lastScrollTop = currentScrollTop <= 0 ? 0 : currentScrollTop;
+    }
+
+    // Update currency display based on settings
+    function updateCurrencyDisplay(currency) {
+      // Update header stats with converted amounts
+      updateHeaderStats();
+
+      // Update today earnings and wallet balance
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      if (userInfo.today_earning !== undefined) {
+        const todayEarning = parseFloat(userInfo.today_earning) || 0;
+        document.getElementById('today-earnings').innerHTML = formatCurrency(todayEarning, currency);
+      }
+
+      if (userInfo.wallet_balance !== undefined) {
+        const walletBalance = parseFloat(userInfo.wallet_balance) || 0;
+        document.getElementById('wallet-balance').innerHTML = formatCurrency(walletBalance, currency);
+      }
+
+      // Update reward per task
+      const rewardPerTask = document.getElementById('reward-per-task');
+      if (rewardPerTask) {
+        const userLevel = userInfo.level || 0;
+        const getLevelReward = (level) => {
+          const levelRewards = {
+            0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+            5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+          };
+          return levelRewards[level] || 7.00;
+        };
+        const reward = getLevelReward(userLevel);
+        const currencySymbols = {
+          'USD': '$',
+          'KES': 'KES ',
+          'EUR': '€',
+          'GBP': '£'
+        };
+        const symbol = currencySymbols[currency] || 'KES ';
+        const convertedReward = convertCurrency(reward, 'KES', currency);
+        rewardPerTask.textContent = `${symbol}${convertedReward.toFixed(2)}`;
+      }
+
+      // Re-render tasks to update reward displays
+      renderTasks();
+
+      console.log(`💰 Currency display updated to: ${currency}`);
+    }
+
+
+    // Check if today is a holiday/restricted date
+    async function checkHolidayStatus() {
+      try {
+        const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/check-restriction') : `${window.location.origin}/api/auth/check-restriction`;
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.success && data.isRestricted) {
+          window.isRestricted = true;
+          showRestrictedDateMessage(data.reason, data.holidayName);
+        }
+      } catch (err) {
+        console.error('Error checking holiday status:', err);
+      }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', async function () {
+      checkHolidayStatus();
+      console.log('🔄 Page refreshed - Loading fresh data from API...');
+      console.log('📋 Current completedTaskIds before loading:', completedTaskIds);
+      console.log('🔗 API Base URL:', window.API_BASE_URL);
+
+      try {
+        // Set up midnight refresh checker
+        setupMidnightRefreshChecker();
+
+        // Load user data
+        console.log('👤 Loading user data...');
+        await loadUserData();
+        console.log('✅ User data loaded');
+
+        // Load tasks from API FIRST (before initializing task order)
+        console.log('📋 Loading tasks from API...');
+        await loadTasksFromAPI();
+        // Immediately initialize order and render tasks so users see data as soon as it's available
+        try {
+          initializeTaskOrder();
+        } catch (e) { console.warn('initializeTaskOrder early call failed', e); }
+        try {
+          renderTasks();
+        } catch (e) { console.warn('early renderTasks failed', e); }
+        try { document.body.classList.remove('tasks-loading'); } catch (e) { console.warn('Could not remove tasks-loading class early', e); }
+
+        console.log('📋 Tasks loaded, count:', tasks.length);
+        console.log('📋 Sample tasks available:', sampleTasks.length);
+
+        // Ensure tasks are loaded before initializing order
+        if (!tasks || tasks.length === 0) {
+          console.warn('⚠️ No tasks after API load, using sample tasks');
+          tasks = [...sampleTasks];
+
+          // Update rewards based on user level
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          const userLevel = userInfo.level || 0;
+          const getLevelReward = (level) => {
+            const levelRewards = {
+              0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+              5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+            };
+            return levelRewards[level] || 7.00;
+          };
+          const levelReward = getLevelReward(userLevel);
+
+          tasks = tasks.map(task => ({
+            ...task,
+            earning: levelReward,
+            reward: levelReward
+          }));
+        }
+
+        // Initialize task order AFTER tasks are loaded (this will check for midnight refresh)
+        initializeTaskOrder();
+
+        // CRITICAL: Load completed tasks from backend FIRST (this is the source of truth)
+        // This must complete before rendering tasks
+        console.log('📋 Loading completed tasks from backend...');
+        const loadedTaskIds = await loadCompletedTasksFromBackend();
+        console.log('📋 Completed tasks loaded from backend:', completedTaskIds);
+        console.log('📋 Number of completed tasks:', completedTaskIds.length);
+
+        // Verify the completedTaskIds array
+        if (completedTaskIds.length === 0) {
+          console.log('⚠️ No completed tasks found - this might be normal for a new day');
+        } else {
+          console.log('✅ Found completed tasks:', completedTaskIds);
+        }
+
+        // Load user info for task limits
+        console.log('👤 Loading user info for task limits...');
+        await loadUserInfo();
+        console.log('✅ User info loaded');
+
+        // Ensure tasks are loaded - if empty, use sample tasks
+        if (!tasks || tasks.length === 0) {
+          console.warn('⚠️ Tasks array is empty, loading sample tasks');
+          tasks = [...sampleTasks];
+
+          // Update rewards based on user level
+          const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+          const userLevel = userInfo.level || 0;
+          const getLevelReward = (level) => {
+            const levelRewards = {
+              0: 7.00, 1: 18.00, 2: 27.00, 3: 53.00, 4: 76.00,
+              5: 265.00, 6: 238.00, 7: 300.00, 8: 430.00, 9: 560.00
+            };
+            return levelRewards[level] || 7.00;
+          };
+          const levelReward = getLevelReward(userLevel);
+
+          // Update all sample tasks with level-based reward
+          tasks = tasks.map(task => ({
+            ...task,
+            earning: levelReward,
+            reward: levelReward
+          }));
+
+          // Re-initialize task order after loading sample tasks
+          initializeTaskOrder();
+        }
+
+        // Now render tasks with the correct completed status
+        // Make sure completedTaskIds is not empty or undefined
+        if (completedTaskIds === undefined) {
+          completedTaskIds = [];
+        }
+
+        console.log('📋 About to render tasks. Tasks count:', tasks.length);
+        console.log('📋 Task order length:', taskOrder.length);
+        renderTasks();
+
+        // Update summary after rendering
+        updateSummary();
+
+        // Set up scroll handler
+        const header = document.querySelector('.header');
+
+        if (header) {
+          window.addEventListener('scroll', handleScroll, { passive: true });
+        }
+
+        console.log('📱 Task page loaded with', tasks.length, 'apps available');
+        console.log('📊 Completed tasks count:', completedTaskIds.length);
+        const ongoingCountEl = document.querySelector('.ongoing-count');
+        const completedCountEl = document.querySelector('.completed-count');
+        const ongoingValue = ongoingCountEl ? ongoingCountEl.textContent : '0';
+        const completedValue = completedCountEl ? completedCountEl.textContent : '0';
+        console.log('📊 Summary:', ongoingValue, 'ongoing,', completedValue, 'completed');
+        // Reveal tasks area now that initialization finished
+        try { document.body.classList.remove('tasks-loading'); } catch (e) { console.warn('Could not remove tasks-loading class', e); }
+      } catch (error) {
+        console.error('❌ CRITICAL ERROR during page initialization:', error);
+        console.error('❌ Error stack:', error.stack);
+
+        // Ensure tasks are displayed even if initialization fails
+        if (!tasks || tasks.length === 0) {
+          console.log('🆘 Emergency fallback: Loading sample tasks');
+          tasks = [...sampleTasks];
+          initializeTaskOrder();
+          renderTasks();
+          updateSummary();
+        }
+
+        // Show error to user
+        showModal('error', 'Failed to load some data. Please refresh the page. Error: ' + error.message);
+        // Ensure tasks are visible on error so fallback UI is accessible
+        try { document.body.classList.remove('tasks-loading'); } catch (e) { console.warn('Could not remove tasks-loading class on error', e); }
+      }
+    });
+
+    function requestGeolocationOnLoad() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            console.log('📍 Device location:', position.coords.latitude, position.coords.longitude);
+          },
+          (error) => {
+            console.warn('⚠️ Geolocation failed:', error.message);
+          }
+        );
+      } else {
+        console.warn('❌ Geolocation not supported by this browser.');
+      }
+    }
+
+    // Call this at the end of document load
+    document.addEventListener('DOMContentLoaded', function () {
+      // ... (existing startup logic)
+      requestGeolocationOnLoad();
+    });
+
+    function getAccountCreatedTimestamp() {
+      // Try to get account creation date from userInfo if present
+      let userInfo = {};
+      try {
+        userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      } catch (_) { }
+      let created = userInfo.createdAt || userInfo.created_at;
+      if (created) {
+        // Try parsing if it's an ISO string
+        let createdTime = Date.parse(created);
+        return isNaN(createdTime) ? null : createdTime;
+      }
+      return null;
+    }
+
+    function getEATNow() {
+      // Returns a Date object set to the current time in EAT/GMT+3
+      const now = new Date();
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      return new Date(utc + 3 * 60 * 60 * 1000);
+    }
+
+    function updateTrialCountdown() {
+      const banner = document.getElementById('trial-banner');
+
+      // Check if user is Level 1 or higher (not a temporary worker)
+      let userInfo = {};
+      try {
+        userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      } catch (_) { }
+
+      // If user has upgraded (Level 1-9), do not show free trial banner
+      if (userInfo.level && parseInt(userInfo.level) >= 1) {
+        if (banner) banner.style.display = 'none';
+        return;
+      }
+
+      let startTime = getAccountCreatedTimestamp();
+      if (!startTime) {
+        let startStr = localStorage.getItem('trialStart');
+        if (!startStr) {
+          const now = Date.now();
+          localStorage.setItem('trialStart', now.toString());
+          startStr = now.toString();
+        }
+        startTime = parseInt(startStr, 10);
+      }
+      // Use EAT now for day calculations
+      const eatNow = getEATNow();
+      const eatNowMs = eatNow.getTime();
+      // EAT start of today
+      const eatToday = new Date(eatNow);
+      eatToday.setHours(0, 0, 0, 0);
+      // Calculate days left from EAT midnight boundaries
+      const daysTotal = 7;
+      const msInDay = 86400 * 1000;
+      // When does trial end: EAT day boundary
+      const trialEndMs = startTime + msInDay * daysTotal;
+      const msLeft = trialEndMs - eatNowMs;
+      let days = Math.floor(msLeft / msInDay);
+      if (msLeft > 0 && eatNowMs < trialEndMs) {
+        // If less than 1 day but more than 0ms, still show 0 days left
+        if (days < 0) days = 0;
+      } else {
+        days = 0;
+      }
+      if (msLeft <= 0) {
+        banner.style.display = 'block';
+        banner.innerHTML = '⏰ Your 7-day free period has ended. <a id="upgrade-link" href="#" style="color:#299600;text-decoration:underline;">Upgrade now</a>.';
+        const taskList = document.getElementById('task-list');
+        if (taskList) {
+          taskList.innerHTML = '<div style="color:#c0392b;padding:40px 16px;font-size:20px;font-weight:bold;">You must upgrade to continue using tasks.</div>';
+        }
+        setTimeout(() => {
+          const link = document.getElementById('upgrade-link');
+          if (link) link.onclick = function (e) { e.preventDefault(); window.location.href = 'level.html'; };
+        }, 100);
+        return;
+      }
+      // Compute remaining hours, mins, secs (still from EAT)
+      const hours = Math.floor((msLeft % msInDay) / 3600000);
+      const mins = Math.floor((msLeft % 3600000) / 60000);
+      const secs = Math.floor((msLeft % 60000) / 1000);
+      banner.style.display = 'block';
+      banner.innerHTML = `🕒 ${days} days, ${hours} hours ${mins} min ${secs}s left in your free trial. <a id='upgrade-link' href='#' style='color:#299600;text-decoration:underline;'>Upgrade now</a>`;
+      setTimeout(() => {
+        const link = document.getElementById('upgrade-link');
+        if (link) link.onclick = function (e) { e.preventDefault(); window.location.href = 'level.html'; };
+      }, 100);
+    }
+
+    // Call on document ready and on interval
+    document.addEventListener('DOMContentLoaded', function () {
+      // ... existing startup logic ...
+      updateTrialCountdown();
+      setInterval(updateTrialCountdown, 1000);
+    });
+
+    // Completed tab and today tab both refresh logic
+    function refreshAllTabsAndCounts() {
+      renderTasks();
+      updateSummary && updateSummary();
+    }
+
+    // ... in setupMidnightRefreshChecker (after checkMidnightRefresh is called on interval/trigger) ...
+    // Just after checkMidnightRefresh(); add:
+    refreshAllTabsAndCounts();
+    // And inside checkMidnightRefresh(), after daily reset, also add a call to refreshAllTabsAndCounts();
+
+    function updateCompletedStatCard() {
+      let completedLocal = 0;
+      try {
+        const loc = JSON.parse(localStorage.getItem('completedTaskIds') || '[]');
+        if (Array.isArray(loc)) {
+          completedLocal = loc.length;
+        } else if (loc && loc.ids && Array.isArray(loc.ids)) {
+          completedLocal = loc.ids.length;
+        }
+      } catch (_) { completedLocal = 0; }
+      var stat = document.getElementById('total-tasks');
+      if (stat) stat.textContent = completedLocal;
+    }
+
+    // ... existing code ...
+    // After every renderTasks(), updateSummary(), and checkMidnightRefresh(), add:
+    updateCompletedStatCard && updateCompletedStatCard();
+    // ...
+  </script>
+</body>
+
+</html>
