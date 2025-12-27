@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Withdrawal - CIC</title>
+
+  <!-- Monarch Design System -->
+  <!-- Monarch Design System -->
+  <link rel="stylesheet" href="css/monarch-design-system.css">
+  <link rel="stylesheet" href="assets/css/monarch-design-system.css">
+  <script src="js/api-config.js"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <script src="js/activity-tracker.js"></script>
+  <style>
+    :root {
+      --brand-green: #00ff88;
+      --brand-maroon: #8b4513;
+      --brand-dark: #006633;
+      --brand-accent: #32ff7e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--brand-green);
+      padding: 20px;
+      color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    /* Balance Card */
+    .balance-card {
+      background: white;
+      margin: 20px;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .balance-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .balance-amount {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--brand-green);
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 0 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin: 24px 0 16px 0;
+    }
+
+    /* Withdrawal Form */
+    .withdrawal-form {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .form-input:focus {
+      border-color: var(--brand-green);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      outline: none;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    .form-select:focus {
+      border-color: var(--brand-green);
+    }
+
+    /* Quick Amount Buttons */
+    .quick-amounts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .quick-amounts {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .quick-btn {
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+
+    .quick-btn {
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .quick-btn:hover {
+      background: var(--brand-green);
+      color: white;
+      border-color: var(--brand-green);
+    }
+
+    /* Info Box */
+    .info-box {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .info-box-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 8px;
+    }
+
+    .info-box-text {
+      font-size: 13px;
+      color: #856404;
+      line-height: 1.5;
+    }
+
+    /* Withdraw Button */
+    .withdraw-btn {
+      width: 100%;
+      background: var(--brand-green);
+      color: white;
+      border: none;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 20px;
+    }
+
+    .withdraw-btn:hover {
+      background: var(--brand-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+    }
+
+    .withdraw-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Recent Withdrawals */
+    .withdrawals-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .withdrawal-item {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .withdrawal-info {
+      flex: 1;
+    }
+
+    .withdrawal-amount {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .withdrawal-date {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .withdrawal-status {
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-rejected,
+    .status-failed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-approved {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-green);
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 32px 24px;
+      border-radius: 16px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .modal-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    .modal-message {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .modal-btn {
+      background: var(--brand-green);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <button class="back-btn" onclick="window.history.back()">←</button>
+      <h1 class="header-title" data-translate="withdrawal">Withdrawal</h1>
+    </div>
+  </div>
+
+  <!-- Balance Card -->
+  <div class="balance-card">
+    <div class="balance-label" data-translate="available-balance">Available Balance</div>
+    <div class="balance-amount"><span id="available-balance">0.00</span></div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <h2 class="section-title" data-translate="withdraw-funds">Withdraw Funds</h2>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <div class="info-box-title" data-translate="important-info">⚠️ Important Information</div>
+      <div class="info-box-text">
+        <span data-translate="min-withdrawal-info">• Minimum withdrawal: </span><span id="min-withdrawal-display">KES
+          300</span><br>
+        <span data-translate="mpesa-info">• M-Pesa withdrawals: Instant processing</span><br>
+        <span data-translate="bank-info">• Bank transfers: 24-48 hours</span><br>
+        <span data-translate="details-info">• Make sure your payment details are correct</span>
+      </div>
+    </div>
+
+    <!-- Withdrawal Form -->
+    <div class="withdrawal-form">
+      <div class="form-group">
+        <label class="form-label" data-translate="withdrawal-method">Withdrawal Method</label>
+        <select class="form-select" id="withdrawal-method">
+          <option value="" data-translate="select-method">Select method</option>
+          <option value="mpesa" data-translate="mpesa">M-Pesa</option>
+          <option value="bank" data-translate="bank-transfer">Bank Transfer</option>
+          <option value="airtel" data-translate="airtel-money">Airtel Money</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="bank-selection-group" style="display: none;">
+        <label class="form-label" data-translate="select-bank">Select Your Bank</label>
+        <select class="form-select" id="bank-name">
+          <option value="" data-translate="choose-bank">Choose bank</option>
+          <option value="Equity Bank">Equity Bank</option>
+          <option value="KCB">KCB (Kenya Commercial Bank)</option>
+          <option value="Co-operative Bank">Co-operative Bank</option>
+          <option value="Absa Bank">Absa Bank (Barclays)</option>
+          <option value="Standard Chartered">Standard Chartered Bank</option>
+          <option value="Stanbic Bank">Stanbic Bank</option>
+          <option value="I&M Bank">I&M Bank</option>
+          <option value="Diamond Trust Bank">Diamond Trust Bank (DTB)</option>
+          <option value="Family Bank">Family Bank</option>
+          <option value="NCBA Bank">NCBA Bank</option>
+          <option value="Guaranty Trust Bank">Guaranty Trust Bank (GT Bank)</option>
+          <option value="Sidian Bank">Sidian Bank</option>
+          <option value="Bank of Africa">Bank of Africa</option>
+          <option value="Prime Bank">Prime Bank</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-translate="phone-account">Phone Number / Account Number</label>
+        <input type="text" class="form-input" id="account-number" placeholder="e.g., 0712345678 or Account No."
+          data-translate-placeholder="account-placeholder">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-translate="amount">Amount</label>
+        <input type="number" class="form-input" id="withdrawal-amount" placeholder="0.00" min="300" step="100"
+          readonly="readonly">
+
+        <div class="quick-amounts" id="quick-amounts">
+          <button class="quick-btn" data-amount="300" onclick="setWithdrawAmount(300)">300</button>
+          <button class="quick-btn" data-amount="500" onclick="setWithdrawAmount(500)">500</button>
+          <button class="quick-btn" data-amount="2000" onclick="setWithdrawAmount(2000)">2,000</button>
+          <button class="quick-btn" data-amount="5000" onclick="setWithdrawAmount(5000)">5,000</button>
+          <button class="quick-btn" data-amount="10000" onclick="setWithdrawAmount(10000)">10,000</button>
+          <button class="quick-btn" data-amount="20000" onclick="setWithdrawAmount(20000)">20,000</button>
+          <button class="quick-btn" data-amount="50000" onclick="setWithdrawAmount(50000)">50,000</button>
+          <button class="quick-btn" data-amount="100000" onclick="setWithdrawAmount(100000)">100,000</button>
+          <button class="quick-btn" data-amount="200000" onclick="setWithdrawAmount(200000)">200,000</button>
+        </div>
+      </div>
+
+      <button class="withdraw-btn" onclick="processWithdrawal()" data-translate="request-withdrawal">Request
+        Withdrawal</button>
+    </div>
+
+    <h2 class="section-title" data-translate="recent-withdrawals">Recent Withdrawals</h2>
+    <div class="withdrawals-list" id="withdrawals-list">
+      <div style="text-align: center; padding: 40px; color: #666;" data-translate="no-history">
+        No withdrawal history
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span data-translate="home">Home</span>
+    </a>
+    <a href="task.html" class="nav-item">
+      <span class="nav-icon">📋</span>
+      <span data-translate="tasks">Tasks</span>
+    </a>
+    <a href="level.html" class="nav-item">
+      <span class="nav-icon">📊</span>
+      <span data-translate="level">Level</span>
+    </a>
+    <a href="withdrawal.html" class="nav-item active">
+      <span class="nav-icon">💸</span>
+      <span data-translate="withdraw">Withdraw</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="nav-icon">👤</span>
+      <span data-translate="profile">Profile</span>
+    </a>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <div class="modal-icon" id="modal-icon">💸</div>
+      <div class="modal-title" id="modal-title" data-translate="processing-title">Processing</div>
+      <div class="modal-message" id="modal-message" data-translate="wait-message">Please wait...</div>
+      <button class="modal-btn" onclick="closeModal()" data-translate="ok">OK</button>
+    </div>
+  </div>
+
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <script>
+    // Currency conversion rates (approximate - should be fetched from API in production)
+    const currencyRates = {
+      USD: 1.0,      // Base currency
+      KES: 130.0,    // 1 USD = 130 KES (approximate)
+      EUR: 0.92,     // 1 USD = 0.92 EUR (approximate)
+      GBP: 0.79      // 1 USD = 0.79 GBP (approximate)
+    };
+
+    // Get current currency from settings
+    function getCurrentCurrency() {
+      if (window.CICSettings) {
+        return window.CICSettings.get('currency') || 'KES';
+      }
+      return localStorage.getItem('cic-currency') || 'KES';
+    }
+
+    // Convert amount to current currency
+    function convertCurrency(amount, fromCurrency = 'KES', toCurrency = null) {
+      if (!toCurrency) {
+        toCurrency = getCurrentCurrency();
+      }
+
+      if (fromCurrency === toCurrency) {
+        return amount;
+      }
+
+      // Convert to USD first (base currency)
+      let amountInUSD = amount;
+      if (fromCurrency !== 'USD') {
+        const rate = currencyRates[fromCurrency];
+        if (rate && rate > 0) {
+          amountInUSD = amount / rate;
+        } else {
+          console.warn(`Invalid rate for ${fromCurrency}, using original amount`);
+          return amount;
+        }
+      }
+
+      // Convert from USD to target currency
+      if (toCurrency !== 'USD') {
+        const rate = currencyRates[toCurrency];
+        if (rate && rate > 0) {
+          return amountInUSD * rate;
+        } else {
+          console.warn(`Invalid rate for ${toCurrency}, using USD amount`);
+          return amountInUSD;
+        }
+      }
+
+      return amountInUSD;
+    }
+
+    // Format currency amount
+    function formatCurrency(amount, currency = null) {
+      if (!currency) {
+        currency = getCurrentCurrency();
+      }
+
+      const convertedAmount = convertCurrency(amount, 'KES', currency);
+      const currencySymbols = {
+        'USD': '$',
+        'KES': 'KES ',
+        'EUR': '€',
+        'GBP': '£'
+      };
+
+      const symbol = currencySymbols[currency] || currency + ' ';
+      return `${symbol}${convertedAmount.toFixed(2)}`;
+    }
+
+    let currentBalance = 0;
+
+    // Load balance from correct API endpoint
+    async function loadBalance() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      try {
+        console.log('🔄 Loading wallet balance...');
+
+        // Try multiple endpoints to get wallet balance
+        const endpoints = [
+          'user/stats',
+          'auth/stats',
+          'user/wallet'
+        ];
+
+        let balanceFound = false;
+
+        for (const endpoint of endpoints) {
+          try {
+            const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl(endpoint) : `https://cicagency.onrender.com/api/${endpoint}`;
+            const response = await fetch(apiUrl, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              console.log(`📊 API Response from ${endpoint}:`, data);
+
+              // Check for wallet balance in different possible fields
+              const walletBalance = data.wallet_balance ||
+                data.balance ||
+                data.walletBalance ||
+                data.available_balance ||
+                data.availableBalance;
+
+              if (walletBalance !== undefined && walletBalance !== null) {
+                currentBalance = parseFloat(walletBalance);
+
+                // Update balance with currency conversion
+                document.getElementById('available-balance').innerHTML = formatCurrency(currentBalance);
+
+                console.log('✅ Wallet balance loaded:', currentBalance);
+                balanceFound = true;
+                break;
+              }
+            }
+          } catch (error) {
+            console.warn(`⚠️ Failed to fetch from ${endpoint}:`, error);
+          }
+        }
+
+        if (!balanceFound) {
+          console.error('❌ Could not fetch wallet balance from any endpoint');
+          document.getElementById('available-balance').textContent = '0.00';
+          showModal('❌', 'Error', 'Unable to load wallet balance. Please try again.');
+        }
+
+      } catch (error) {
+        console.error('❌ Error loading balance:', error);
+        document.getElementById('available-balance').textContent = '0.00';
+        showModal('❌', 'Error', 'Failed to load wallet balance');
+      }
+    }
+
+    // Load payment details and autofill withdrawal form
+    function loadPaymentDetails() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const apiBaseUrl = (window.API_BASE_URL || '').replace(/\/api$/, '') + '/api';
+      fetch(`${apiBaseUrl}/auth/payment-details`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.details) {
+            // Autofill withdrawal form
+            document.getElementById('withdrawal-method').value = data.details.method || '';
+            document.getElementById('account-number').value = data.details.account_number || '';
+
+            // Show/hide bank selection based on method
+            const bankGroup = document.getElementById('bank-selection-group');
+            if (data.details.method === 'bank') {
+              bankGroup.style.display = 'block';
+              document.getElementById('bank-name').value = data.details.bank_name || '';
+            } else {
+              bankGroup.style.display = 'none';
+            }
+          }
+        })
+        .catch(err => console.error('Error loading payment details:', err));
+    }
+
+    // Load withdrawal history
+    function loadWithdrawals() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const apiBaseUrl = (window.API_BASE_URL || '').replace(/\/api$/, '') + '/api';
+      fetch(`${apiBaseUrl}/mpesa/withdrawals`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById('withdrawals-list');
+
+          if (data.withdrawals && data.withdrawals.length > 0) {
+            list.innerHTML = data.withdrawals.map(w => {
+              // Map status for display: 'approved' -> 'completed', 'rejected' -> 'failed'
+              const displayStatus = w.status === 'approved' ? 'completed' :
+                w.status === 'rejected' ? 'failed' :
+                  w.status;
+              return `
+            <div class="withdrawal-item">
+              <div class="withdrawal-info">
+                <div class="withdrawal-amount">${formatCurrency(w.amount)}</div>
+                <div class="withdrawal-date">${new Date(w.request_date || w.created_at).toLocaleDateString()}</div>
+              </div>
+              <span class="withdrawal-status status-${displayStatus}">${displayStatus}</span>
+            </div>
+          `;
+            }).join('');
+          }
+        })
+        .catch(err => console.error('Error loading withdrawals:', err));
+    }
+
+    function setWithdrawAmount(amount) {
+      // Get current currency and convert amount if needed
+      const currency = getCurrentCurrency();
+      let displayAmount = amount;
+
+      // If currency is not KES, convert the amount
+      if (currency !== 'KES') {
+        displayAmount = convertCurrency(amount, 'KES', currency);
+      }
+
+      // Set the value in the input (always store in KES for backend)
+      const amountInput = document.getElementById('withdrawal-amount');
+      amountInput.value = Math.floor(displayAmount);
+
+      // Update the input to show converted value but store KES value
+      // We'll convert back to KES when submitting
+      console.log(`Setting amount: ${displayAmount} ${currency} (${amount} KES)`);
+    }
+
+    function processWithdrawal() {
+      const method = document.getElementById('withdrawal-method').value;
+      const accountNumber = document.getElementById('account-number').value;
+      let amount = parseFloat(document.getElementById('withdrawal-amount').value);
+      const bankName = document.getElementById('bank-name').value;
+      const currency = getCurrentCurrency();
+
+      // Convert amount back to KES if user is viewing in different currency
+      if (currency !== 'KES' && amount) {
+        // Convert from displayed currency back to KES for backend
+        amount = convertCurrency(amount, currency, 'KES');
+        console.log(`Converting ${amount} ${currency} back to KES: ${amount}`);
+      }
+
+      // Validation
+      if (!method) {
+        showModal('❌', 'Error', 'Please select a withdrawal method');
+        return;
+      }
+
+      if (method === 'bank' && !bankName) {
+        showModal('❌', 'Error', 'Please select your bank');
+        return;
+      }
+
+      if (!accountNumber) {
+        showModal('❌', 'Error', 'Please enter your account number');
+        return;
+      }
+
+      // Minimum withdrawal is 300 KES (always check in KES)
+      const minWithdrawalKES = 300;
+
+      if (!amount || isNaN(amount) || amount < minWithdrawalKES) {
+        const minDisplay = formatCurrency(minWithdrawalKES, currency);
+        showModal('❌', 'Error', `Minimum withdrawal is ${minDisplay}`);
+        return;
+      }
+
+      // Check balance (currentBalance is always in KES)
+      if (amount > currentBalance) {
+        showModal('❌', 'Error', 'Insufficient balance');
+        return;
+      }
+
+      // Show processing
+      showModal('⏳', 'Processing', 'Submitting your withdrawal request...');
+
+      const token = localStorage.getItem('token');
+
+
+      // Submit withdrawal request
+      const apiBaseUrl = (window.API_BASE_URL || '').replace(/\/api$/, '') + '/api';
+      fetch(`${apiBaseUrl}/mpesa/withdraw`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          method: method,
+          account_number: accountNumber,
+          amount: amount,
+          bank_name: method === 'bank' ? bankName : null
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            let message = `Withdrawal request for ${formatCurrency(amount)} submitted successfully.`;
+            if (method === 'mpesa' || method === 'airtel') {
+              message += ' Money will be sent to your account shortly.';
+            } else {
+              message += ' Processing time: 24-48 hours.';
+            }
+            showModal('✅', 'Success!', message);
+
+            // Clear form
+            document.getElementById('withdrawal-method').value = '';
+            document.getElementById('bank-name').value = '';
+            document.getElementById('account-number').value = '';
+            document.getElementById('withdrawal-amount').value = '';
+            document.getElementById('bank-selection-group').style.display = 'none';
+
+            // Reload data
+            loadBalance();
+            loadWithdrawals();
+          } else {
+            showModal('❌', 'Error', data.error || 'Failed to process withdrawal');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          showModal('❌', 'Error', 'Failed to submit withdrawal request');
+        });
+    }
+
+    function showModal(icon, title, message) {
+      document.getElementById('modal-icon').textContent = icon;
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-message').textContent = message;
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+      // Apply global settings
+      if (window.CICSettings) {
+        window.CICSettings.applySettings();
+      }
+
+      // Load data
+      loadBalance();
+      loadPaymentDetails(); // Autofill from bind details
+      loadWithdrawals();
+      updateMinWithdrawalDisplay();
+
+      // Show/hide bank selection when withdrawal method changes
+      document.getElementById('withdrawal-method').addEventListener('change', function () {
+        const bankGroup = document.getElementById('bank-selection-group');
+        if (this.value === 'bank') {
+          bankGroup.style.display = 'block';
+        } else {
+          bankGroup.style.display = 'none';
+        }
+      });
+
+      // Listen for settings changes
+      if (window.CICSettings) {
+        window.CICSettings.addListener('currency', (currency) => {
+          updateCurrencyDisplay(currency);
+        });
+      }
+    });
+
+    // Update currency display based on settings
+    function updateCurrencyDisplay(currency) {
+      const currencySymbols = {
+        'KES': 'KES',
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£'
+      };
+
+      const symbol = currencySymbols[currency] || 'KES';
+
+      // Update balance display with conversion
+      document.getElementById('available-balance').innerHTML = formatCurrency(currentBalance, currency);
+
+      // Update quick amount buttons
+      document.querySelectorAll('#quick-amounts .quick-btn[data-amount]').forEach(btn => {
+        const amount = parseFloat(btn.getAttribute('data-amount'));
+        const converted = convertCurrency(amount, 'KES', currency);
+        const displayValue = Math.max(1, Math.floor(converted));
+        btn.textContent = displayValue.toLocaleString();
+      });
+
+      // Update minimum withdrawal display
+      const minWithdrawalKES = 300;
+      const minWithdrawalElement = document.getElementById('min-withdrawal-display');
+      if (minWithdrawalElement) {
+        minWithdrawalElement.textContent = formatCurrency(minWithdrawalKES, currency);
+      }
+
+      // Reload withdrawals to update currency
+      loadWithdrawals();
+    }
+
+    // Update minimum withdrawal display on page load
+    function updateMinWithdrawalDisplay() {
+      const currency = getCurrentCurrency();
+      const minWithdrawalKES = 300;
+      const minWithdrawalElement = document.getElementById('min-withdrawal-display');
+      if (minWithdrawalElement) {
+        minWithdrawalElement.textContent = formatCurrency(minWithdrawalKES, currency);
+      }
+    }
+  </script>
+</body>
+
+</html>

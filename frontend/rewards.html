@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Rewards Information - CIC</title>
+
+    <!-- Monarch Design System -->
+    <link rel="stylesheet" href="css/monarch-design-system.css">
+    <script src="js/api-config.js?v=debug"></script>
+    <script src="js/cic-settings-manager.js"></script>
+    <script src="js/cic-settings-init.js"></script>
+    <style>
+        :root {
+            --brand-green: #00ff88;
+            --brand-maroon: #8b4513;
+            --brand-dark: #006633;
+            --brand-accent: #32ff7e;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--brand-green);
+            padding: 20px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title {
+            flex: 1;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .policy-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .policy-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--brand-green);
+        }
+
+        .section-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .section-list {
+            padding-left: 20px;
+            margin-bottom: 12px;
+        }
+
+        .section-list li {
+            margin-bottom: 8px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .highlight-box {
+            background: #e8f5e9;
+            border-left: 4px solid var(--brand-green);
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        .highlight-text {
+            font-size: 14px;
+            color: var(--brand-dark);
+            line-height: 1.6;
+        }
+
+        .reward-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .reward-table th,
+        .reward-table td {
+            border: 1px solid #eee;
+            padding: 8px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .reward-table th {
+            background-color: #f9f9f9;
+            font-weight: 700;
+            color: #555;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--brand-green);
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            opacity: 1;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <button class="back-btn" onclick="window.history.back()">←</button>
+            <h1 class="header-title" data-translate="rewards-info-title">Rewards Information</h1>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <div class="policy-card">
+            <div class="policy-title" data-translate="how-it-works">How Rewards Work</div>
+
+            <div class="section">
+                <div class="section-title" data-translate="task-rewards">Task Rewards</div>
+                <div class="section-content">
+                    <table class="reward-table">
+                        <thead>
+                            <tr>
+                                <th data-translate="level">Level</th>
+                                <th data-translate="daily-tasks">Daily Tasks</th>
+                                <th data-translate="reward-per-task">Reward/Task</th>
+                                <th data-translate="daily-income">Daily Income</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Temp</td>
+                                <td>5</td>
+                                <td>KES 7</td>
+                                <td>KES 35</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 1</td>
+                                <td>5</td>
+                                <td>KES 18</td>
+                                <td>KES 90</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 2</td>
+                                <td>10</td>
+                                <td>KES 27</td>
+                                <td>KES 270</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 3</td>
+                                <td>15</td>
+                                <td>KES 53</td>
+                                <td>KES 795</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 4</td>
+                                <td>20</td>
+                                <td>KES 76</td>
+                                <td>KES 1,520</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 5</td>
+                                <td>20</td>
+                                <td>KES 265</td>
+                                <td>KES 5,300</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 6</td>
+                                <td>25</td>
+                                <td>KES 238</td>
+                                <td>KES 5,950</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 7</td>
+                                <td>30</td>
+                                <td>KES 300</td>
+                                <td>KES 9,000</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 8</td>
+                                <td>35</td>
+                                <td>KES 430</td>
+                                <td>KES 15,050</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 9</td>
+                                <td>40</td>
+                                <td>KES 560</td>
+                                <td>KES 22,400</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title" data-translate="referral-program">Referral Program</div>
+                <div class="section-content" data-translate="referral-program-desc">
+                    Invite friends to join CIC and earn commissions when they upgrade their VIP level.
+                </div>
+                <div class="highlight-box">
+                    <div class="highlight-text">
+                        <strong><span data-translate="tip">Tip</span>:</strong> <span data-translate="referral-tip">The
+                            more active users you invite, the higher your daily team commission!</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title" data-translate="referral-bonuses">Referral Bonuses</div>
+                <div class="section-content">
+                    <p data-translate="referral-bonus-desc">Earn a one-time bonus when your direct invitee upgrades to a
+                        new VIP level.</p>
+                    <table class="reward-table">
+                        <thead>
+                            <tr>
+                                <th data-translate="friend-level">Friend's New Level</th>
+                                <th data-translate="bonus-amount">Your Bonus</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>VIP 1</td>
+                                <td>KES 252 (9%)</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 2</td>
+                                <td>KES 607 (7.4%)</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 3</td>
+                                <td>KES 1,900 (8.1%)</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 4</td>
+                                <td>KES 5,000 (7.6%)</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 5</td>
+                                <td>KES 15,000 (8.4%)</td>
+                            </tr>
+                            <tr>
+                                <td>VIP 6</td>
+                                <td>KES 40,000 (8.3%)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title" data-translate="withdrawal-rules">Withdrawal Rules</div>
+                <ul class="section-list">
+                    <li data-translate="withdrawal-rule-1">Minimum withdrawal amount is KES 500.</li>
+                    <li data-translate="withdrawal-rule-2">Withdrawals are processed within 24 hours.</li>
+                    <li data-translate="withdrawal-rule-3">Handling fee of 5% applies to all withdrawals.</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="home.html" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span data-translate="home">Home</span>
+        </a>
+        <a href="task.html" class="nav-item">
+            <span class="nav-icon">📋</span>
+            <span data-translate="tasks">Tasks</span>
+        </a>
+        <a href="invest.html" class="nav-item">
+            <span class="nav-icon">💰</span>
+            <span data-translate="invest">Invest</span>
+        </a>
+        <a href="withdrawal.html" class="nav-item">
+            <span class="nav-icon">💸</span>
+            <span data-translate="withdraw">Withdraw</span>
+        </a>
+        <a href="profile.html" class="nav-item active">
+            <span class="nav-icon">👤</span>
+            <span data-translate="profile">Profile</span>
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.CICLanguageManager) {
+                window.CICLanguageManager.applyLanguage();
+            }
+        });
+    </script>
+</body>
+
+</html>

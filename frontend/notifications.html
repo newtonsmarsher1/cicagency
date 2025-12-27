@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-translate="notifications-title">Notifications - CIC</title>
+  <link rel="stylesheet" href="assets/css/auth-styles.css">
+  <script src="js/api-config.js"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+</head>
+
+<body style="font-family: 'Segoe UI', Arial, sans-serif; background:#f6f8fa; margin:0;">
+  <header
+    style="background:linear-gradient(135deg,#00ff88,#00cc6a);color:#fff;padding:16px 20px;position:sticky;top:0;">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <strong data-translate="notifications-header">Notifications</strong>
+      <a href="home.html" style="color:#fff;text-decoration:none" data-translate="home">Home</a>
+    </div>
+  </header>
+  <main style="padding:16px;">
+    <div id="list" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+    </div>
+  </main>
+  <script>
+    function setLastSeen(ts) { localStorage.setItem('notif_last_seen', new Date(ts || Date.now()).toISOString()); }
+    function getLastSeen() { const v = localStorage.getItem('notif_last_seen'); return v ? new Date(v).getTime() : 0; }
+    function iconFor(type) { if (type === 'payment') return '💰'; if (type === 'task') return '✅'; return '🔔'; }
+    function item(n) {
+      const wrap = document.createElement('div');
+      wrap.style.padding = '12px 16px';
+      wrap.style.borderBottom = '1px solid #eee';
+      wrap.style.display = 'flex';
+      wrap.style.gap = '10px';
+      wrap.innerHTML = `<div style="width:36px;height:36px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center">${iconFor(n.type)}</div>
+        <div style="flex:1">
+          <div style="font-weight:700">${n.title}</div>
+          <div style="color:#555">${n.message}</div>
+          <div style="color:#888;font-size:12px;margin-top:4px;">${new Date(n.created_at).toLocaleString()}</div>
+        </div>`;
+      return wrap;
+    }
+    async function load() {
+      try {
+        const res = await fetchNotifications();
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        if (res.success && res.data && res.data.length) {
+          // Sort newest first
+          const arr = res.data.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+          arr.forEach(n => list.appendChild(item(n)));
+          // mark all as seen
+          setLastSeen(arr[0]?.created_at);
+        } else {
+          list.innerHTML = '<div style="padding:16px;" data-translate="no-notifications">No notifications</div>';
+        }
+        if (window.CICLanguageManager) window.CICLanguageManager.applyLanguage();
+      } catch (e) {
+        document.getElementById('list').innerHTML = '<div style="padding:16px;" data-translate="failed-load-notif">Failed to load notifications</div>';
+        if (window.CICLanguageManager) window.CICLanguageManager.applyLanguage();
+      }
+    }
+    load();
+  </script>
+</body>
+
+</html>

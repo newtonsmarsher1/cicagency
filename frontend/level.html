@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Level - CIC</title>
+  <script src="js/api-config.js"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <script src="js/activity-tracker.js"></script>
+  <style>
+    :root {
+      --brand-green: #00ff88;
+      --brand-green-dark: #00cc6a;
+      --brand-green-light: #33ff99;
+      --brand-white: #ffffff;
+      --brand-gray: #f8f9fa;
+      --brand-dark: #2c3e50;
+      --brand-accent: #32ff7e;
+      --icon-bg: #e8fff0;
+      --icon-color: #00ff88;
+      --text-primary: #2c3e50;
+      --text-secondary: #6c757d;
+      --success-green: #28a745;
+      --warning-orange: #ffc107;
+      --danger-red: #dc3545;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-light) 50%, var(--brand-green-dark) 100%);
+      min-height: 100vh;
+      display: flex !important;
+      flex-direction: column;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    /* Header */
+    .header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 24px;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      background: var(--brand-white);
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    /* Level Cards Container */
+    .levels-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    /* Level Card */
+    .level-card {
+      background: var(--brand-white);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 255, 136, 0.15);
+      border: 2px solid var(--icon-bg);
+      position: relative;
+      transition: all 0.3s ease;
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .level-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0, 255, 136, 0.25);
+    }
+
+    .level-card.current {
+      border-color: var(--brand-green);
+      box-shadow: 0 8px 24px rgba(0, 255, 136, 0.3);
+    }
+
+    .level-card.locked {
+      opacity: 0.7;
+      filter: grayscale(0.3);
+    }
+
+    /* Level Header */
+    .level-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .level-icon {
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-accent) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: white;
+      position: relative;
+      box-shadow: 0 4px 16px rgba(0, 255, 136, 0.3);
+    }
+
+    .level-card.locked .level-icon {
+      background: linear-gradient(135deg, #ccc 0%, #999 100%);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .level-card.current .level-icon {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 4px 16px rgba(0, 255, 136, 0.3);
+      }
+
+      50% {
+        box-shadow: 0 6px 24px rgba(0, 255, 136, 0.5);
+      }
+
+      100% {
+        box-shadow: 0 4px 16px rgba(0, 255, 136, 0.3);
+      }
+    }
+
+    .level-icon::before {
+      content: '👑';
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      font-size: 20px;
+      background: var(--warning-orange);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+    }
+
+    .level-card.locked .level-icon::before {
+      display: none;
+    }
+
+    .level-info {
+      flex: 1;
+    }
+
+    .level-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .level-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* Level Details */
+    .level-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .detail-item {
+      text-align: center;
+      padding: 12px;
+      background: var(--brand-gray);
+      border-radius: 12px;
+      border: 2px solid var(--icon-bg);
+    }
+
+    .detail-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--brand-green);
+    }
+
+    .detail-value.amount {
+      color: var(--warning-orange);
+    }
+
+    /* Action Button */
+    .level-action {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .action-btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn.enroll {
+      background: var(--brand-green);
+      color: white;
+      box-shadow: 0 4px 16px rgba(0, 255, 136, 0.3);
+    }
+
+    .action-btn.enroll:hover {
+      background: var(--brand-green-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 255, 136, 0.4);
+    }
+
+    .action-btn.full {
+      background: var(--danger-red);
+      color: white;
+      box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+    }
+
+    .action-btn.locked {
+      background: #ccc;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    /* Level Label */
+    .level-label {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--brand-green);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .level-card.locked .level-label {
+      background: #ccc;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-green);
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 16px;
+      }
+
+      .levels-container {
+        gap: 12px;
+      }
+
+      .level-card {
+        padding: 16px;
+      }
+
+      .level-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+      }
+
+      .level-title {
+        font-size: 18px;
+      }
+
+      .level-details {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .detail-item {
+        padding: 10px;
+      }
+
+      .detail-value {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        padding: 16px;
+      }
+
+      .header-title {
+        font-size: 20px;
+      }
+
+      .back-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+      }
+
+      .level-card {
+        padding: 14px;
+      }
+
+      .level-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+      }
+
+      .level-title {
+        font-size: 16px;
+      }
+
+      .action-btn {
+        padding: 10px 20px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+  <!-- Header -->
+  <div class="header" style="display: block !important; visibility: visible !important;">
+    <div class="header-content">
+      <button class="back-btn" onclick="window.history.back()">←</button>
+      <h1 class="header-title" data-translate="levels-title">Levels</h1>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+    <div class="levels-container"
+      style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
+      <!-- J1 Level -->
+      <div class="level-card" data-level="1">
+        <div class="level-label">J1</div>
+        <div class="level-header">
+          <div class="level-icon">J1</div>
+          <div class="level-info">
+            <div class="level-title">Level J1</div>
+            <div class="level-subtitle">Regular Staff</div>
+          </div>
+        </div>
+        <div class="level-details">
+          <div class="detail-item">
+            <div class="detail-label" data-translate="per-order">Per Order</div>
+            <div class="detail-value amount">16.00</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label" data-translate="daily-tasks-label">Daily Tasks</div>
+            <div class="detail-value">5</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label" data-translate="amount-label">Amount</div>
+            <div class="detail-value amount">2,800.00</div>
+          </div>
+        </div>
+        <div class="level-action">
+          <button class="action-btn enroll" data-level="1" data-translate="enroll-now">Enroll Now</button>
+        </div>
+      </div>
+
+      <!-- J2 Level -->
+      <div class="level-card" data-level="2">
+        <div class="level-label">J2</div>
+        <div class="level-header">
+          <div class="level-icon">J2</div>
+          <div class="level-info">
+            <div class="level-title">Level J2</div>
+            <div class="level-subtitle">Senior Staff</div>
+          </div>
+        </div>
+        <div class="level-details">
+          <div class="detail-item">
+            <div class="detail-label">Per Order</div>
+            <div class="detail-value amount">25.00</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Daily Tasks</div>
+            <div class="detail-value">10</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value amount">8,200.00</div>
+          </div>
+        </div>
+        <div class="level-action">
+          <button class="action-btn enroll" data-level="2" data-translate="enroll-now">Enroll Now</button>
+        </div>
+      </div>
+
+      <!-- J3 Level -->
+      <div class="level-card" data-level="3">
+        <div class="level-label">J3</div>
+        <div class="level-header">
+          <div class="level-icon">J3</div>
+          <div class="level-info">
+            <div class="level-title">Level J3</div>
+            <div class="level-subtitle">Team Leader</div>
+          </div>
+        </div>
+        <div class="level-details">
+          <div class="detail-item">
+            <div class="detail-label">Per Order</div>
+            <div class="detail-value amount">52.00</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Daily Tasks</div>
+            <div class="detail-value">15</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value amount">23,400.00</div>
+          </div>
+        </div>
+        <div class="level-action">
+          <button class="action-btn enroll" data-level="3" data-translate="enroll-now">Enroll Now</button>
+        </div>
+      </div>
+
+      <!-- J4 Level -->
+      <div class="level-card" data-level="4">
+        <div class="level-label">J4</div>
+        <div class="level-header">
+          <div class="level-icon">J4</div>
+          <div class="level-info">
+            <div class="level-title">Level J4</div>
+            <div class="level-subtitle">Manager</div>
+          </div>
+        </div>
+        <div class="level-details">
+          <div class="detail-item">
+            <div class="detail-label">Per Order</div>
+            <div class="detail-value amount">88.00</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Daily Tasks</div>
+            <div class="detail-value">30</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value amount">65,800.00</div>
+          </div>
+        </div>
+        <div class="level-action">
+          <button class="action-btn enroll" data-level="4" data-translate="enroll-now">Enroll Now</button>
+        </div>
+      </div>
+
+      <!-- J5 Level -->
+      <div class="level-card" data-level="5">
+        <div class="level-label">J5</div>
+        <div class="level-header">
+          <div class="level-icon">J5</div>
+          <div class="level-info">
+            <div class="level-title">Level J5</div>
+            <div class="level-subtitle">Senior Manager</div>
+          </div>
+        </div>
+        <div class="level-details">
+          <div class="detail-item">
+            <div class="detail-label">Per Order</div>
+            <div class="detail-value amount">267.00</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Daily Tasks</div>
+            <div class="detail-value">25</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value amount">178,000.00</div>
+          </div>
+        </div>
+        <div class="level-action">
+          <button class="action-btn enroll" data-level="5" data-translate="enroll-now">Enroll Now</button>
+        </div>
+      </div>
+
+      <!-- J6 Level -->
+      <div class="level-card" data-level="6">
+        <div class="level-label">J6</div>
+        <div class="level-header">
+          <div class="level-icon">J6</div>
+          <div class="level-info">
+            <div class="level-title">Level J6</div>
+            <div class="level-subtitle">Director</div>
+          </div>
+        </div>
+        <div class="level-details">
+          <div class="detail-item">
+            <div class="detail-label">Per Order</div>
+            <div class="detail-value amount">230.00</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Daily Tasks</div>
+            <div class="detail-value">75</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value amount">483,000.00</div>
+          </div>
+        </div>
+        <div class="level-action">
+          <button class="action-btn enroll" data-level="6" data-translate="enroll-now">Enroll Now</button>
+        </div>
+      </div>
+
+      <!-- J7 Level -->
+      <div class="level-card" data-level="7">
+        <div class="level-label">J7</div>
+        <div class="level-header">
+          <div class="level-icon">J7</div>
+          <div class="level-info">
+            <div class="level-title">Level J7</div>
+            <div class="level-subtitle">Senior Director</div>
+          </div>
+        </div>
+        <div class="level-details">
+          <div class="detail-item">
+            <div class="detail-label">Per Order</div>
+            <div class="detail-value amount">298.00</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Daily Tasks</div>
+            <div class="detail-value">140</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value amount">1,085,000.00</div>
+          </div>
+        </div>
+        <div class="level-action">
+          <button class="action-btn enroll" data-level="7" data-translate="enroll-now">Enroll Now</button>
+        </div>
+      </div>
+
+      <!-- J8 Level -->
+      <div class="level-card" data-level="8">
+        <div class="level-label">J8</div>
+        <div class="level-header">
+          <div class="level-icon">J8</div>
+          <div class="level-info">
+            <div class="level-title">Level J8</div>
+            <div class="level-subtitle">Vice President</div>
+          </div>
+        </div>
+        <div class="level-details">
+          <div class="detail-item">
+            <div class="detail-label">Per Order</div>
+            <div class="detail-value amount">428.00</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Daily Tasks</div>
+            <div class="detail-value">220</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value amount">2,258,000.00</div>
+          </div>
+        </div>
+        <div class="level-action">
+          <button class="action-btn enroll" data-level="8" data-translate="enroll-now">Enroll Now</button>
+        </div>
+      </div>
+
+      <!-- J9 Level -->
+      <div class="level-card" data-level="9">
+        <div class="level-label">J9</div>
+        <div class="level-header">
+          <div class="level-icon">J9</div>
+          <div class="level-info">
+            <div class="level-title">Level J9</div>
+            <div class="level-subtitle">President</div>
+          </div>
+        </div>
+        <div class="level-details">
+          <div class="detail-item">
+            <div class="detail-label">Per Order</div>
+            <div class="detail-value amount">555.00</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Daily Tasks</div>
+            <div class="detail-value">350</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value amount">4,280,000.00</div>
+          </div>
+        </div>
+        <div class="level-action">
+          <button class="action-btn enroll" data-level="9" data-translate="enroll-now">Enroll Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span data-translate="home">Home</span>
+    </a>
+    <a href="task.html" class="nav-item">
+      <span class="nav-icon">📋</span>
+      <span data-translate="tasks">Tasks</span>
+    </a>
+    <a href="level.html" class="nav-item active">
+      <span class="nav-icon">📊</span>
+      <span data-translate="levels-nav">Levels</span>
+    </a>
+    <a href="withdrawal.html" class="nav-item">
+      <span class="nav-icon">💸</span>
+      <span data-translate="withdraw">Withdraw</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="nav-icon">👤</span>
+      <span data-translate="profile">Profile</span>
+    </a>
+  </div>
+
+  <script src="js/api-config.js"></script>
+  <script>
+    // Currency conversion rates (approximate - should be fetched from API in production)
+    const currencyRates = {
+      USD: 1.0,      // Base currency
+      KES: 130.0,    // 1 USD = 130 KES (approximate)
+      EUR: 0.92,     // 1 USD = 0.92 EUR (approximate)
+      GBP: 0.79      // 1 USD = 0.79 GBP (approximate)
+    };
+
+    // Get current currency from settings
+    function getCurrentCurrency() {
+      if (window.CICSettings) {
+        return window.CICSettings.get('currency') || 'KES';
+      }
+      return localStorage.getItem('cic-currency') || 'KES';
+    }
+
+    // Convert amount to current currency
+    function convertCurrency(amount, fromCurrency = 'KES', toCurrency = null) {
+      if (!toCurrency) {
+        toCurrency = getCurrentCurrency();
+      }
+
+      if (fromCurrency === toCurrency) {
+        return amount;
+      }
+
+      // Convert to USD first (base currency)
+      let amountInUSD = amount;
+      if (fromCurrency !== 'USD') {
+        amountInUSD = amount / currencyRates[fromCurrency];
+      }
+
+      // Convert from USD to target currency
+      if (toCurrency !== 'USD') {
+        return amountInUSD * currencyRates[toCurrency];
+      }
+
+      return amountInUSD;
+    }
+
+    // Format currency amount
+    function formatCurrency(amount, currency = null) {
+      if (!currency) {
+        currency = getCurrentCurrency();
+      }
+
+      const convertedAmount = convertCurrency(amount, 'KES', currency);
+      const currencySymbols = {
+        'USD': '$',
+        'KES': 'KES ',
+        'EUR': '€',
+        'GBP': '£'
+      };
+
+      const symbol = currencySymbols[currency] || currency + ' ';
+      return `${symbol}${convertedAmount.toFixed(2)}`;
+    }
+
+    // IMMEDIATE: Ensure page is visible from the start
+    (function () {
+      // Force visibility immediately
+      const forceVisibility = () => {
+        if (document.body) {
+          document.body.style.display = 'block';
+          document.body.style.visibility = 'visible';
+          document.body.style.opacity = '1';
+        }
+
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+          mainContent.style.display = 'block';
+          mainContent.style.visibility = 'visible';
+          mainContent.style.opacity = '1';
+        }
+
+        const levelsContainer = document.querySelector('.levels-container');
+        if (levelsContainer) {
+          levelsContainer.style.display = 'flex';
+          levelsContainer.style.visibility = 'visible';
+          levelsContainer.style.opacity = '1';
+        }
+
+        document.querySelectorAll('.level-card').forEach(card => {
+          card.style.display = 'block';
+          card.style.visibility = 'visible';
+          card.style.opacity = '1';
+        });
+      };
+
+      // Force visibility immediately
+      forceVisibility();
+
+      // Use MutationObserver to prevent content from being hidden
+      if (typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+              const target = mutation.target;
+              if (target.classList && (target.classList.contains('main-content') ||
+                target.classList.contains('levels-container') ||
+                target.classList.contains('level-card'))) {
+                // If someone tries to hide it, immediately restore visibility
+                if (target.style.display === 'none' ||
+                  target.style.visibility === 'hidden' ||
+                  target.style.opacity === '0') {
+                  console.log('⚠️ Detected content being hidden, restoring visibility');
+                  forceVisibility();
+                }
+              }
+            }
+          });
+        });
+
+        // Start observing when DOM is ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => {
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+              observer.observe(mainContent, { attributes: true, attributeFilter: ['style'] });
+            }
+            forceVisibility();
+          });
+        } else {
+          const mainContent = document.querySelector('.main-content');
+          if (mainContent) {
+            observer.observe(mainContent, { attributes: true, attributeFilter: ['style'] });
+          }
+          forceVisibility();
+        }
+      }
+
+      // Also set on document ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', forceVisibility);
+      } else {
+        forceVisibility();
+      }
+
+      // Keep forcing visibility periodically
+      setInterval(forceVisibility, 1000);
+    })();
+
+    // Level data configuration
+    const levelData = {
+      1: {
+        name: 'Level J1',
+        subtitle: 'Regular Staff',
+        icon: 'J1',
+        perOrder: 18.00,
+        dailyTasks: 5,
+        amount: 2800.00,
+        rechargeRequired: 2800,
+        status: 'available'
+      },
+      2: {
+        name: 'Level J2',
+        subtitle: 'Senior Staff',
+        icon: 'J2',
+        perOrder: 27.00,
+        dailyTasks: 10,
+        amount: 8200.00,
+        rechargeRequired: 8200,
+        status: 'available'
+      },
+      3: {
+        name: 'Level J3',
+        subtitle: 'Team Leader',
+        icon: 'J3',
+        perOrder: 53.00,
+        dailyTasks: 15,
+        amount: 23500.00,
+        rechargeRequired: 23500,
+        status: 'available'
+      },
+      4: {
+        name: 'Level J4',
+        subtitle: 'Manager',
+        icon: 'J4',
+        perOrder: 76.00,
+        dailyTasks: 30,
+        amount: 65800.00,
+        rechargeRequired: 65800,
+        status: 'available'
+      },
+      5: {
+        name: 'Level J5',
+        subtitle: 'Senior Manager',
+        icon: 'J5',
+        perOrder: 265.00,
+        dailyTasks: 25,
+        amount: 178000.00,
+        rechargeRequired: 178000,
+        status: 'available'
+      },
+      6: {
+        name: 'Level J6',
+        subtitle: 'Director',
+        icon: 'J6',
+        perOrder: 238.00,
+        dailyTasks: 75,
+        amount: 483000.00,
+        rechargeRequired: 483000,
+        status: 'available'
+      },
+      7: {
+        name: 'Level J7',
+        subtitle: 'Senior Director',
+        icon: 'J7',
+        perOrder: 300.00,
+        dailyTasks: 140,
+        amount: 1085000.00,
+        rechargeRequired: 1085000,
+        status: 'available'
+      },
+      8: {
+        name: 'Level J8',
+        subtitle: 'Vice President',
+        icon: 'J8',
+        perOrder: 430.00,
+        dailyTasks: 220,
+        amount: 2258000.00,
+        rechargeRequired: 2258000,
+        status: 'available'
+      },
+      9: {
+        name: 'Level J9',
+        subtitle: 'President',
+        icon: 'J9',
+        perOrder: 560.00,
+        dailyTasks: 350,
+        amount: 4280000.00,
+        rechargeRequired: 4280000,
+        status: 'available'
+      }
+    };
+
+    let currentUserLevel = 0;
+    let userWalletBalance = 0;
+    let isUpdatingLevelCards = false; // Prevent rapid updates
+
+    // Check authentication
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('No authentication token found. Showing levels page for viewing.');
+        return false; // Don't redirect, just return false
+      }
+      return true;
+    }
+
+    // Load user data
+    async function loadUserData() {
+      // Prevent multiple simultaneous calls
+      if (isUpdatingLevelCards) {
+        console.log('⚠️ Already updating level cards, skipping...');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('No authentication token found. User needs to log in to see real data.');
+        // Show default values when not logged in
+        currentUserLevel = 0;
+        userWalletBalance = 0;
+
+        // Update level cards based on default data (only once)
+        isUpdatingLevelCards = true;
+        updateLevelCards();
+        setTimeout(() => {
+          isUpdatingLevelCards = false;
+        }, 100);
+        return;
+      }
+
+      try {
+        isUpdatingLevelCards = true;
+        // Use API_CONFIG to get the correct backend URL
+        const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/stats') : 'https://cicagency.onrender.com/api/auth/stats';
+        const res = await fetch(apiUrl, {
+          headers: { Authorization: "Bearer " + token }
+        });
+
+        if (!res.ok) {
+          console.error('Failed to load user data:', res.status);
+          // Still show default state even on error
+          currentUserLevel = 0;
+          userWalletBalance = 0;
+          updateLevelCards();
+          isUpdatingLevelCards = false;
+          return;
+        }
+
+        const data = await res.json();
+        console.log('User data loaded:', data);
+
+        // Update user level and wallet
+        const newLevel = data.level || 0;
+        const newBalance = data.wallet_balance || 0;
+
+        // Always update to ensure UI is correct
+        currentUserLevel = newLevel;
+        userWalletBalance = newBalance;
+
+        // Update level cards based on user data
+        updateLevelCards();
+
+        // Reset flag after update
+        setTimeout(() => {
+          isUpdatingLevelCards = false;
+        }, 100);
+
+      } catch (error) {
+        console.error('Error loading user data:', error);
+        // Show default state on error
+        currentUserLevel = 0;
+        userWalletBalance = 0;
+        updateLevelCards();
+        isUpdatingLevelCards = false;
+      }
+    }
+
+    // Update level cards currency displays
+    function updateLevelCardsCurrency() {
+      const currency = getCurrentCurrency();
+      const levelCards = document.querySelectorAll('.level-card');
+
+      levelCards.forEach(card => {
+        const level = parseInt(card.dataset.level);
+        const levelInfo = levelData[level];
+        if (!levelInfo) return;
+
+        // Update Per Order amount
+        const perOrderElement = card.querySelector('.detail-item:first-child .detail-value.amount');
+        if (perOrderElement) {
+          const converted = convertCurrency(levelInfo.perOrder, 'KES', currency);
+          perOrderElement.textContent = converted.toFixed(2);
+        }
+
+        // Update Amount (total)
+        const amountElement = card.querySelector('.detail-item:last-child .detail-value.amount');
+        if (amountElement) {
+          const converted = convertCurrency(levelInfo.amount, 'KES', currency);
+          amountElement.textContent = converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+      });
+    }
+
+    // Update level cards based on user data
+    function updateLevelCards() {
+      const levelCards = document.querySelectorAll('.level-card');
+
+      if (levelCards.length === 0) {
+        console.log('⚠️ No level cards found in DOM');
+        return;
+      }
+
+      // Update currency displays first
+      updateLevelCardsCurrency();
+
+      // In updateLevelCards, only lock levels 7, 8, 9 and add availability notice
+      levelCards.forEach(card => {
+        const level = parseInt(card.dataset.level);
+        card.classList.remove('current', 'locked', 'available');
+        // Remove any prior unlock notice
+        let unlockBadge = card.querySelector('.unlock-date-badge');
+        if (unlockBadge) unlockBadge.remove();
+        if ([7, 8, 9].includes(level)) {
+          card.classList.add('locked');
+          updateActionButton(card, 'locked');
+          // Add unlock date badge if not present
+          unlockBadge = document.createElement('div');
+          unlockBadge.className = 'unlock-date-badge';
+          unlockBadge.textContent = 'Available after April 30th, 2026';
+          unlockBadge.style.position = 'absolute';
+          unlockBadge.style.left = '50%';
+          unlockBadge.style.bottom = '14px';
+          unlockBadge.style.transform = 'translateX(-50%)';
+          unlockBadge.style.background = '#ffc107';
+          unlockBadge.style.color = '#2c3e50';
+          unlockBadge.style.padding = '6px 16px';
+          unlockBadge.style.borderRadius = '8px';
+          unlockBadge.style.fontWeight = '700';
+          unlockBadge.style.fontSize = '13px';
+          unlockBadge.style.boxShadow = '0 2px 8px rgba(255,193,7,0.16)';
+          unlockBadge.style.zIndex = '10';
+          card.appendChild(unlockBadge);
+        } else if (level === currentUserLevel) {
+          card.classList.add('current');
+          updateActionButton(card, 'current');
+        } else if (level < currentUserLevel) {
+          card.classList.add('available');
+          updateActionButton(card, 'completed');
+        } else if (userWalletBalance >= levelData[level].rechargeRequired) {
+          card.classList.add('available');
+          updateActionButton(card, 'enroll');
+        } else {
+          card.classList.add('locked');
+          updateActionButton(card, 'locked');
+        }
+      });
+
+      console.log('✅ Level cards updated');
+    }
+
+    // Update action button based on status
+    function updateActionButton(card, status) {
+      const button = card.querySelector('.action-btn');
+      if (!button) return;
+
+      const level = parseInt(card.dataset.level);
+      const levelInfo = levelData[level];
+
+      // Store the current status to prevent unnecessary updates
+      const currentStatus = button.getAttribute('data-status');
+      if (currentStatus === status) {
+        return; // Already in correct state, skip update
+      }
+
+      // Remove all button classes and event handlers
+      // Remove inline onclick if exists
+      button.removeAttribute('onclick');
+      button.className = 'action-btn';
+      button.setAttribute('data-status', status);
+      button.setAttribute('data-level', level);
+
+      // Update button state directly
+      switch (status) {
+        case 'current':
+          button.textContent = 'Current Level';
+          button.classList.add('locked');
+          button.disabled = true;
+          button.onclick = null;
+          break;
+        case 'completed':
+          button.textContent = 'Completed';
+          button.classList.add('locked');
+          button.disabled = true;
+          button.onclick = null;
+          break;
+        case 'enroll':
+          button.textContent = 'Enroll Now';
+          button.classList.add('enroll');
+          button.disabled = false;
+          // Set up click handler
+          button.onclick = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const btnLevel = parseInt(this.getAttribute('data-level') || this.closest('.level-card')?.dataset.level);
+            if (btnLevel) {
+              enrollLevel(btnLevel);
+            }
+          };
+          break;
+        case 'locked':
+          const convertedRequired = convertCurrency(levelInfo.rechargeRequired, 'KES', getCurrentCurrency());
+          button.textContent = `Need ${formatCurrency(levelInfo.rechargeRequired)}`;
+          button.classList.add('locked');
+          button.disabled = true;
+          button.onclick = null;
+          // In updateActionButton, only add padlock for J7/J8/J9. For all other levels, remove it.
+          if (status === 'locked' && [7, 8, 9].includes(level)) {
+            button.textContent = 'Locked';
+            button.classList.add('locked');
+            button.disabled = true;
+            button.onclick = null;
+            let padlock = card.querySelector('.padlock-icon');
+            if (!padlock) {
+              padlock = document.createElement('span');
+              padlock.className = 'padlock-icon';
+              padlock.style.position = 'absolute';
+              padlock.style.top = '18px';
+              padlock.style.right = '52px';
+              padlock.style.fontSize = '26px';
+              padlock.style.color = '#888';
+              padlock.style.pointerEvents = 'none';
+              padlock.innerText = '🔒';
+              card.querySelector('.level-header').appendChild(padlock);
+            }
+          } else {
+            // Remove padlock for all other levels
+            let padlock = card.querySelector('.padlock-icon');
+            if (padlock) padlock.remove();
+          }
+          break;
+      }
+    }
+
+    // Enroll in level
+    async function enrollLevel(level) {
+      // Ensure level is a number
+      level = parseInt(level);
+
+      console.log('enrollLevel called with level:', level);
+      console.log('Current wallet balance:', userWalletBalance);
+      console.log('Current user level:', currentUserLevel);
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please login first to enroll in levels');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const levelInfo = levelData[level];
+      console.log('Level info:', levelInfo);
+
+      // Check if user is already at this level or higher
+      if (currentUserLevel >= level) {
+        alert(`You are already at Level J${currentUserLevel} or higher. You cannot downgrade to Level J${level}.`);
+        return;
+      }
+
+      // Check if user has enough balance
+      if (userWalletBalance < levelInfo.rechargeRequired) {
+        const insufficient = levelInfo.rechargeRequired - userWalletBalance;
+        const currency = getCurrentCurrency();
+        const message = `Insufficient balance!\n\n` +
+          `Required: ${formatCurrency(levelInfo.rechargeRequired, currency)}\n` +
+          `Your Balance: ${formatCurrency(userWalletBalance, currency)}\n` +
+          `You need: ${formatCurrency(insufficient, currency)} more\n\n` +
+          `Would you like to recharge now?`;
+
+        if (confirm(message)) {
+          // Redirect to payment page with suggested amount
+          window.location.href = `payment.html?amount=${levelInfo.rechargeRequired}`;
+        }
+        return;
+      }
+
+      // Confirm enrollment
+      const currency = getCurrentCurrency();
+      const confirmMessage = `Enroll in Level J${level}?\n\n` +
+        `Level: ${levelInfo.name} (${levelInfo.subtitle})\n` +
+        `Per Order: ${formatCurrency(levelInfo.perOrder, currency)}\n` +
+        `Daily Tasks: ${levelInfo.dailyTasks}\n` +
+        `Cost: ${formatCurrency(levelInfo.rechargeRequired, currency)}\n\n` +
+        `This will deduct ${formatCurrency(levelInfo.rechargeRequired, currency)} from your wallet.`;
+
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+
+      // Show loading state
+      const button = document.querySelector(`[data-level="${level}"] .action-btn`);
+      const originalText = button ? button.textContent : 'Enroll Now';
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Processing...';
+      }
+
+      try {
+        // Use API_CONFIG to get the correct backend URL
+        const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/upgrade-level') : 'https://cicagency.onrender.com/api/auth/upgrade-level';
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            level: parseInt(level),
+            rechargeAmount: levelInfo.rechargeRequired
+          })
+        });
+
+        let data;
+        try {
+          data = await res.json();
+        } catch (jsonError) {
+          console.error('Error parsing response:', jsonError);
+          const text = await res.text();
+          console.error('Response text:', text);
+          alert(`❌ Enrollment Failed\n\nServer returned invalid response. Please check console for details.`);
+          if (button) {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+          return;
+        }
+
+        console.log('Response status:', res.status);
+        console.log('Response data:', data);
+
+        if (res.ok && data.success) {
+          // Show success message first
+          const currency = getCurrentCurrency();
+          alert(`✅ Successfully enrolled in Level J${level}!\n\n` +
+            `Amount deducted: ${formatCurrency(levelInfo.rechargeRequired, currency)}\n` +
+            `New level: J${level}\n` +
+            `Your wallet balance has been updated.`);
+
+          // Reload user data to get fresh data from server
+          await loadUserData();
+
+          // Note: updateLevelCards() is already called in loadUserData()
+          // So we don't need to call it again here
+        } else {
+          // Handle error response
+          const errorMessage = data.error || data.message || 'Failed to enroll in level';
+          console.error('Enrollment error:', errorMessage);
+          console.error('Full error data:', data);
+          alert(`❌ Enrollment Failed\n\n${errorMessage}\n\nPlease try again or contact support if the problem persists.`);
+
+          if (button) {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+        }
+
+      } catch (error) {
+        console.error('Error enrolling in level:', error);
+        alert(`❌ Network Error\n\nFailed to connect to server. Please check your internet connection and try again.`);
+
+        if (button) {
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+      }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('🔄 Level page initializing...');
+
+      // CRITICAL: Ensure all content is visible
+      const ensureVisibility = () => {
+        const mainContent = document.querySelector('.main-content');
+        const levelsContainer = document.querySelector('.levels-container');
+        const levelCards = document.querySelectorAll('.level-card');
+
+        if (mainContent) {
+          mainContent.style.display = 'block';
+          mainContent.style.visibility = 'visible';
+          mainContent.style.opacity = '1';
+        }
+
+        if (levelsContainer) {
+          levelsContainer.style.display = 'flex';
+          levelsContainer.style.visibility = 'visible';
+          levelsContainer.style.opacity = '1';
+        }
+
+        levelCards.forEach(card => {
+          card.style.display = 'block';
+          card.style.visibility = 'visible';
+          card.style.opacity = '1';
+        });
+      };
+
+      // Ensure visibility immediately
+      ensureVisibility();
+
+      // Also ensure visibility after a short delay (in case something tries to hide it)
+      setTimeout(ensureVisibility, 50);
+      setTimeout(ensureVisibility, 200);
+      setTimeout(ensureVisibility, 500);
+
+      // Load user data immediately (will show default values if not logged in)
+      loadUserData().then(() => {
+        console.log('✅ Level page initialized');
+        // Update currency displays
+        updateLevelCardsCurrency();
+        // Ensure visibility again after data loads
+        ensureVisibility();
+      }).catch(err => {
+        console.error('Error initializing level page:', err);
+        // Ensure visibility even on error
+        ensureVisibility();
+      });
+
+      // Add click handlers for navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function (e) {
+          // Remove active class from all nav items
+          document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+          // Add active class to clicked item
+          this.classList.add('active');
+        });
+      });
+
+      // Listen for currency changes
+      if (window.CICSettings) {
+        window.CICSettings.addListener('currency', () => {
+          updateLevelCardsCurrency();
+        });
+      }
+    });
+
+    // Also run immediately if DOM is already loaded
+    if (document.readyState !== 'loading') {
+      const mainContent = document.querySelector('.main-content');
+      if (mainContent) {
+        mainContent.style.display = 'block';
+        mainContent.style.visibility = 'visible';
+        mainContent.style.opacity = '1';
+      }
+    }
+  </script>
+</body>
+
+</html>

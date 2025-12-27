@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - CIC Group</title>
+    <link rel="stylesheet" href="assets/css/admin-styles.css">
+</head>
+
+<body>
+    <!-- Side Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin Portal</h2>
+            <button class="close-btn" id="closeBtn">&times;</button>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="#" class="nav-link active" data-page="dashboard">
+                    <span class="icon">📊</span>
+                    <span class="text">Dashboard</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="users">
+                    <span class="icon">👥</span>
+                    <span class="text">Users</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="payments">
+                    <span class="icon">💳</span>
+                    <span class="text">Payments</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="withdrawals">
+                    <span class="icon">💰</span>
+                    <span class="text">Withdrawals</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="tasks">
+                    <span class="icon">✅</span>
+                    <span class="text">Tasks</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="invitation-codes">
+                    <span class="icon">🎫</span>
+                    <span class="text">Invitation Codes</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="manual-recharges">
+                    <span class="icon">💰</span>
+                    <span class="text">Manage Recharges</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="manage-numbers">
+                    <span class="icon">📱</span>
+                    <span class="text">Financial Numbers</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="reports">
+                    <span class="icon">📈</span>
+                    <span class="text">Reports</span>
+                </a></li>
+            <li id="ceoApprovalLink" style="display: none;"><a href="#" class="nav-link" data-page="approvals">
+                    <span class="icon">✅</span>
+                    <span class="text">Pending Approvals</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="profile">
+                    <span class="icon">👤</span>
+                    <span class="text">Profile Settings</span>
+                </a></li>
+            <li id="adminManagementLink" style="display: none;"><a href="#" class="nav-link"
+                    data-page="admin-management">
+                    <span class="icon">🛡️</span>
+                    <span class="text">Admin Management</span>
+                </a></li>
+            <li><a href="#" class="nav-link" data-page="settings">
+                    <span class="icon">⚙️</span>
+                    <span class="text">Settings</span>
+                </a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <button class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <h1 class="page-title">Dashboard</h1>
+            <div class="topbar-right">
+                <span class="admin-name" id="adminName">Administrator</span>
+                <button class="btn-action" onclick="switchPage('profile')" style="margin-left: 10px;">Profile</button>
+                <button class="btn-action" onclick="logout()"
+                    style="background: var(--danger-color); color: white; margin-left: 10px;">Logout</button>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="content-area">
+            <!-- Dashboard Page -->
+            <div class="page active" id="dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3 id="totalUsers">0</h3>
+                            <p>Total Users</p>
+                            <span class="stat-sub" id="activeUsers">0 Active</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💳</div>
+                        <div class="stat-info">
+                            <h3 id="totalPayments">0</h3>
+                            <p>Total Payments</p>
+                            <span class="stat-sub" id="paymentAmount">KES 0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3 id="totalWithdrawals">0</h3>
+                            <p>Total Withdrawals</p>
+                            <span class="stat-sub" id="withdrawalAmount">KES 0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <h3 id="totalTasks">0</h3>
+                            <p>Tasks Completed</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💵</div>
+                        <div class="stat-info">
+                            <h3 id="totalWallet">KES 0</h3>
+                            <p>Total Wallet Balance</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-info">
+                            <h3 id="totalEarnings">KES 0</h3>
+                            <p>Total Earnings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-sections">
+                    <div class="section-card">
+                        <h2>Pending Actions</h2>
+                        <div class="pending-actions">
+                            <div class="pending-item">
+                                <span class="pending-icon">💳</span>
+                                <div class="pending-info">
+                                    <h4>Pending Payments</h4>
+                                    <p id="pendingPayments">0 payments awaiting confirmation</p>
+                                </div>
+                            </div>
+                            <div class="pending-item">
+                                <span class="pending-icon">💰</span>
+                                <div class="pending-info">
+                                    <h4>Pending Withdrawals</h4>
+                                    <p id="pendingWithdrawals">0 withdrawal requests</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <h2>Recent Users</h2>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Joined</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentUsersTable">
+                                    <tr>
+                                        <td colspan="4" class="loading">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Page -->
+            <div class="page" id="users">
+                <div class="page-header">
+                    <h2>User Management</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="search-box">
+                            <input type="text" id="userSearch" placeholder="Search users...">
+                            <button class="search-btn">🔍</button>
+                        </div>
+                        <button class="btn-primary" onclick="openCreatePaymentModal()">+ Add Payment</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Wallet</th>
+                                <th>Earnings</th>
+                                <th>Level</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                            <tr>
+                                <td colspan="8" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="usersPagination"></div>
+            </div>
+
+            <!-- Payments Page -->
+            <div class="page" id="payments">
+                <div class="page-header">
+                    <h2>Payment Management</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="filter-box">
+                            <select id="paymentFilter">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="success">Success</option>
+                                <option value="failed">Failed</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" onclick="openCreatePaymentModal()">+ Add Payment</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Phone</th>
+                                <th>Amount</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTable">
+                            <tr>
+                                <td colspan="8" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="paymentsPagination"></div>
+            </div>
+
+            <!-- Withdrawals Page -->
+            <div class="page" id="withdrawals">
+                <div class="page-header">
+                    <h2>Withdrawal Management</h2>
+                    <div class="filter-box">
+                        <select id="withdrawalFilter">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Bank</th>
+                                <th>Account</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawalsTable">
+                            <tr>
+                                <td colspan="8" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="withdrawalsPagination"></div>
+            </div>
+
+            <!-- Tasks Page -->
+            <div class="page" id="tasks">
+                <div class="page-header">
+                    <h2>Task Management</h2>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Task Name</th>
+                                <th>Correct</th>
+                                <th>Reward</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasksTable">
+                            <tr>
+                                <td colspan="6" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="tasksPagination"></div>
+            </div>
+
+            <!-- Invitation Codes Page -->
+            <div class="page" id="invitation-codes">
+                <div class="page-header">
+                    <h2>Invitation Codes Management</h2>
+                    <button class="btn-primary" onclick="openCreateInvitationCodeModal()">+ Create Code</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Code</th>
+                                <th>Created By</th>
+                                <th>Used By</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Used At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invitationCodesTable">
+                            <tr>
+                                <td colspan="8" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Manage Recharges Page -->
+            <div class="page" id="manual-recharges">
+                <div class="page-header">
+                    <h2>Manual Recharge Management</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-primary" onclick="loadManualRecharges()">Refresh Data</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Phone</th>
+                                <th>Amount</th>
+                                <th>MPesa Message</th>
+                                <th>Status</th>
+                                <th>Admin Notes</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manualRechargesTable">
+                            <tr>
+                                <td colspan="9" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Manage Rotating Numbers Page -->
+            <div class="page" id="manage-numbers">
+                <div class="page-header">
+                    <h2>Financial Numbers Management</h2>
+                </div>
+                <div class="settings-card">
+                    <h3>Add New Number</h3>
+                    <form id="addNumberFormMain">
+                        <div class="form-group">
+                            <label>Phone Number:</label>
+                            <input type="text" id="newPhoneNumber" placeholder="e.g. 0712345678" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Account Name:</label>
+                            <input type="text" id="newAccountName" placeholder="e.g. CIC GROUP">
+                        </div>
+                        <button type="submit" class="btn-primary">Add to Rotation</button>
+                    </form>
+                </div>
+                <div class="table-container" style="margin-top: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Number</th>
+                                <th>Account Name</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rotatingNumbersTable">
+                            <tr>
+                                <td colspan="4" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div class="page" id="reports">
+                <div class="page-header">
+                    <h2>Financial Reports</h2>
+                    <button class="btn-primary" onclick="loadFinancialReport()">Refresh</button>
+                </div>
+                <div class="dashboard-sections">
+                    <div class="section-card">
+                        <h2>Financial Summary</h2>
+                        <div id="financialSummary" class="loading">Loading...</div>
+                    </div>
+                    <div class="section-card">
+                        <h2>System Statistics</h2>
+                        <div id="systemStats" class="loading">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Approvals Page (CEO Only) -->
+            <div class="page" id="approvals">
+                <div class="page-header">
+                    <h2>Pending Admin Approvals</h2>
+                    <button class="btn-primary" onclick="loadPendingApprovals()">Refresh</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingApprovalsTable">
+                            <tr>
+                                <td colspan="7" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admin Management Page (CEO Only) -->
+            <div class="page" id="admin-management">
+                <div class="page-header">
+                    <h2>Admin User Management</h2>
+                    <button class="btn-primary" onclick="loadAdminUsers()">Refresh</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Full Name</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersTable">
+                            <tr>
+                                <td colspan="8" class="loading">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Profile Settings Page -->
+            <div class="page" id="profile">
+                <div class="page-header">
+                    <h2>Profile Settings</h2>
+                </div>
+                <div class="settings-card">
+                    <h3>Personal Information</h3>
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label>Full Name:</label>
+                            <input type="text" id="profileFullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" id="profileEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Username:</label>
+                            <input type="text" id="profileUsername" disabled style="background: #f3f4f6;">
+                            <small style="color: var(--text-secondary);">Username cannot be changed</small>
+                        </div>
+                        <button type="submit" class="btn-primary">Update Profile</button>
+                    </form>
+                </div>
+
+                <div class="settings-card" style="margin-top: 30px;">
+                    <h3>Change Password</h3>
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label>Current Password:</label>
+                            <input type="password" id="currentPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label>New Password:</label>
+                            <input type="password" id="newPasswordProfile" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm New Password:</label>
+                            <input type="password" id="confirmNewPassword" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn-primary">Change Password</button>
+                    </form>
+                </div>
+
+                <div class="settings-card" style="margin-top: 30px;">
+                    <h3>Account Information</h3>
+                    <div class="info-item">
+                        <label>Role:</label>
+                        <span id="profileRole">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Status:</label>
+                        <span id="profileStatus">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Last Login:</label>
+                        <span id="profileLastLogin">-</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Member Since:</label>
+                        <span id="profileCreatedAt">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div class="page" id="settings">
+                <div class="page-header">
+                    <h2>Settings</h2>
+                </div>
+                <div class="settings-card">
+                    <h3>System Information</h3>
+                    <div class="info-item">
+                        <label>Server Port:</label>
+                        <span>2003</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Database:</label>
+                        <span>Connected</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Last Updated:</label>
+                        <span id="lastUpdate">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for User Details -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>User Details</h2>
+            <div id="userModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal for Withdrawal Action -->
+    <div class="modal" id="withdrawalModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Update Withdrawal Status</h2>
+            <form id="withdrawalForm">
+                <input type="hidden" id="withdrawalId">
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select id="withdrawalStatus" required>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes:</label>
+                    <textarea id="withdrawalNotes" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Update Status</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for User Edit -->
+    <div class="modal" id="userEditModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Edit User</h2>
+            <form id="userEditForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="editUserName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="editUserEmail">
+                </div>
+                <div class="form-group">
+                    <label>Phone:</label>
+                    <input type="text" id="editUserPhone" required>
+                </div>
+                <div class="form-group">
+                    <label>Wallet Balance:</label>
+                    <input type="number" step="0.01" id="editUserWallet">
+                </div>
+                <div class="form-group">
+                    <label>Total Earnings:</label>
+                    <input type="number" step="0.01" id="editUserEarnings">
+                </div>
+                <div class="form-group">
+                    <label>Level:</label>
+                    <input type="number" id="editUserLevel" min="0">
+                </div>
+                <button type="submit" class="btn-primary">Update User</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Wallet Adjustment -->
+    <div class="modal" id="walletAdjustModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Adjust Wallet Balance</h2>
+            <form id="walletAdjustForm">
+                <input type="hidden" id="walletUserId">
+                <div class="form-group">
+                    <label>Type:</label>
+                    <select id="walletAdjustType" required>
+                        <option value="add">Add Money</option>
+                        <option value="subtract">Subtract Money</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Amount:</label>
+                    <input type="number" step="0.01" id="walletAdjustAmount" required min="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="walletAdjustDescription" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Adjust Wallet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Password Reset -->
+    <div class="modal" id="passwordResetModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Reset User Password</h2>
+            <form id="passwordResetForm">
+                <input type="hidden" id="passwordResetUserId">
+                <div class="form-group">
+                    <label>New Password:</label>
+                    <input type="password" id="newPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password:</label>
+                    <input type="password" id="confirmPassword" required minlength="6">
+                </div>
+                <button type="submit" class="btn-primary">Reset Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Create Payment -->
+    <div class="modal" id="createPaymentModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Create Payment</h2>
+            <form id="createPaymentForm">
+                <div class="form-group">
+                    <label>User ID:</label>
+                    <input type="number" id="paymentUserId" required>
+                </div>
+                <div class="form-group">
+                    <label>Amount:</label>
+                    <input type="number" step="0.01" id="paymentAmount" required min="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Payment Type:</label>
+                    <select id="paymentType" required>
+                        <option value="recharge">Recharge</option>
+                        <option value="bonus">Bonus</option>
+                        <option value="referral">Referral</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number:</label>
+                    <input type="text" id="paymentPhone">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="paymentDescription" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Create Payment</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Payment Status Update -->
+    <div class="modal" id="paymentStatusModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Update Payment Status</h2>
+            <form id="paymentStatusForm">
+                <input type="hidden" id="paymentStatusId">
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select id="paymentStatusSelect" required>
+                        <option value="pending">Pending</option>
+                        <option value="success">Success</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Update Status</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Create Invitation Code -->
+    <div class="modal" id="createInvitationCodeModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Create Invitation Code</h2>
+            <form id="createInvitationCodeForm">
+                <div class="form-group">
+                    <label>Code:</label>
+                    <input type="text" id="invitationCode" required>
+                </div>
+                <div class="form-group">
+                    <label>Created By (User ID, optional):</label>
+                    <input type="number" id="invitationCreatedBy">
+                </div>
+                <button type="submit" class="btn-primary">Create Code</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Admin Password Reset -->
+    <div class="modal" id="adminPasswordResetModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Reset Admin Password</h2>
+            <form id="adminPasswordResetForm">
+                <input type="hidden" id="adminResetId">
+                <div class="form-group">
+                    <label>New Password:</label>
+                    <input type="password" id="adminNewPassword" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password:</label>
+                    <input type="password" id="adminConfirmPassword" required minlength="6">
+                </div>
+                <button type="submit" class="btn-primary">Reset Admin Password</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/admin.js"></script>
+</body>
+
+</html>

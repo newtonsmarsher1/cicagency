@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#00ff88">
+  <title data-translate="team-management-title">Team Management - CIC</title>
+  <link rel="stylesheet" href="assets/css/auth-styles.css">
+  <script src="js/api-config.js"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --team-primary: var(--brand-green, #00ff88);
+      --team-primary-dark: var(--dark-green, #00cc6a);
+      --team-primary-light: var(--light-green, #33ff99);
+      --team-bg: var(--white-bg, #ffffff);
+      --team-card-bg: var(--card-bg, #f8f9fa);
+      --team-text: var(--text-primary, #2c3e50);
+      --team-text-secondary: var(--text-secondary, #6c757d);
+    }
+
+    [data-theme="dark"] {
+      --team-bg: #1a1a1a;
+      --team-card-bg: #2d2d2d;
+      --team-text: #e0e0e0;
+      --team-text-secondary: #b0b0b0;
+    }
+
+    /* Ensure text is always visible - override any conflicting styles */
+    .code-display {
+      color: #000000 !important;
+      background: #ffffff !important;
+    }
+
+    .referral-link {
+      color: #000000 !important;
+      background: #ffffff !important;
+    }
+
+    [data-theme="dark"] .code-display {
+      color: var(--team-primary) !important;
+      background: #2d2d2d !important;
+    }
+
+    [data-theme="dark"] .referral-link {
+      color: var(--team-primary-light) !important;
+      background: #2d2d2d !important;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--team-bg);
+      margin: 0;
+      padding-bottom: 20px;
+      color: var(--team-text);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--team-primary), var(--team-primary-dark));
+      color: #fff;
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background 0.3s ease;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 10px;
+    }
+
+    main {
+      padding: 16px;
+    }
+
+    section {
+      background: var(--team-card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      transition: background-color 0.3s ease;
+    }
+
+    .section-title {
+      font-size: 14px;
+      color: var(--team-text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .section-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--team-primary-dark) !important;
+      transition: color 0.3s ease;
+    }
+
+    [data-theme="dark"] .section-value {
+      color: var(--team-primary) !important;
+    }
+
+    .code-display {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 18px;
+      text-align: center;
+      letter-spacing: 2px;
+      color: #000000;
+      margin: 8px 0;
+      border: 2px solid var(--team-primary);
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    [data-theme="dark"] .code-display {
+      background: #2d2d2d;
+      color: var(--team-primary);
+      border-color: var(--team-primary);
+    }
+
+    .referral-link-container {
+      margin: 16px 0;
+    }
+
+    .referral-link {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 12px;
+      word-break: break-all;
+      font-size: 14px;
+      color: #000000;
+      margin: 8px 0;
+      border: 2px dashed var(--team-primary);
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    [data-theme="dark"] .referral-link {
+      background: #2d2d2d;
+      color: var(--team-primary-light);
+      border-color: var(--team-primary);
+    }
+
+    .copy-btn {
+      width: 100%;
+      background: var(--team-primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.3s ease, transform 0.1s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--team-primary-dark);
+    }
+
+    .copy-btn:active {
+      transform: scale(0.98);
+    }
+
+    .qr-container {
+      display: flex;
+      justify-content: center;
+      margin: 16px 0;
+      padding: 16px;
+      background: var(--team-card-bg);
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    #qrcode {
+      padding: 16px;
+      background: var(--team-bg);
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    .info-text {
+      font-size: 12px;
+      color: var(--team-text-secondary);
+      margin-top: 8px;
+      text-align: center;
+      transition: color 0.3s ease;
+    }
+
+    .team-list-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .refresh-team-btn {
+      border: none;
+      background: var(--team-primary-light);
+      color: var(--team-primary-dark);
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .refresh-team-btn:hover {
+      background: var(--team-primary);
+      color: white;
+    }
+
+    .team-list-container {
+      max-height: 320px;
+      overflow-y: auto;
+      border-radius: 8px;
+      border: 1px solid var(--team-primary-light);
+      background: var(--team-card-bg);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .team-empty {
+      padding: 16px;
+      font-size: 13px;
+      color: #666666 !important;
+      text-align: center;
+      transition: color 0.3s ease;
+    }
+
+    [data-theme="dark"] .team-empty {
+      color: #999999 !important;
+    }
+
+    .team-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .team-table thead {
+      position: sticky;
+      top: 0;
+      background: var(--team-card-bg);
+      z-index: 1;
+      transition: background-color 0.3s ease;
+    }
+
+    .team-table th,
+    .team-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--team-primary-light);
+      white-space: nowrap;
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .team-table td:first-child {
+      color: #000000 !important;
+      font-weight: 600;
+    }
+
+    [data-theme="dark"] .team-table td:first-child {
+      color: #e0e0e0 !important;
+    }
+
+    .team-table th {
+      font-weight: 600;
+      color: #555555 !important;
+    }
+
+    [data-theme="dark"] .team-table th {
+      color: #b0b0b0 !important;
+    }
+
+    .team-table td.name-cell {
+      font-weight: 600;
+      color: #000000 !important;
+    }
+
+    [data-theme="dark"] .team-table td.name-cell {
+      color: #e0e0e0 !important;
+    }
+
+    .team-table td.phone-cell {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      color: #333333 !important;
+    }
+
+    [data-theme="dark"] .team-table td.phone-cell {
+      color: #b0b0b0 !important;
+    }
+
+    .team-table td.date-cell {
+      font-size: 11px;
+      color: #555555 !important;
+    }
+
+    [data-theme="dark"] .team-table td.date-cell {
+      color: #999999 !important;
+    }
+
+    .team-table tr:nth-child(even) td {
+      background: var(--team-bg);
+    }
+
+    .team-table tr:hover td {
+      background: var(--team-primary-light);
+      opacity: 0.3;
+    }
+
+    [data-theme="dark"] .team-table tr:hover td {
+      opacity: 0.5;
+    }
+
+    @media (max-width: 480px) {
+
+      .team-table th:nth-child(3),
+      .team-table td:nth-child(3) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <div style="display: flex; align-items: center;">
+        <button class="back-btn" onclick="window.history.back()">←</button>
+        <strong>Team Management</strong>
+      </div>
+      <a href="home.html" style="color:#fff;text-decoration:none">Home</a>
+    </div>
+  </header>
+  <main>
+    <section>
+      <div class="section-title" data-translate="team-size">Team Size</div>
+      <div id="team-size" class="section-value">0</div>
+    </section>
+
+    <section>
+      <div class="section-title" data-translate="your-invitation-code">Your Invitation Code</div>
+      <div id="invite-code" class="code-display" data-translate="loading">Loading...</div>
+      <button class="copy-btn" onclick="copyInvitationCode()" data-translate="copy-code">Copy Code</button>
+    </section>
+
+    <section>
+      <div class="section-title" data-translate="referral-link-label">Referral Link</div>
+      <div class="referral-link-container">
+        <div id="referral-link" class="referral-link" data-translate="loading">Loading...</div>
+        <button class="copy-btn" onclick="copyReferralLink()" data-translate="copy-link">Copy Link</button>
+      </div>
+      <div class="info-text" data-translate="share-link-msg">Share this link with your friends to invite them!</div>
+    </section>
+
+    <section>
+      <div class="section-title" data-translate="qr-code-label">QR Code</div>
+      <div class="qr-container">
+        <div id="qrcode"></div>
+      </div>
+      <div class="info-text" data-translate="scan-qr-msg">Scan this QR code to join with your invitation code</div>
+    </section>
+
+    <section>
+      <div class="team-list-section-title">
+        <div class="section-title" data-translate="direct-team-members">Your Direct Team Members</div>
+        <button class="refresh-team-btn" type="button" onclick="loadTeamMembers()"
+          data-translate="refresh">Refresh</button>
+      </div>
+      <div class="team-list-container" id="team-list">
+        <div class="team-empty" data-translate="loading-team">Loading team members...</div>
+      </div>
+      <div class="info-text" data-translate="registration-info">Members here registered using your invitation code.
+      </div>
+    </section>
+  </main>
+  <script>
+    let invitationCode = '';
+    let referralLink = '';
+
+    async function load() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        // Use API_CONFIG to get the correct backend URL
+        const apiBase = window.API_CONFIG ? window.API_CONFIG.BASE_URL : 'https://cicagency.onrender.com/api';
+
+        // Ensure user has invitation code
+        const ensureUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/ensure-invitation-code') : `${apiBase}/auth/ensure-invitation-code`;
+        const ensureResponse = await fetch(ensureUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (ensureResponse.ok) {
+          const ensureData = await ensureResponse.json();
+          if (ensureData.success) {
+            invitationCode = ensureData.invitation_code;
+          }
+        }
+
+        // Get user stats
+        const statsUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/stats') : `${apiBase}/auth/stats`;
+        const statsResponse = await fetch(statsUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (statsResponse.ok) {
+          const d = await statsResponse.json();
+          if (d.success) {
+            document.getElementById('team-size').textContent = d.team_size || 0;
+
+            // Use invitation code from stats or from ensure endpoint
+            invitationCode = d.invitation_code || invitationCode || 'N/A';
+            document.getElementById('invite-code').textContent = invitationCode;
+
+            // Generate referral link
+            const baseUrl = window.location.origin || 'https://your-domain.com';
+            referralLink = `${baseUrl}/signup.html?code=${invitationCode}`;
+            document.getElementById('referral-link').textContent = referralLink;
+
+            // Generate QR code
+            if (typeof QRCode !== 'undefined') {
+              document.getElementById('qrcode').innerHTML = '';
+              new QRCode(document.getElementById('qrcode'), {
+                text: referralLink,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+              });
+            }
+          }
+        }
+
+        // Load team members list
+        await loadTeamMembers();
+      } catch (e) {
+        console.error('Error loading team data:', e);
+      }
+    }
+
+    async function loadTeamMembers() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        const container = document.getElementById('team-list');
+        if (container) {
+          container.innerHTML = '<div class="team-empty">Please log in again to see your team.</div>';
+        }
+        return;
+      }
+
+      const container = document.getElementById('team-list');
+      if (container) {
+        container.innerHTML = '<div class="team-empty">Loading team members...</div>';
+      }
+
+      try {
+        // Use API_CONFIG to get the correct backend URL
+        const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/team') : 'https://cicagency.onrender.com/api/auth/team';
+        const res = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to load team members');
+        }
+
+        const data = await res.json();
+        if (!data.success || !Array.isArray(data.team)) {
+          if (container) {
+            container.innerHTML = '<div class="team-empty">No team data available.</div>';
+          }
+          return;
+        }
+
+        if (data.team.length === 0) {
+          if (container) {
+            container.innerHTML = '<div class="team-empty">You have no team members yet. Share your link to start building your team.</div>';
+          }
+          return;
+        }
+
+        const rows = data.team.map((member, idx) => {
+          const createdAt = member.created_at ? new Date(member.created_at) : null;
+          const dateStr = createdAt
+            ? createdAt.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+            : '-';
+          const timeStr = createdAt
+            ? createdAt.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+            : '';
+          return `
+            <tr>
+              <td>${idx + 1}</td>
+              <td class="name-cell">${member.name || '—'}</td>
+              <td class="phone-cell">${member.phone || '—'}</td>
+              <td class="date-cell">${dateStr}<br><span style="font-size:10px;color:#999;">${timeStr}</span></td>
+            </tr>
+          `;
+        }).join('');
+
+        if (container) {
+          container.innerHTML = `
+            <table class="team-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading team members:', error);
+        if (container) {
+          container.innerHTML = '<div class="team-empty">Could not load team members. Pull to refresh or try again later.</div>';
+        }
+      }
+    }
+
+    function copyInvitationCode() {
+      if (!invitationCode || invitationCode === 'N/A') {
+        alert('Invitation code not available');
+        return;
+      }
+
+      navigator.clipboard.writeText(invitationCode).then(() => {
+        alert('Invitation code copied to clipboard!');
+      }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = invitationCode;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('Invitation code copied to clipboard!');
+      });
+    }
+
+    function copyReferralLink() {
+      if (!referralLink || referralLink.includes('Loading')) {
+        alert('Referral link not available');
+        return;
+      }
+
+      navigator.clipboard.writeText(referralLink).then(() => {
+        alert('Referral link copied to clipboard!');
+      }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = referralLink;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('Referral link copied to clipboard!');
+      });
+    }
+
+    // Apply settings on page load and when settings change
+    function applySettings() {
+      if (!window.CICSettings) {
+        console.log('Settings manager not loaded yet');
+        setTimeout(applySettings, 100);
+        return;
+      }
+
+      const themeColor = window.CICSettings.get('themeColor') || 'green';
+      const theme = window.CICSettings.get('theme') || 'light';
+
+      // Update CSS variables based on theme color
+      const colorMap = {
+        green: {
+          primary: '#00ff88',
+          dark: '#00cc6a',
+          light: '#33ff99'
+        },
+        blue: {
+          primary: '#2196f3',
+          dark: '#1976d2',
+          light: '#64b5f6'
+        },
+        purple: {
+          primary: '#9c27b0',
+          dark: '#7b1fa2',
+          light: '#ba68c8'
+        },
+        orange: {
+          primary: '#ff9800',
+          dark: '#f57c00',
+          light: '#ffb74d'
+        },
+        red: {
+          primary: '#f44336',
+          dark: '#d32f2f',
+          light: '#ef5350'
+        }
+      };
+
+      const colors = colorMap[themeColor] || colorMap.green;
+
+      // Update CSS custom properties
+      document.documentElement.style.setProperty('--team-primary', colors.primary);
+      document.documentElement.style.setProperty('--team-primary-dark', colors.dark);
+      document.documentElement.style.setProperty('--team-primary-light', colors.light);
+
+      // Apply theme (light/dark)
+      document.body.setAttribute('data-theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
+
+      console.log('✅ Settings applied:', { themeColor, theme });
+    }
+
+    // Listen for settings changes
+    if (window.CICSettings) {
+      window.CICSettings.addListener('themeColor', applySettings);
+      window.CICSettings.addListener('theme', applySettings);
+
+      // Apply settings immediately
+      applySettings();
+    } else {
+      // Wait for settings manager to load
+      window.addEventListener('load', function () {
+        setTimeout(applySettings, 500);
+      });
+    }
+
+    // Also listen for the settingsApplied event
+    window.addEventListener('settingsApplied', function () {
+      applySettings();
+    });
+
+    load();
+  </script>
+</body>
+
+</html>

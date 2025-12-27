@@ -1,0 +1,43 @@
+{
+  "name": "mpesa-payment-api",
+  "version": "1.0.0",
+  "description": "Professional M-Pesa STK Push Payment API Server",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "admin:install": "cd admin-portal && npm install",
+    "admin:start": "cd admin-portal && node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mpesa",
+    "payment",
+    "stk-push",
+    "kenya",
+    "mobile-money",
+    "api"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.86.2",
+    "@vercel/postgres": "^0.5.1",
+    "axios": "^1.6.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "git": "^0.1.5",
+    "install": "^0.13.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^7.0.11",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title data-translate="wealth-fund-title">Wealth Fund - CIC</title>
+
+  <!-- API Config -->
+  <script src="js/api-config.js"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+
+  <style>
+    :root {
+      --brand-green: #00ff88;
+      --brand-maroon: #8b4513;
+      --brand-dark: #006633;
+      --brand-accent: #32ff7e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--brand-green);
+      padding: 20px;
+      color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-title {
+      flex: 1;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    /* Balance Card */
+    .balance-card {
+      background: white;
+      margin: 20px;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .balance-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .balance-amount {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--brand-green);
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 0 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin: 24px 0 16px 0;
+    }
+
+    /* Investment Plans */
+    .plans-grid {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .plan-card {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .plan-card.featured {
+      border: 2px solid var(--brand-green);
+      box-shadow: 0 4px 16px rgba(0, 255, 136, 0.2);
+    }
+
+    .plan-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--brand-green);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .plan-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-accent) 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    .plan-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .plan-description {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .plan-features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .plan-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      background: #e8f5e9;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand-green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .feature-text {
+      flex: 1;
+    }
+
+    .feature-label {
+      font-weight: 600;
+      color: #333;
+      margin-right: 8px;
+    }
+
+    .feature-value {
+      color: var(--brand-green);
+      font-weight: 700;
+    }
+
+    .invest-btn {
+      width: 100%;
+      background: var(--brand-green);
+      color: white;
+      border: none;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .invest-btn:hover {
+      background: var(--brand-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+    }
+
+    /* Info Box */
+    .info-box {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .info-box-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #856404;
+      margin-bottom: 8px;
+    }
+
+    .info-box-text {
+      font-size: 13px;
+      color: #856404;
+      line-height: 1.5;
+    }
+
+    /* My Investments */
+    .investments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .investment-item {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .investment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .investment-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .investment-status {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .investment-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .detail-item {
+      font-size: 13px;
+    }
+
+    .detail-label {
+      color: #666;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      color: #333;
+      font-weight: 600;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-green);
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 32px 24px;
+      border-radius: 16px;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .modal-input:focus {
+      border-color: var(--brand-green);
+    }
+
+    .modal-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .modal-btn {
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .modal-btn.primary {
+      background: var(--brand-green);
+      color: white;
+    }
+
+    .modal-btn.secondary {
+      background: #f5f5f5;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <button class="back-btn" onclick="window.history.back()">←</button>
+      <h1 class="header-title" data-translate="wealth-fund-header">Wealth Fund</h1>
+    </div>
+  </div>
+
+  <!-- Balance Card -->
+  <div class="balance-card">
+    <div class="balance-label" data-translate="available-balance">Available Balance</div>
+    <div class="balance-amount"><span id="available-balance">0.00</span></div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <h2 class="section-title" data-translate="investment-plans-title">Investment Plans</h2>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <div class="info-box-title" data-translate="how-it-works">📊 How It Works</div>
+      <div class="info-box-text" data-translate="how-it-works-desc">
+        Choose a plan, invest your funds, and earn daily returns. Your principal can be withdrawn after the investment
+        period ends.
+      </div>
+    </div>
+
+    <div class="plans-grid" id="plans-grid">
+      <!-- Plans will be rendered here by JS -->
+    </div>
+
+    <!-- My Investments -->
+    <h2 class="section-title" data-translate="my-investments-title">My Investments</h2>
+    <div class="investments-list" id="investments-list">
+      <div style="text-align: center; padding: 40px; color: #666;" data-translate="no-investments">
+        No active investments yet
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span data-translate="home">Home</span>
+    </a>
+    <a href="task.html" class="nav-item">
+      <span class="nav-icon">📋</span>
+      <span data-translate="tasks">Tasks</span>
+    </a>
+    <a href="invest.html" class="nav-item active">
+      <span class="nav-icon">💰</span>
+      <span data-translate="invest">Invest</span>
+    </a>
+    <a href="withdrawal.html" class="nav-item">
+      <span class="nav-icon">💸</span>
+      <span data-translate="withdraw">Withdraw</span>
+    </a>
+    <a href="profile.html" class="nav-item">
+      <span class="nav-icon">👤</span>
+      <span data-translate="profile">Profile</span>
+    </a>
+  </div>
+
+  <!-- Investment Modal -->
+  <div class="modal" id="invest-modal">
+    <div class="modal-content">
+      <div class="modal-title" id="modal-plan-name">Investment</div>
+      <div style="margin-bottom: 20px;">
+        <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
+          <span data-translate="daily-return-label">Daily Return:</span> <span id="modal-daily-return"
+            style="color: var(--brand-green); font-weight: 600;">0%</span>
+        </div>
+        <div style="font-size: 14px; color: #666; margin-bottom: 8px;">
+          <span data-translate="duration-label">Duration:</span> <span id="modal-duration"
+            style="color: var(--brand-green); font-weight: 600;">0 Days</span>
+        </div>
+        <div style="font-size: 14px; color: #666;">
+          <span data-translate="minimum-label">Minimum:</span> <span id="modal-min"
+            style="color: var(--brand-green); font-weight: 600;">KES 0</span>
+        </div>
+      </div>
+      <input type="number" class="modal-input" id="invest-amount" placeholder="Enter amount (minimum 100)"
+        data-translate-placeholder="enter-amount" min="100" step="100">
+      <div class="modal-buttons">
+        <button class="modal-btn secondary" onclick="closeInvestModal()" data-translate="cancel">Cancel</button>
+        <button class="modal-btn primary" onclick="processInvestment()" data-translate="invest-now">Invest</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Currency conversion rates (approximate - should be fetched from API in production)
+    const currencyRates = {
+      USD: 1.0,      // Base currency
+      KES: 130.0,    // 1 USD = 130 KES (approximate)
+      EUR: 0.92,     // 1 USD = 0.92 EUR (approximate)
+      GBP: 0.79      // 1 USD = 0.79 GBP (approximate)
+    };
+
+    // Get current currency from settings
+    function getCurrentCurrency() {
+      if (window.CICSettings) {
+        return window.CICSettings.get('currency') || 'KES';
+      }
+      return localStorage.getItem('cic-currency') || 'KES';
+    }
+
+    // Convert amount to current currency
+    function convertCurrency(amount, fromCurrency = 'KES', toCurrency = null) {
+      const val = parseFloat(amount);
+      if (isNaN(val)) return 0;
+
+      if (!toCurrency) {
+        toCurrency = getCurrentCurrency();
+      }
+
+      if (fromCurrency === toCurrency) {
+        return val;
+      }
+
+      // Convert to USD first (base currency)
+      let amountInUSD = val;
+      if (fromCurrency !== 'USD') {
+        amountInUSD = val / currencyRates[fromCurrency];
+      }
+
+      // Convert from USD to target currency
+      if (toCurrency !== 'USD') {
+        return amountInUSD * currencyRates[toCurrency];
+      }
+
+      return amountInUSD;
+    }
+
+    // Format currency amount
+    function formatCurrency(amount, currency = null) {
+      if (!currency) {
+        currency = getCurrentCurrency();
+      }
+
+      const val = parseFloat(amount);
+      if (isNaN(val)) return '0.00';
+
+      const convertedAmount = convertCurrency(val, 'KES', currency);
+      const currencySymbols = {
+        'USD': '$',
+        'KES': 'KES ',
+        'EUR': '€',
+        'GBP': '£'
+      };
+
+      const symbol = currencySymbols[currency] || currency + ' ';
+
+      // Ensure convertedAmount is a number
+      const numSafe = parseFloat(convertedAmount);
+      return `${symbol}${isNaN(numSafe) ? '0.00' : numSafe.toFixed(2)}`;
+    }
+
+    let currentPlan = {};
+
+    // Define investment plans (amounts are in KES)
+    const INVESTMENT_PLANS = [
+      { id: 'starter', name: 'Starter Plan', icon: '🌱', description: 'Low barrier to entry, for first-time investors', dailyReturn: 1.0, minAmount: 100, duration: 14, totalReturn: '14%' },
+      { id: 'basic-200', name: 'Basic Plan 200', icon: '💵', description: 'Affordable investment option for steady growth', dailyReturn: 1.2, minAmount: 200, duration: 20, totalReturn: '24%' },
+      { id: 'standard-500', name: 'Standard Plan 500', icon: '💴', description: 'Standard investment plan with good returns', dailyReturn: 1.5, minAmount: 500, duration: 30, totalReturn: '45%' },
+      { id: 'bronze', name: 'Bronze Plan', icon: '🥉', description: 'Perfect for beginners looking to start their investment journey', dailyReturn: 1.5, minAmount: 100, duration: 30, totalReturn: '45%' },
+      { id: 'silver', name: 'Silver Plan', icon: '🥈', description: 'Most popular choice with balanced risk and returns', dailyReturn: 2.0, minAmount: 100, duration: 60, totalReturn: '120%', featured: true },
+      { id: 'gold', name: 'Gold Plan', icon: '🥇', description: 'Premium plan for serious investors seeking maximum returns', dailyReturn: 2.5, minAmount: 1000, duration: 90, totalReturn: '225%' },
+      { id: 'platinum', name: 'Platinum Plan', icon: '💎', description: 'High tier plan for experienced investors', dailyReturn: 3.0, minAmount: 5000, duration: 120, totalReturn: '360%' },
+      { id: 'diamond', name: 'Diamond Plan', icon: '🔷', description: 'Top-tier exclusive plan with highest returns', dailyReturn: 4.0, minAmount: 10000, duration: 180, totalReturn: '720%' }
+    ];
+
+    function renderInvestmentPlans() {
+      const container = document.getElementById('plans-grid');
+      if (!container) return;
+      container.innerHTML = INVESTMENT_PLANS.map(plan => `
+        <div class="plan-card ${plan.featured ? 'featured' : ''}">
+          ${plan.featured ? '<div class="plan-badge" data-translate="popular">⭐ Popular</div>' : ''}
+          <div class="plan-icon">${plan.icon}</div>
+          <div class="plan-name">${plan.name}</div>
+          <div class="plan-description" data-translate="plan-desc-${plan.id}">${plan.description}</div>
+          <div class="plan-features">
+            <div class="plan-feature">
+              <div class="feature-icon">📈</div>
+              <div class="feature-text">
+                <span class="feature-label" data-translate="daily-return">Daily Return:</span>
+                <span class="feature-value">${plan.dailyReturn}%</span>
+              </div>
+            </div>
+            <div class="plan-feature">
+              <div class="feature-icon">💰</div>
+              <div class="feature-text">
+                <span class="feature-label" data-translate="min-investment">Min Investment:</span>
+                <span class="feature-value" data-min-invest="${plan.minAmount}">${formatCurrency(plan.minAmount)}</span>
+              </div>
+            </div>
+            <div class="plan-feature">
+              <div class="feature-icon">⏱️</div>
+              <div class="feature-text">
+                <span class="feature-label" data-translate="duration">Duration:</span>
+                <span class="feature-value">${plan.duration} <span data-translate="days">Days</span></span>
+              </div>
+            </div>
+            <div class="plan-feature">
+              <div class="feature-icon">💵</div>
+              <div class="feature-text">
+                <span class="feature-label" data-translate="total-return">Total Return:</span>
+                <span class="feature-value">${plan.totalReturn}</span>
+              </div>
+            </div>
+          </div>
+          <button class="invest-btn" onclick="openInvestModal('${plan.name}', ${plan.minAmount}, ${plan.dailyReturn}, ${plan.duration})" data-translate="invest-now">Invest Now</button>
+        </div>
+      `).join('');
+      // Apply translations to dynamically added content
+      if (window.CICLanguageManager) {
+        window.CICLanguageManager.applyLanguage();
+      }
+    }
+
+    // Load balance
+    async function loadBalance() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      try {
+        // Use API_CONFIG to get the correct backend URL
+        const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/stats') : 'https://cicagency.onrender.com/api/auth/stats';
+        console.log('💰 Loading balance from:', apiUrl);
+        const response = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log('💰 Balance status:', response.status);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Calculate Total Balance (Earnings + Recharges)
+          const walletBalance = parseFloat(data.wallet_balance || 0);
+          const personalWallet = parseFloat(data.personal_wallet || 0);
+          const totalBalance = walletBalance + personalWallet;
+
+          document.getElementById('available-balance').innerHTML = formatCurrency(totalBalance);
+          console.log('✅ Balance loaded successfully:', totalBalance);
+        } else {
+          console.error('❌ API returned success:false:', data);
+        }
+      } catch (err) {
+        console.error('❌ Error loading balance:', err);
+      }
+    }
+
+    // Load investments
+    async function loadInvestments() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        // Use API_CONFIG to get the correct backend URL
+        const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('investments') : 'https://cicagency.onrender.com/api/investments';
+        console.log('📈 Loading investments from:', apiUrl);
+        const res = await fetch(apiUrl, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        console.log('📈 Investments status:', res.status);
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || err.message || `HTTP error! status: ${res.status}`);
+        }
+
+        const data = await res.json();
+        console.log('📈 Investments data:', data);
+        const list = document.getElementById('investments-list');
+        if (!list) return;
+
+        if (!data.success) {
+          console.error('API error:', data.error);
+          list.innerHTML = `<p class="no-investments" data-translate="error-loading-investments">Error loading investments: ${data.error || 'Unknown error'}</p>`;
+          if (window.CICLanguageManager) window.CICLanguageManager.applyLanguage();
+          return;
+        }
+
+        if (data.investments && data.investments.length > 0) {
+          list.innerHTML = data.investments.map(inv => {
+            const amount = parseFloat(inv.amount || 0);
+            const dailyRate = parseFloat(inv.daily_return || 0);
+            const duration = parseInt(inv.duration || inv.duration_days || 0);
+            // Calculate Expected Amount = Principal + (Principal * Daily% * Days)
+            const profit = amount * (dailyRate / 100) * duration;
+            const expectedAmount = amount + profit;
+
+            return `
+            <div class="investment-item">
+              <div class="investment-header">
+                <div class="investment-name">${inv.plan_name}</div>
+                <span class="investment-status status-${inv.status}">${inv.status}</span>
+              </div>
+              <div class="investment-details">
+                <div class="detail-item">
+                  <span class="detail-label">Amount</span>
+                  <span class="detail-value">${formatCurrency(amount)}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Expected Amount</span>
+                  <span class="detail-value" style="color: var(--brand-green);">${formatCurrency(expectedAmount)}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Daily Return</span>
+                  <span class="detail-value">${inv.daily_return}%</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Duration</span>
+                  <span class="detail-value">${duration} Days</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Start Date</span>
+                  <span class="detail-value">${new Date(inv.created_at).toLocaleDateString()}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">End Date</span>
+                  <span class="detail-value">${inv.end_date ? new Date(inv.end_date).toLocaleDateString() : 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+          `}).join('');
+        } else {
+          list.innerHTML = '<p class="no-investments" data-translate="no-investments-msg">No investments yet. Start investing to see your portfolio here.</p>';
+          if (window.CICLanguageManager) window.CICLanguageManager.applyLanguage();
+        }
+      } catch (err) {
+        console.error('Error loading investments:', err);
+        const list = document.getElementById('investments-list');
+        if (list) {
+          list.innerHTML = '<p class="no-investments">Error loading investments: ' + err.message + '</p>';
+        }
+      }
+    }
+
+    function openInvestModal(planName, minAmount, dailyReturn, duration) {
+      currentPlan = { planName, minAmount, dailyReturn, duration };
+      const currency = getCurrentCurrency();
+      document.getElementById('modal-plan-name').textContent = `${planName}`;
+      document.getElementById('modal-daily-return').textContent = `${dailyReturn}%`;
+      document.getElementById('modal-duration').textContent = `${duration} Days`;
+      // Show minimum in user's currency
+      document.getElementById('modal-min').textContent = formatCurrency(minAmount, currency);
+      var am = document.getElementById('invest-amount');
+      am.value = '';
+      // Set numeric min on input in user's currency
+      const convertedMin = convertCurrency(minAmount, 'KES', currency);
+      am.min = Math.max(1, Math.round(convertedMin));
+      am.placeholder = `Minimum ${formatCurrency(minAmount, currency)}`;
+      document.getElementById('invest-modal').classList.add('show');
+    }
+
+    function closeInvestModal() {
+      document.getElementById('invest-modal').classList.remove('show');
+    }
+
+    function processInvestment() {
+      const currency = getCurrentCurrency();
+      const amount = parseFloat(document.getElementById('invest-amount').value);
+
+      // Absolute minimum investment is 100 KES
+      const ABSOLUTE_MINIMUM_KES = 100;
+      const convertedAbsoluteMin = convertCurrency(ABSOLUTE_MINIMUM_KES, 'KES', currency);
+
+      if (!amount || isNaN(amount) || amount < convertedAbsoluteMin) {
+        const currencySymbols = {
+          'USD': '$',
+          'KES': 'KES ',
+          'EUR': '€',
+          'GBP': '£'
+        };
+        const symbol = currencySymbols[currency] || 'KES ';
+        alert(`Minimum investment is ${symbol}${convertedAbsoluteMin.toFixed(2)}`);
+        return;
+      }
+
+      // Convert amount from user's currency to KES (backend expects KES)
+      const amountInKES = convertCurrency(amount, currency, 'KES');
+
+      // Also check against plan-specific minimum (which should be >= 100)
+      const convertedPlanMin = convertCurrency(currentPlan.minAmount, 'KES', currency);
+      const effectiveMinimum = Math.max(convertedAbsoluteMin, convertedPlanMin);
+
+      if (amount < effectiveMinimum) {
+        const currencySymbols = {
+          'USD': '$',
+          'KES': 'KES ',
+          'EUR': '€',
+          'GBP': '£'
+        };
+        const symbol = currencySymbols[currency] || 'KES ';
+        alert(`Minimum investment for ${currentPlan.planName} is ${symbol}${effectiveMinimum.toFixed(2)}`);
+        return;
+      }
+
+      // Double-check absolute minimum in KES
+      if (amountInKES < ABSOLUTE_MINIMUM_KES) {
+        alert(`Minimum investment is KES ${ABSOLUTE_MINIMUM_KES}`);
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('You must be logged in to make an investment');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Use API_CONFIG to get the correct backend URL
+      const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('investments/create') : 'https://cicagency.onrender.com/api/investments/create';
+
+      const requestBody = {
+        plan_name: currentPlan.planName,
+        amount: amountInKES, // Send amount in KES to backend
+        daily_return: currentPlan.dailyReturn,
+        duration: currentPlan.duration
+      };
+
+      console.log('Creating investment:', {
+        userAmount: amount,
+        userCurrency: currency,
+        amountInKES: amountInKES,
+        requestBody: requestBody
+      });
+
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestBody)
+      })
+        .then(res => {
+          if (!res.ok) {
+            return res.json().then(err => {
+              console.error('Investment creation failed:', err);
+              // Return error data instead of throwing
+              return { success: false, error: err.error || err.details || err.message || 'Investment failed' };
+            });
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data.success) {
+            const investedAmount = formatCurrency(amount, currency);
+            const newBalance = data.wallet_balance !== undefined ? formatCurrency(data.wallet_balance, currency) : '';
+            alert(`✅ Investment successful! You've invested ${investedAmount} in the ${currentPlan.planName} Plan.${newBalance ? `\n\nRemaining balance: ${newBalance}` : ''}`);
+            closeInvestModal();
+            // Reload balance to show updated amount
+            loadBalance();
+            loadInvestments();
+          } else {
+            // Show user-friendly error message
+            const errorMessage = data.error || data.details || 'Failed to create investment. Please try again.';
+            alert('❌ ' + errorMessage);
+            console.error('Investment failed:', data);
+            // Don't close modal so user can adjust amount
+          }
+        })
+        .catch(err => {
+          console.error('Error creating investment:', err);
+          // Show user-friendly error message
+          const errorMessage = err.message || 'An error occurred while creating the investment. Please try again.';
+          alert('❌ ' + errorMessage);
+        });
+    }
+
+    // Local fallback helpers
+    function saveLocalInvestment(requestBody, userAmount, currency) {
+      const stored = JSON.parse(localStorage.getItem('localInvestments') || '[]');
+      const now = new Date();
+      const end = new Date(now.getTime() + (requestBody.duration || 0) * 24 * 60 * 60 * 1000);
+      const localInv = {
+        plan_name: requestBody.plan_name,
+        amount: requestBody.amount,
+        amount_user_currency: userAmount,
+        currency: currency,
+        daily_return: requestBody.daily_return,
+        duration: requestBody.duration,
+        created_at: now.toISOString(),
+        end_date: end.toISOString(),
+        status: 'pending',
+        local: true
+      };
+      stored.push(localInv);
+      localStorage.setItem('localInvestments', JSON.stringify(stored));
+    }
+
+    // Update investment plan minimum amounts
+    function updateInvestmentPlansCurrency() {
+      const currency = getCurrentCurrency();
+      document.querySelectorAll('[data-min-invest]').forEach(element => {
+        const minAmount = parseFloat(element.getAttribute('data-min-invest'));
+        element.textContent = formatCurrency(minAmount, currency);
+      });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+      renderInvestmentPlans(); // Render investment plans on page load
+      loadBalance();
+      loadInvestments();
+      updateInvestmentPlansCurrency();
+
+      // Listen for currency changes
+      if (window.CICSettings) {
+        window.CICSettings.addListener('currency', () => {
+          renderInvestmentPlans(); // Re-render plans when currency changes
+          loadBalance();
+          loadInvestments();
+          updateInvestmentPlansCurrency();
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

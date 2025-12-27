@@ -1,0 +1,1221 @@
+<!--
+    CIC - Login
+    Author: Smarsher.com group
+    Date: 2025-11-18
+    Version: 1.0.0
+    Description: This is the login page for the CIC application.
+    Features:
+    - Login form with phone number and password
+    - Login with phone number
+    - Login with password
+    - Login with fingerprint
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title data-translate="login-title">CIC - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="assets/css/auth-styles.css">
+  <script src="js/api-config.js?v=debug"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <style>
+    /* CSS Custom Properties for Luminous Green Theme */
+    :root {
+      /* Primary Luminous Green Colors - Brighter */
+      --luminous-green: #00ffaa;
+      --luminous-green-dark: #00dd88;
+      --luminous-green-light: #44ffbb;
+      --luminous-green-glow: rgba(0, 255, 170, 0.5);
+      --luminous-green-shadow: rgba(0, 255, 170, 0.6);
+
+      /* Secondary Colors */
+      --dark-bg: #0a0a0a;
+      --dark-surface: #1a1a1a;
+      --dark-card: #2a2a2a;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --text-muted: #808080;
+
+      /* Gradient Backgrounds */
+      --bg-gradient: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+      --card-gradient: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 100%);
+      --button-gradient: linear-gradient(135deg, var(--luminous-green) 0%, var(--luminous-green-dark) 100%);
+
+      /* Shadows and Effects */
+      --glow-shadow: 0 0 30px var(--luminous-green-glow);
+      --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --button-shadow: 0 4px 25px var(--luminous-green-shadow);
+
+      /* Animation Timings */
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+    }
+
+    /* Custom login page styles - matching original signup design */
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-header {
+      background: var(--card-gradient);
+      padding: calc(24px + var(--spacing-md)) var(--spacing-lg) var(--spacing-xl);
+      border-bottom-left-radius: 32px;
+      border-bottom-right-radius: 32px;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--luminous-green), transparent);
+      animation: headerGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes headerGlow {
+
+      0%,
+      100% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .auth-logo {
+      width: 100px;
+      height: 100px;
+      background: var(--button-gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--glow-shadow);
+      border: 4px solid var(--dark-bg);
+      position: absolute;
+      top: 50%;
+      left: 50px;
+      transform: translateY(-50%);
+      z-index: 10;
+      overflow: hidden;
+      flex-shrink: 0;
+      animation: logoBreathing 2.5s ease-in-out infinite;
+    }
+
+    /* Breathing animation - gentle pulsing scale and glow */
+    @keyframes logoBreathing {
+
+      0%,
+      100% {
+        transform: translateY(-50%) scale(1);
+        box-shadow: 0 0 30px var(--luminous-green-glow), 0 0 60px var(--luminous-green-glow);
+      }
+
+      50% {
+        transform: translateY(-50%) scale(1.08);
+        box-shadow: 0 0 50px var(--luminous-green-shadow), 0 0 100px var(--luminous-green-shadow);
+      }
+    }
+
+    /* Enhanced shimmer effect */
+    .auth-logo::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      transform: rotate(45deg);
+      animation: logoShimmer 3s infinite;
+      z-index: 2;
+    }
+
+    @keyframes logoShimmer {
+      0% {
+        transform: rotate(45deg) translateX(-100%);
+      }
+
+      100% {
+        transform: rotate(45deg) translateX(100%);
+      }
+    }
+
+    .auth-logo span {
+      color: var(--dark-bg);
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      z-index: 3;
+      position: relative;
+    }
+
+    .auth-title-section {
+      text-align: center;
+      flex: 1;
+      z-index: 1;
+    }
+
+    .auth-title {
+      color: var(--text-primary);
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: var(--spacing-sm);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .auth-subtitle {
+      color: var(--luminous-green);
+      font-size: 1rem;
+      font-weight: 600;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .auth-form-container {
+      flex: 1;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      background: radial-gradient(circle at center, rgba(0, 255, 136, 0.05) 0%, transparent 70%);
+    }
+
+    .auth-form {
+      background: linear-gradient(145deg, rgba(42, 42, 42, 0.95), rgba(31, 31, 31, 0.95));
+      border-radius: 32px;
+      padding: 40px;
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(0, 255, 136, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      max-width: 450px;
+      margin: 0 auto;
+      width: 100%;
+      position: relative;
+      border: 2px solid rgba(0, 255, 136, 0.3);
+      backdrop-filter: blur(15px);
+    }
+
+    .auth-form::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--luminous-green), transparent, var(--luminous-green));
+      border-radius: 32px;
+      z-index: -1;
+      animation: borderGlow 3s linear infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes borderGlow {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .form-group {
+      margin-bottom: 28px;
+      position: relative;
+    }
+
+    .input-group {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #29AB87;
+      /* jungle green */
+      border: 2px solid #1d8f70;
+      border-radius: 20px;
+      padding: 0 20px;
+      transition: all 0.3s ease;
+      min-height: 60px;
+      box-shadow: 0 2px 10px rgba(41, 171, 135, 0.25);
+    }
+
+    .input-group:focus-within {
+      border-color: #22a07f;
+      box-shadow: 0 0 0 4px rgba(41, 171, 135, 0.3), 0 2px 10px rgba(41, 171, 135, 0.35);
+    }
+
+    .input-icon {
+      font-size: 1.4rem;
+      color: #ffffff;
+      margin-right: 15px;
+      transition: var(--transition-normal);
+    }
+
+    .input-group:focus-within .input-icon {
+      color: var(--luminous-green-light);
+      transform: rotate(360deg);
+    }
+
+    .form-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 20px 0;
+      font-size: 1.1rem;
+      background: #29AB87;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.85);
+      transition: var(--transition-normal);
+      font-weight: 500;
+    }
+
+    .form-input:focus::placeholder {
+      color: var(--luminous-green);
+    }
+
+    .password-toggle {
+      background: none;
+      border: none;
+      color: var(--luminous-green);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: var(--spacing-sm);
+      border-radius: 8px;
+      transition: var(--transition-fast);
+      margin-left: var(--spacing-sm);
+    }
+
+    .password-toggle:hover {
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--luminous-green-light);
+      transform: rotate(360deg);
+    }
+
+    .remember-group {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .remember-checkbox {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--luminous-green);
+      cursor: pointer;
+      transition: var(--transition-normal);
+    }
+
+    .remember-checkbox:hover {
+      transform: scale(1.1);
+    }
+
+    .remember-label {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-normal);
+    }
+
+    .remember-label:hover {
+      color: var(--luminous-green);
+    }
+
+    .forgot-password {
+      text-align: right;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .forgot-password a {
+      color: var(--luminous-green);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: var(--transition-fast);
+      position: relative;
+    }
+
+    .forgot-password a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--luminous-green);
+      transition: var(--transition-normal);
+    }
+
+    .forgot-password a:hover::after {
+      width: 100%;
+    }
+
+    .forgot-password a:hover {
+      color: var(--luminous-green-light);
+      text-shadow: 0 0 10px var(--luminous-green-glow);
+    }
+
+    .auth-action {
+      width: 100%;
+      background: var(--button-gradient);
+      color: var(--dark-bg);
+      border: none;
+      border-radius: 20px;
+      padding: 20px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      margin-bottom: var(--spacing-md);
+      box-shadow: var(--button-shadow);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 1px;
+    }
+
+    .auth-action::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .auth-action:hover::before {
+      left: 100%;
+    }
+
+    .auth-action:hover {
+      box-shadow: 0 8px 30px var(--luminous-green-shadow);
+      background: linear-gradient(135deg, var(--luminous-green-light) 0%, var(--luminous-green) 100%);
+    }
+
+    .auth-action:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-action.loading {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .auth-action.loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid var(--dark-bg);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .secondary-action {
+      width: 100%;
+      background: transparent;
+      color: var(--text-secondary);
+      border: 2px solid rgba(0, 123, 255, 0.3);
+      border-radius: 20px;
+      padding: 18px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      margin-bottom: var(--spacing-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .secondary-action::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 123, 255, 0.1), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .secondary-action:hover::before {
+      left: 100%;
+    }
+
+    .secondary-action:hover {
+      background: rgba(0, 123, 255, 0.1);
+      border-color: #007bff;
+      color: #007bff;
+      box-shadow: 0 4px 20px rgba(0, 123, 255, 0.4);
+    }
+
+    .auth-link {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .auth-link a {
+      color: var(--luminous-green);
+      text-decoration: none;
+      font-weight: 700;
+      margin-left: var(--spacing-xs);
+      transition: var(--transition-fast);
+      position: relative;
+    }
+
+    .auth-link a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--luminous-green);
+      transition: var(--transition-normal);
+    }
+
+    .auth-link a:hover::after {
+      width: 100%;
+    }
+
+    .auth-link a:hover {
+      color: var(--luminous-green-light);
+      text-shadow: 0 0 10px var(--luminous-green-glow);
+    }
+
+    .notification {
+      margin-bottom: var(--spacing-lg);
+      padding: var(--spacing-md);
+      border-radius: 16px;
+      font-weight: 600;
+      text-align: center;
+      font-size: 1rem;
+      display: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .notification.success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      border: none;
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+      animation: slideInFromRight 0.5s ease-out;
+      overflow: hidden;
+      max-width: 280px;
+      min-width: 200px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .notification.success::before {
+      content: "✓";
+      background: white;
+      color: #28a745;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .notification.success::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.8);
+      animation: progressBar 8s linear forwards;
+      border-radius: 0 0 8px 8px;
+    }
+
+    @keyframes progressBar {
+      0% {
+        width: 100%;
+      }
+
+      95% {
+        width: 5%;
+      }
+
+      100% {
+        width: 0%;
+        opacity: 0;
+      }
+    }
+
+    .notification.error {
+      background: #dc3545;
+      color: white;
+      border: none;
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+      animation: slideInFromRight 0.3s ease-out;
+      overflow: hidden;
+      max-width: 250px;
+      min-width: 180px;
+    }
+
+    .notification.error::before {
+      content: "✕";
+      background: white;
+      color: #dc3545;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .notification.error::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.8);
+      animation: progressBar 5s linear forwards;
+      border-radius: 0 0 8px 8px;
+    }
+
+    @keyframes slideInFromRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInFromLeft {
+      from {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideInError {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOutToRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes slideOutToLeft {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      to {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+    }
+
+    /* Connection Status Indicator */
+    .connection-status {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 1001;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .connection-status.connected {
+      background: rgba(40, 167, 69, 0.9);
+    }
+
+    .connection-status.disconnected {
+      background: rgba(220, 53, 69, 0.9);
+    }
+
+    .connection-status.checking {
+      background: rgba(255, 193, 7, 0.9);
+    }
+
+    @media (max-width: 768px) {
+      .auth-header {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-md);
+      }
+
+      .auth-title-section {
+        position: static;
+        transform: none;
+        text-align: center;
+        pointer-events: auto;
+      }
+
+      .auth-title {
+        font-size: 2rem;
+      }
+
+      .auth-logo {
+        width: 80px;
+        height: 80px;
+      }
+
+      .auth-logo span {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Floating Particles -->
+  <div class="floating-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+
+
+  <div class="auth-container">
+    <div class="auth-header">
+      <div class="auth-logo">
+        <span>CIC</span>
+      </div>
+      <div class="auth-title-section">
+        <h1 class="auth-title">CIC Agency</h1>
+        <p class="auth-subtitle" data-translate="welcome-success">Welcome to Success</p>
+      </div>
+      <div id="login-notification" class="notification"></div>
+    </div>
+
+    <div class="auth-form-container">
+      <form class="auth-form" id="loginForm" autocomplete="on">
+
+        <div class="form-group">
+          <div class="input-group">
+            <span class="input-icon">📱</span>
+            <input type="text" name="phone" class="form-input"
+              placeholder="+CountryCode - Please enter your phone number" data-translate-placeholder="enter-phone"
+              required autocomplete="tel">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-group">
+            <span class="input-icon">🔒</span>
+            <input type="password" name="password" class="form-input" placeholder="Please enter login password"
+              data-translate-placeholder="enter-password" required autocomplete="current-password">
+            <button type="button" class="password-toggle">👁</button>
+          </div>
+        </div>
+
+        <div class="remember-group">
+          <input type="checkbox" id="remember" name="remember" class="remember-checkbox">
+          <label for="remember" class="remember-label" data-translate="remember-me">Remember username/password</label>
+        </div>
+
+        <div class="forgot-password">
+          <a href="forgot-password.html" data-translate="forgot-password">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="auth-action" data-translate="login">Login</button>
+
+        <button type="button" class="secondary-action" onclick="window.location.href='signup.html'"
+          data-translate="register">Register</button>
+
+        <div class="auth-box">
+          <span data-translate="no-account">Don't have an account?</span>
+          <a href="signup.html" data-translate="register-alt">Register</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    const notif = document.getElementById('login-notification');
+
+    // Debug: Check if form elements exist
+    console.log('Form elements check:');
+    console.log('Form:', document.querySelector('.login-form'));
+    console.log('Phone input:', document.querySelector('input[name="phone"]'));
+    console.log('Password input:', document.querySelector('input[name="password"]'));
+    console.log('Submit button:', document.querySelector('.auth-action'));
+
+    // Ensure the form submission handler is properly attached
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log('🔍 DOM loaded, initializing login form...');
+
+      const form = document.getElementById('loginForm');
+      const submitBtn = document.querySelector('.auth-action');
+      const notif = document.getElementById('login-notification');
+
+      console.log('Form found:', !!form);
+      console.log('Submit button found:', !!submitBtn);
+      console.log('Notification element found:', !!notif);
+
+      if (!form) {
+        console.error('❌ Form not found');
+        return;
+      }
+
+      if (!submitBtn) {
+        console.error('❌ Submit button not found');
+        return;
+      }
+
+      if (!notif) {
+        console.error('❌ Notification element not found');
+        return;
+      }
+
+      console.log('✅ All required elements found');
+
+      // Check for auto-login phone number (from inactivity redirect)
+      const autoLoginPhone = localStorage.getItem('auto-login-phone');
+      if (autoLoginPhone) {
+        const phoneInput = form.querySelector('input[name="phone"]');
+        if (phoneInput) {
+          phoneInput.value = autoLoginPhone;
+          localStorage.removeItem('auto-login-phone'); // Clear after use
+          console.log('📱 Auto-filled phone number:', autoLoginPhone);
+
+          // Check if biometric is enabled and attempt auto-login
+          const biometricEnabled = window.CICSettings &&
+            window.CICSettings.get('security.biometric');
+          if (biometricEnabled) {
+            console.log('🔐 Biometric enabled, attempting auto-login...');
+            // Small delay to ensure form is ready, then attempt biometric login
+            setTimeout(() => {
+              attemptBiometricAutoLogin(form, notif, submitBtn, autoLoginPhone);
+            }, 500);
+          }
+        }
+      }
+
+      // Attempt biometric auto-login
+      async function attemptBiometricAutoLogin(form, notif, submitBtn, phone) {
+        try {
+          console.log('🔐 Attempting biometric auto-login for:', phone);
+
+          // Check if WebAuthn is available
+          if ('credentials' in navigator && 'get' in navigator.credentials) {
+            const credentialId = localStorage.getItem('biometric-credential-id');
+            if (credentialId) {
+              try {
+                const publicKeyCredentialRequestOptions = {
+                  challenge: new Uint8Array(32),
+                  timeout: 60000,
+                  userVerification: 'required'
+                };
+
+                const assertion = await navigator.credentials.get({
+                  publicKey: publicKeyCredentialRequestOptions
+                });
+
+                if (assertion) {
+                  console.log('✅ Biometric authentication successful');
+
+                  // Get stored encrypted password
+                  const encryptedPassword = localStorage.getItem('biometric-password-encrypted');
+                  if (encryptedPassword) {
+                    try {
+                      const password = atob(encryptedPassword); // Decode
+
+                      // Fill password field
+                      const passwordInput = form.querySelector('input[name="password"]');
+                      if (passwordInput) {
+                        passwordInput.value = password;
+                      }
+
+                      // Automatically submit the form
+                      console.log('🚀 Auto-submitting login form...');
+                      await handleLogin(form, notif, submitBtn);
+                      return;
+                    } catch (e) {
+                      console.warn('Could not decrypt password:', e);
+                    }
+                  }
+
+                  // If password not available, show message
+                  showNotification(notif, "Biometric verified! Please enter your password.", "info");
+                }
+              } catch (error) {
+                console.log('Biometric authentication failed or cancelled:', error);
+                // User cancelled or biometric failed, show normal login form
+              }
+            } else {
+              console.log('No credential ID found, skipping WebAuthn');
+            }
+          }
+
+          // Fallback: If WebAuthn not available, try to use stored password
+          const encryptedPassword = localStorage.getItem('biometric-password-encrypted');
+          if (encryptedPassword) {
+            try {
+              const password = atob(encryptedPassword);
+              const passwordInput = form.querySelector('input[name="password"]');
+              if (passwordInput) {
+                passwordInput.value = password;
+                // Show info message
+                showNotification(notif, "Password auto-filled. Click login to continue.", "info");
+              }
+            } catch (e) {
+              console.warn('Could not decrypt password:', e);
+            }
+          }
+        } catch (error) {
+          console.error('Error during biometric auto-login:', error);
+        }
+      }
+
+      // Login handler function
+      async function handleLogin(form, notif, submitBtn) {
+        console.log('🚀 Starting login process...');
+
+        // Clear previous notifications
+        notif.style.display = "none";
+        notif.textContent = "";
+
+        // Get form data
+        const phoneInput = form.querySelector('input[name="phone"]');
+        const passwordInput = form.querySelector('input[name="password"]');
+
+        const phone = phoneInput ? phoneInput.value.trim() : '';
+        const password = passwordInput ? passwordInput.value : '';
+
+        console.log('📱 Phone:', phone);
+        console.log('🔒 Password:', password ? '***' : 'empty');
+
+        // Validate inputs
+        if (!phone || !password) {
+          showNotification(notif, "Please fill in all fields", "error");
+          return;
+        }
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Logging in...";
+        submitBtn.classList.add('loading');
+
+        try {
+          console.log('🚀 Sending login request...');
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+          // Use API_CONFIG to get the correct backend URL
+          const apiUrl = window.API_CONFIG ? window.API_CONFIG.getUrl('auth/login') : 'https://cicagency.onrender.com/api/auth/login';
+          console.log('🌐 API URL:', apiUrl);
+
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ phone, password }),
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          console.log('📡 Response status:', response.status);
+
+          let data;
+          try {
+            data = await response.json();
+            console.log('📦 Response data:', data);
+          } catch (parseError) {
+            console.error('❌ Failed to parse response:', parseError);
+            throw new Error('Invalid response from server');
+          }
+
+          if (response.ok) {
+            // Store token and user data
+            if (data.token) {
+              localStorage.setItem('token', data.token);
+              console.log('✅ Token stored');
+            }
+            if (data.user) {
+              localStorage.setItem('user', JSON.stringify(data.user));
+              console.log('✅ User data stored');
+            }
+
+            // Check if biometric login is enabled and save credentials
+            if (window.CICSettings && window.CICSettings.get('security.biometric')) {
+              try {
+                // Store login credentials for biometric authentication
+                const credentialData = {
+                  phone: phone,
+                  timestamp: Date.now()
+                };
+                localStorage.setItem('biometric-login-data', JSON.stringify(credentialData));
+
+                // Store encrypted password for auto-login (using simple base64 encoding)
+                // Note: In production, use Web Crypto API for proper encryption
+                if (password) {
+                  try {
+                    const encryptedPassword = btoa(password); // Simple encoding (not secure, but works for demo)
+                    localStorage.setItem('biometric-password-encrypted', encryptedPassword);
+                  } catch (e) {
+                    console.warn('Could not store password for biometric:', e);
+                  }
+                }
+              } catch (e) {
+                console.warn('Could not save biometric data:', e);
+              }
+            }
+
+            showNotification(notif, "Login successful!", "success");
+
+            // Redirect after short delay
+            setTimeout(() => {
+              window.location.href = 'home.html';
+            }, 1500);
+          } else {
+            const errorMessage = data.error || data.message || 'Login failed';
+            console.error('❌ Login failed:', errorMessage);
+            showNotification(notif, errorMessage, "error");
+          }
+        } catch (error) {
+          console.error('❌ Login error:', error);
+          let errorMessage = "Network error. Please try again.";
+
+          if (error.name === 'AbortError') {
+            errorMessage = "Request timeout. Please check your connection and try again.";
+          } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            errorMessage = "Cannot connect to server. Please check your connection.";
+          } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+            errorMessage = "Server is not responding. Please try again later.";
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
+          showNotification(notif, errorMessage, "error");
+        } finally {
+          // Reset button state
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Login";
+          submitBtn.classList.remove('loading');
+        }
+      }
+
+      // Add click handler to submit button
+      submitBtn.addEventListener('click', async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('🔘 Login button clicked');
+        await handleLogin(form, notif, submitBtn);
+        return false;
+      });
+
+      // Add form submission handler as backup
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('📝 Form submitted');
+        await handleLogin(form, notif, submitBtn);
+        return false;
+      });
+
+      // Additional safety: prevent any default form submission
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        return false;
+      });
+
+      // Helper function to show notifications
+      function showNotification(element, message, type) {
+        // Create close button for success notifications
+        if (type === 'success') {
+          element.innerHTML = `
+        <span style="flex: 1; font-weight: 600; font-size: 1.1em;">${message}</span>
+        <button onclick="hideNotification(this.parentElement)" style="
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          color: white;
+          font-size: 18px;
+          cursor: pointer;
+          margin-left: 12px;
+          padding: 4px 8px;
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.3s ease;
+        " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">×</button>
+      `;
+        } else {
+          element.innerHTML = `<span>${message}</span>`;
+        }
+
+        element.className = `notification ${type}`;
+        element.style.display = "flex";
+
+        // Auto-hide error notifications after 5 seconds
+        if (type === 'error') {
+          setTimeout(() => {
+            hideNotification(element);
+          }, 5000);
+        }
+
+        // Auto-hide success notifications after 4 seconds (before redirect)
+        if (type === 'success') {
+          setTimeout(() => {
+            hideNotification(element);
+          }, 4000);
+        }
+      }
+
+      // Helper function to hide notifications with animation
+      function hideNotification(element) {
+        element.style.animation = 'slideOutToRight 0.3s ease-in';
+        setTimeout(() => {
+          element.style.display = "none";
+          element.style.animation = '';
+        }, 300);
+      }
+    });
+
+    // Password toggle functionality
+    const passwordInput = document.querySelector('input[name="password"]');
+    const passwordToggle = document.querySelector('.password-toggle');
+
+    passwordToggle.addEventListener('click', function () {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.textContent = type === 'password' ? '👁' : '🙈';
+    });
+
+
+    // Initialize language manager immediately
+    (async function () {
+      // Load language manager
+      const script = document.createElement('script');
+      script.src = 'js/language-manager.js';
+      document.head.appendChild(script);
+
+      script.onload = async function () {
+        if (window.languageManager) {
+          await window.languageManager.init();
+          console.log('🌍 Language manager loaded and initialized on login page');
+        }
+      };
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Register - CIC Group</title>
+    <link rel="stylesheet" href="assets/css/admin-styles.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-register:hover {
+            background: var(--secondary-color);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+        }
+
+        .auth-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>📝 Admin Registration</h1>
+                <p>Register for admin access</p>
+            </div>
+
+            <div class="info-box">
+                <strong>⚠️ Important:</strong> Your registration will be reviewed by the CEO. You will be notified once
+                approved.
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="new-password"
+                        minlength="6">
+                    <small style="color: var(--text-secondary); font-size: 0.85rem;">Minimum 6 characters</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required
+                        autocomplete="new-password" minlength="6">
+                </div>
+
+                <button type="submit" class="btn-register">Register</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="/login">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const registerForm = document.getElementById('registerForm');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Check if already logged in
+        const token = localStorage.getItem('adminToken');
+        if (token) {
+            window.location.href = '/dashboard';
+        }
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const full_name = document.getElementById('full_name').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirm_password = document.getElementById('confirm_password').value;
+
+            errorMessage.classList.remove('show');
+
+            // Validate passwords match
+            if (password !== confirm_password) {
+                errorMessage.textContent = 'Passwords do not match';
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            if (password.length < 6) {
+                errorMessage.textContent = 'Password must be at least 6 characters';
+                errorMessage.classList.add('show');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ full_name, username, email, password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Redirect to login with success message
+                    window.location.href = '/login?registered=true';
+                } else {
+                    errorMessage.textContent = result.message || 'Registration failed';
+                    errorMessage.classList.add('show');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.classList.add('show');
+            }
+        });
+    </script>
+</body>
+
+</html>

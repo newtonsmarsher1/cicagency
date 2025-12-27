@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Profile - CIC</title>
+
+  <!-- Monarch Design System -->
+  <link rel="stylesheet" href="css/monarch-design-system.css">
+  <script src="js/api-config.js?v=debug"></script>
+  <script src="js/cic-settings-manager.js"></script>
+  <script src="js/cic-settings-init.js"></script>
+  <script src="js/activity-tracker.js"></script>
+
+  <style>
+    :root {
+      --brand-green: #00ff88;
+      --brand-maroon: #8b4513;
+      --brand-dark: #006633;
+      --brand-accent: #32ff7e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 80px;
+    }
+
+    /* Header Section */
+    .profile-header {
+      background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-accent) 100%);
+      padding: 40px 20px 60px 20px;
+      color: white;
+      text-align: center;
+      position: relative;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      margin: 0 auto 16px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .profile-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .profile-email {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 4px;
+    }
+
+    .profile-phone {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* Stats Cards */
+    .stats-container {
+      margin-top: -40px;
+      padding: 0 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--brand-green);
+    }
+
+    /* Balance Card */
+    .balance-card {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin: 0 20px 20px 20px;
+    }
+
+    .balance-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .balance-amount {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--brand-green);
+      margin-bottom: 16px;
+    }
+
+    .balance-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .balance-btn {
+      background: var(--brand-green);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .balance-btn:hover {
+      background: var(--brand-dark);
+    }
+
+    .balance-btn.secondary {
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .balance-btn.secondary:hover {
+      background: #e0e0e0;
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 0 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+      margin: 24px 0 16px 0;
+    }
+
+    /* Menu Items */
+    .menu-grid {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .menu-item {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: #333;
+      transition: all 0.3s;
+    }
+
+    .menu-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 255, 136, 0.2);
+    }
+
+    .menu-icon {
+      width: 48px;
+      height: 48px;
+      background: #f5f5f5;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .menu-text {
+      flex: 1;
+    }
+
+    .menu-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .menu-desc {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .menu-arrow {
+      font-size: 20px;
+      color: #ccc;
+    }
+
+    /* Logout Button */
+    .logout-btn {
+      width: 100%;
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: all 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #d32f2f;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-green);
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+
+    .nav-icon {
+      font-size: 24px;
+    }
+
+    /* Info Section */
+    .info-section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* Wallet Card Style from Home */
+    .wallet-section {
+      display: flex;
+      justify-content: center;
+      margin: 10px 20px 20px 20px;
+    }
+
+    .wallet-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      text-align: center;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 255, 136, 0.1);
+      text-decoration: none;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .wallet-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 255, 136, 0.2);
+      border-color: var(--brand-green);
+    }
+
+    .wallet-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .wallet-amount {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--brand-green);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-avatar">
+      <span id="avatar-icon">👤</span>
+    </div>
+    <div class="profile-name" id="user-name">Loading...</div>
+    <div class="profile-email" id="user-email">email@example.com</div>
+    <div class="profile-phone" id="user-phone">+254 --- --- ---</div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label" data-translate="level">Level</div>
+        <div class="stat-value" id="user-level">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" data-translate="tasks-today">Tasks Today</div>
+        <div class="stat-value"><span id="tasks-today">0</span>/<span id="tasks-limit">5</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" data-translate="team-size">Team Size</div>
+        <div class="stat-value" id="team-size">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" data-translate="total-earned">Total Earned</div>
+        <div class="stat-value" id="total-earned-container"><span id="total-earned">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Balance Card -->
+  <div class="balance-card">
+    <div class="balance-title" data-translate="available-balance">Available Balance</div>
+    <div class="balance-amount"><span id="balance-amount">0.00</span></div>
+    <div class="balance-actions">
+      <button class="balance-btn" onclick="window.location.href='invest.html'" data-translate="invest">Invest</button>
+      <button class="balance-btn secondary" onclick="window.location.href='withdrawal.html'"
+        data-translate="withdraw">Withdraw</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <h2 class="section-title" data-translate="account-info">Account Information</h2>
+
+    <div class="info-section">
+      <div class="info-row">
+        <span class="info-label" data-translate="user-id">User ID</span>
+        <span class="info-value" id="user-id">---</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label" data-translate="invitation-code">Invitation Code</span>
+        <span class="info-value" id="invitation-code">---</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label" data-translate="member-since">Member Since</span>
+        <span class="info-value" id="member-since">---</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label" data-translate="account-status">Account Status</span>
+        <span class="info-value" style="color: #4caf50;" data-translate="active">Active</span>
+      </div>
+    </div>
+
+    <h2 class="section-title" data-translate="quick-actions">Quick Actions</h2>
+
+    <div class="menu-grid">
+      <a href="binddetails.html" class="menu-item">
+        <div class="menu-icon">🔗</div>
+        <div class="menu-text">
+          <div class="menu-title" data-translate="bind-details">Bind Details</div>
+          <div class="menu-desc" data-translate="bind-details-desc">Link your payment account</div>
+        </div>
+        <span class="menu-arrow">›</span>
+      </a>
+
+      <div class="wallet-section">
+        <a href="https://app.cicagency.onrender.com/download" class="wallet-card" id="install-app-btn"
+          onclick="installApp(); return false;" style="text-decoration: none;">
+          <div class="wallet-label" data-translate="download-app">Download App</div>
+          <div class="wallet-amount" style="font-size: 1.2rem;" data-translate="get-mobile-app">Get Mobile App 📱</div>
+        </a>
+      </div>
+
+      <a href="team management.html" class="menu-item">
+        <div class="menu-icon">👥</div>
+        <div class="menu-text">
+          <div class="menu-title" data-translate="team-management">Team Management</div>
+          <div class="menu-desc" data-translate="team-management-desc">Manage your team</div>
+        </div>
+        <span class="menu-arrow">›</span>
+      </a>
+
+      <a href="withdrawal-records.html" class="menu-item">
+        <div class="menu-icon">📊</div>
+        <div class="menu-text">
+          <div class="menu-title" data-translate="withdrawal-records">Withdrawal Records</div>
+          <div class="menu-desc" data-translate="withdrawal-records-desc">View transaction history</div>
+        </div>
+        <span class="menu-arrow">›</span>
+      </a>
+
+      <a href="rewards.html" class="menu-item">
+        <div class="menu-icon">🎁</div>
+        <div class="menu-text">
+          <div class="menu-title" data-translate="rewards-info">Rewards Information</div>
+          <div class="menu-desc" data-translate="rewards-info-desc">View earning rules</div>
+        </div>
+        <span class="menu-arrow">›</span>
+      </a>
+
+      <a href="privacy.html" class="menu-item">
+        <div class="menu-icon">🔒</div>
+        <div class="menu-text">
+          <div class="menu-title" data-translate="privacy-policy">Privacy Policy</div>
+          <div class="menu-desc" data-translate="privacy-policy-desc">View privacy terms</div>
+        </div>
+        <span class="menu-arrow">›</span>
+      </a>
+    </div>
+
+    <button class="logout-btn" onclick="logout()" data-translate="logout">Logout</button>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span data-translate="home">Home</span>
+    </a>
+    <a href="task.html" class="nav-item">
+      <span class="nav-icon">📋</span>
+      <span data-translate="tasks">Tasks</span>
+    </a>
+    <a href="level.html" class="nav-item">
+      <span class="nav-icon">📊</span>
+      <span data-translate="level">Level</span>
+    </a>
+    <a href="withdrawal.html" class="nav-item">
+      <span class="nav-icon">💸</span>
+      <span data-translate="withdraw">Withdraw</span>
+    </a>
+    <a href="profile.html" class="nav-item active">
+      <span class="nav-icon">👤</span>
+      <span data-translate="profile">Profile</span>
+    </a>
+  </div>
+
+  <script>
+    // Currency conversion rates (approximate - should be fetched from API in production)
+    const currencyRates = {
+      USD: 1.0,      // Base currency
+      KES: 130.0,    // 1 USD = 130 KES (approximate)
+      EUR: 0.92,     // 1 USD = 0.92 EUR (approximate)
+      GBP: 0.79      // 1 USD = 0.79 GBP (approximate)
+    };
+
+    // Get current currency from settings
+    function getCurrentCurrency() {
+      if (window.CICSettings) {
+        return window.CICSettings.get('currency') || 'KES';
+      }
+      return localStorage.getItem('cic-currency') || 'KES';
+    }
+
+    // Convert amount to current currency
+    function convertCurrency(amount, fromCurrency = 'KES', toCurrency = null) {
+      if (!toCurrency) {
+        toCurrency = getCurrentCurrency();
+      }
+
+      if (fromCurrency === toCurrency) {
+        return amount;
+      }
+
+      // Convert to USD first (base currency)
+      let amountInUSD = amount;
+      if (fromCurrency !== 'USD') {
+        amountInUSD = amount / currencyRates[fromCurrency];
+      }
+
+      // Convert from USD to target currency
+      if (toCurrency !== 'USD') {
+        return amountInUSD * currencyRates[toCurrency];
+      }
+
+      return amountInUSD;
+    }
+
+    // Format currency amount
+    function formatCurrency(amount, currency = null) {
+      if (!currency) {
+        currency = getCurrentCurrency();
+      }
+
+      const convertedAmount = convertCurrency(amount, 'KES', currency);
+      const currencySymbols = {
+        'USD': '$',
+        'KES': 'KES ',
+        'EUR': '€',
+        'GBP': '£'
+      };
+
+      const symbol = currencySymbols[currency] || currency + ' ';
+      return `${symbol}${convertedAmount.toFixed(2)}`;
+    }
+
+    // Load user data
+    function loadUserData() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      fetch(`${API_BASE_URL}/auth/stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+        .then(res => res.json())
+        .then(data => {
+          // Update profile header
+          document.getElementById('user-name').textContent = data.name || 'User';
+          document.getElementById('user-email').textContent = data.email || '';
+          document.getElementById('user-phone').textContent = data.phone || '';
+
+          // Update stats
+          document.getElementById('user-level').textContent = data.level || 0;
+          document.getElementById('tasks-today').textContent = data.tasks_completed_today || 0;
+          document.getElementById('tasks-limit').textContent = getTaskLimit(data.level || 0);
+          document.getElementById('team-size').textContent = data.team_size || 0;
+
+          // Update total earned with currency conversion
+          const totalEarned = parseFloat(data.totalEarnings || 0);
+          const currency = getCurrentCurrency();
+          const currencySymbols = {
+            'USD': '$',
+            'KES': 'KES ',
+            'EUR': '€',
+            'GBP': '£'
+          };
+          const symbol = currencySymbols[currency] || 'KES ';
+          const convertedTotalEarned = convertCurrency(totalEarned, 'KES', currency);
+          document.getElementById('total-earned').textContent = `${symbol}${convertedTotalEarned.toFixed(0)}`;
+
+          // Update balance with currency conversion
+          const balance = parseFloat(data.wallet_balance || 0);
+          const convertedBalance = convertCurrency(balance, 'KES', currency);
+          document.getElementById('balance-amount').innerHTML = `${symbol}${convertedBalance.toFixed(2)}`;
+
+          // Update account info
+          document.getElementById('user-id').textContent = data.id || '---';
+          // Ensure and display invitation code
+          const invitationCode = data.invitation_code;
+          if (!invitationCode) {
+            // If no code, try to get one
+            fetch(`${API_BASE_URL}/auth/ensure-invitation-code`, {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            })
+              .then(res => res.json())
+              .then(ensureData => {
+                if (ensureData.success && ensureData.invitation_code) {
+                  document.getElementById('invitation-code').textContent = ensureData.invitation_code;
+                } else {
+                  document.getElementById('invitation-code').textContent = '---';
+                }
+              })
+              .catch(() => {
+                document.getElementById('invitation-code').textContent = '---';
+              });
+          } else {
+            document.getElementById('invitation-code').textContent = invitationCode;
+          }
+
+          // Format join date
+          if (data.created_at) {
+            const date = new Date(data.created_at);
+            document.getElementById('member-since').textContent = date.toLocaleDateString();
+          }
+        })
+        .catch(err => {
+          console.error('Error loading user data:', err);
+        });
+    }
+
+    // Get task limit based on level
+    function getTaskLimit(level) {
+      const limits = {
+        0: 8, 1: 8, 2: 10, 3: 15, 4: 15,
+        5: 20, 6: 25, 7: 30, 8: 35, 9: 40
+      };
+      return limits[level] || 8;
+    }
+
+    // Logout function
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userInfo');
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('Service Worker Registered'))
+          .catch(err => console.log('Service Worker Error:', err));
+      });
+    }
+
+    // PWA Installation Logic
+    let deferredPrompt;
+
+    // Capture install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      console.log('App install prompt captured');
+    });
+
+    // Handle install button click
+    async function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response to install prompt: ${outcome}`);
+        deferredPrompt = null;
+      } else {
+        // Fallback to direct download if PWA prompt is not available
+        window.location.href = 'https://app.cicagency.onrender.com/download';
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+      loadUserData();
+    });
+  </script>
+</body>
+
+</html>
