@@ -10,17 +10,15 @@ const {
     adminToggleNumber
 } = require('../controllers/manualRechargeController');
 
-const { requireCEO } = require('../controllers/authController');
-
-// Admin Routes
+// Admin Routes for Manual Recharge
 router.get('/requests', adminGetRequests);
 router.post('/approve/:id', adminApproveRequest);
 router.post('/reject/:id', adminRejectRequest);
 
-// Number Management (CEO only)
-router.get('/numbers', requireCEO, adminGetNumbers);
-router.post('/numbers', requireCEO, adminAddNumber);
-router.delete('/numbers/:id', requireCEO, adminDeleteNumber);
-router.put('/numbers/:id/toggle', requireCEO, adminToggleNumber);
+// Admin Routes for Managing Numbers
+router.get('/numbers', adminGetNumbers);
+router.post('/numbers', adminAddNumber);
+router.delete('/numbers/:id', adminDeleteNumber);
+router.patch('/numbers/:id/toggle', adminToggleNumber);
 
 module.exports = router;
